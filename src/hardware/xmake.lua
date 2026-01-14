@@ -5,3 +5,5 @@ add_includedirs("camera/include")
 add_packages("opencv")
 add_rules("iceoryx_deps")
 add_rules("hik_deps")
+
+target("serial")

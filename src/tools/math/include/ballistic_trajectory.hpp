@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rm_ultra_tools/ballistic_models.hpp"
+#include "ballistic_models.hpp"
 #include <Eigen/Eigen>
 #include <tuple>
 

@@ -1,6 +1,6 @@
 // Copyright (c) 2025 Feng. All Rights Reserved.
-#include "rm_ultra_tools/ballistic_trajectory.hpp"
-#include "rm_ultra_tools/ballistic_models.hpp"
+#include "ballistic_trajectory.hpp"
+#include "ballistic_models.hpp"
 #include <cmath>
 
 namespace rm_ultra_tools {

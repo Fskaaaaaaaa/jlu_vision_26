@@ -19,79 +19,40 @@ on_load(function(target)
 end)
 rule_end()
 
+rule("open3d_deps")
+on_load(function(target)
+	local open3d_root = path.absolute("src/thirdparty/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0")
+	target:add("includedirs", path.join(open3d_root, "include"))
+	target:add("linkdirs", path.join(open3d_root, "lib"))
+	target:add("links", "Open3D")
+	target:add("rpathdirs", path.join(open3d_root, "lib"))
+end)
+
+rule("hik_deps")
+on_load(function(target)
+	local hik_root = path.absolute("src/thirdparty/hik_camera_sdk")
+	target:add("includedirs", path.join(hik_root, "include"))
+	if is_arch("x86_64") then
+		target:add("linkdirs", path.join(hik_root, "lib/amd64"))
+	else
+		target:add("linkdirs", path.join(hik_root, "lib/arm64"))
+	end
+	target:add("links", "MvCameraControl")
+end)
+rule_end()
+
 add_requires("opencv")
 add_requires("eigen")
 add_requires("yaml-cpp")
 add_requires("magic_enum")
 add_requires("nameof")
+add_requires("g2o")
+-- FIXME: g2o官方package的deps缺少fmt和spdlog导致链接不通过,
+-- 得手动添加到～/.xmake/repositories/xmake-repo/packages/g/g2o/xmake.lua
+add_requires("glfw")
 
-set_installdir("install")
-includes("src")
---
--- If you want to known more usage about xmake, please see https://xmake.io
---
--- ## FAQ
---
--- You can enter the project directory firstly before building project.
---
---   $ cd projectdir
---
--- 1. How to build project?
---
---   $ xmake
---
--- 2. How to configure project?
---
---   $ xmake f -p [macosx|linux|iphoneos ..] -a [x86_64|i386|arm64 ..] -m [debug|release]
---
--- 3. Where is the build output directory?
---
---   The default output directory is `./build` and you can configure the output directory.
---
---   $ xmake f -o outputdir
---   $ xmake
---
--- 4. How to run and debug target after building project?
---
---   $ xmake run [targetname]
---   $ xmake run -d [targetname]
---
--- 5. How to install target to the system directory or other output directory?
---
---   $ xmake install
---   $ xmake install -o installdir
---
--- 6. Add some frequently-used compilation flags in xmake.lua
---
--- @code
---    -- add debug and release modes
---    add_rules("mode.debug", "mode.release")
---
---    -- add macro definition
---    add_defines("NDEBUG", "_GNU_SOURCE=1")
---
---    -- set warning all as error
---    set_warnings("all", "error")
---
---    -- set language: c99, c++11
---    set_languages("c99", "c++11")
---
---    -- set optimization: none, faster, fastest, smallest
---    set_optimize("fastest")
---
---    -- add include search directories
---    add_includedirs("/usr/include", "/usr/local/include")
---
---    -- add link libraries and search directories
---    add_links("tbox")
---    add_linkdirs("/usr/local/lib", "/usr/lib")
---
---    -- add system link libraries
---    add_syslinks("z", "pthread")
---
---    -- add compilation and link flags
---    add_cxflags("-stdnolib", "-fno-strict-aliasing")
---    add_ldflags("-L/usr/local/lib", "-lpthread", {force = true})
---
--- @endcode
---
+add_subdirs("src/msgs")
+add_subdirs("src/tools")
+add_subdirs("src/hardware")
+add_subdirs("src/auto_aim")
+add_subdirs("src/auto_buff")
