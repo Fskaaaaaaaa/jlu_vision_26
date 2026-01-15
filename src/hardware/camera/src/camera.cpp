@@ -2,11 +2,11 @@
 
 #include <stdexcept>
 
-#include "hikrobot/hikrobot.hpp"
-#include "mindvision/mindvision.hpp"
+#include "hikrobot.hpp"
+// #include "mindvision/mindvision.hpp"
 #include "tools/yaml.hpp"
 
-namespace io {
+namespace hardware {
 Camera::Camera(const std::string &config_path) {
   auto yaml = tools::load(config_path);
   auto camera_name = tools::read<std::string>(yaml, "camera_name");
@@ -34,4 +34,4 @@ void Camera::read(cv::Mat &img,
   camera_->read(img, timestamp);
 }
 
-} // namespace io
+} // namespace hardware

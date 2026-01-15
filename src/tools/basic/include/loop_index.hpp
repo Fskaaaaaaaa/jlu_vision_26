@@ -1,6 +1,6 @@
 #pragma once
 
-namespace rm_ultra_tools {
+namespace tools {
 
 inline int limitIndex(int idx, int max) { return (idx % max + max) % max; }
 
@@ -29,4 +29,4 @@ struct LoopIndex {
   int current_idx;
 };
 
-} // namespace rm_ultra_tools
+} // namespace tools

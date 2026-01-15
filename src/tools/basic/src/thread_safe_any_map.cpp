@@ -1,8 +1,8 @@
-#include "rm_ultra_tools/thread_safe_any_map.hpp"
+#include "thread_safe_any_map.hpp"
 #include <mutex>
 #include <shared_mutex>
 
-namespace rm_ultra_tools {
+namespace tools {
 
 AnyMap::AnyMap(
     std::initializer_list<std::pair<const std::string, std::any>> ilist)
@@ -40,4 +40,4 @@ void AnyMap::clear() {
   return;
 }
 
-} // namespace rm_ultra_tools
+} // namespace tools

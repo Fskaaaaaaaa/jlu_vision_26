@@ -1,8 +1,8 @@
 #pragma once
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/types.hpp>
 
-namespace rm_ultra_tools {
+namespace tools {
 namespace Color {
 
 namespace bgr {
@@ -23,4 +23,4 @@ const cv::Scalar PURPLE(128, 0, 128);
 const cv::Scalar WHITE(255, 255, 255);
 const cv::Scalar BLACK(0, 0, 0);
 } // namespace Color
-} // namespace rm_ultra_tools
+} // namespace tools

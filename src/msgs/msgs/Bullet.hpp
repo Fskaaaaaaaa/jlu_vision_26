@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Feng. All Rights Reserved.
 #pragma once
-#include "Point.hpp"
+#include "Basic.hpp"
 
 namespace msgs {
 struct Bullet {

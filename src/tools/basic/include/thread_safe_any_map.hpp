@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <utility>
 
-namespace rm_ultra_tools {
+namespace tools {
 
 class AnyMap {
 public:
@@ -57,4 +57,4 @@ template <typename T> std::optional<T> AnyMap::find(const std::string &key) {
              : std::nullopt;
 }
 
-} // namespace rm_ultra_tools
+} // namespace tools

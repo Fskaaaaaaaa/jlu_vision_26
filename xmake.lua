@@ -19,28 +19,6 @@ on_load(function(target)
 end)
 rule_end()
 
-rule("open3d_deps")
-on_load(function(target)
-	local open3d_root = path.absolute("src/thirdparty/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0")
-	target:add("includedirs", path.join(open3d_root, "include"))
-	target:add("linkdirs", path.join(open3d_root, "lib"))
-	target:add("links", "Open3D")
-	target:add("rpathdirs", path.join(open3d_root, "lib"))
-end)
-
-rule("hik_deps")
-on_load(function(target)
-	local hik_root = path.absolute("src/thirdparty/hik_camera_sdk")
-	target:add("includedirs", path.join(hik_root, "include"))
-	if is_arch("x86_64") then
-		target:add("linkdirs", path.join(hik_root, "lib/amd64"))
-	else
-		target:add("linkdirs", path.join(hik_root, "lib/arm64"))
-	end
-	target:add("links", "MvCameraControl")
-end)
-rule_end()
-
 add_requires("opencv")
 add_requires("eigen")
 add_requires("yaml-cpp")
@@ -50,9 +28,13 @@ add_requires("g2o")
 -- FIXME: g2o官方package的deps缺少fmt和spdlog导致链接不通过,
 -- 得手动添加到～/.xmake/repositories/xmake-repo/packages/g/g2o/xmake.lua
 add_requires("glfw")
+add_requires("yaml_cpp_struct")
+add_requires("fmt")
 
-add_subdirs("src/msgs")
-add_subdirs("src/tools")
-add_subdirs("src/hardware")
-add_subdirs("src/auto_aim")
-add_subdirs("src/auto_buff")
+includes("src/third_party")
+includes("src/msgs")
+includes("src/tools")
+includes("src/hardware")
+includes("src/auto_aim")
+includes("src/auto_buff")
+includes("src/auto_ballistic")

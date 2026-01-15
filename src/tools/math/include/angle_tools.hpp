@@ -5,7 +5,7 @@
 #include <numbers>
 #include <utility>
 
-namespace rm_ultra_tools {
+namespace tools {
 inline double limitRadian(double angle,
                           std::pair<double, double> range = {
                               -std::numbers::pi, std::numbers::pi}) {
@@ -34,4 +34,4 @@ inline double limitZeroThres(double in, double zero_thres, double max) {
   return std::min(in < zero_thres ? 0. : in, max);
 }
 
-} // namespace rm_ultra_tools
+} // namespace tools
