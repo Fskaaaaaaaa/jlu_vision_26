@@ -3,6 +3,7 @@ set_kind("binary")
 add_files("camera/src/*.cpp")
 add_includedirs("camera/include")
 add_packages("opencv")
+add_packages("reflect-cpp")
 add_rules("iceoryx_deps")
 add_rules("hik_deps")
 

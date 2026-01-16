@@ -6,36 +6,6 @@
 },
 {
   "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/msgs", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/messages/linux/x86_64/release/src/msgs/src/dummy.cpp.o", "src/msgs/src/dummy.cpp"],
-  "file": "src/msgs/src/dummy.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/n/nameof/0.10.4/5bba5bf6c8774dfdbb87f6491b2b1501/include", "-DNDEBUG", "-o", "build/.objs/basic_tools/linux/x86_64/release/src/tools/basic/src/thread_safe_any_map.cpp.o", "src/tools/basic/src/thread_safe_any_map.cpp"],
-  "file": "src/tools/basic/src/thread_safe_any_map.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/n/nameof/0.10.4/5bba5bf6c8774dfdbb87f6491b2b1501/include", "-DNDEBUG", "-o", "build/.objs/basic_tools/linux/x86_64/release/src/tools/basic/src/image_tools.cpp.o", "src/tools/basic/src/image_tools.cpp"],
-  "file": "src/tools/basic/src/image_tools.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/camera/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/hik_camera_sdk/include", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-DNDEBUG", "-o", "build/.objs/camera/linux/x86_64/release/src/hardware/camera/src/main.cpp.o", "src/hardware/camera/src/main.cpp"],
-  "file": "src/hardware/camera/src/main.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/camera/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/hik_camera_sdk/include", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-DNDEBUG", "-o", "build/.objs/camera/linux/x86_64/release/src/hardware/camera/src/hikrobot.cpp.o", "src/hardware/camera/src/hikrobot.cpp"],
-  "file": "src/hardware/camera/src/hikrobot.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/camera/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/hik_camera_sdk/include", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-DNDEBUG", "-o", "build/.objs/camera/linux/x86_64/release/src/hardware/camera/src/camera.cpp.o", "src/hardware/camera/src/camera.cpp"],
-  "file": "src/hardware/camera/src/camera.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
   "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/tiny_api.cpp.o", "src/third_party/tinympc/tiny_api.cpp"],
   "file": "src/third_party/tinympc/tiny_api.cpp"
 },
@@ -56,16 +26,46 @@
 },
 {
   "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/math/include", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/y/yaml_cpp_struct/v1.0.4/43cc9ffaed1c4db7ab6db326180e3835/include", "-I", "/home/aaa/.xmake/packages/m/magic_enum/v0.9.7/a06ef69469b3498cb370c6dd16ff4d1e/include", "-I", "/home/aaa/.xmake/packages/m/magic_enum/v0.9.7/a06ef69469b3498cb370c6dd16ff4d1e/include/magic_enum", "-I", "/home/aaa/.xmake/packages/v/visit_struct/v1.1.0/5d58dab1e3c6474cae5aceb713fe073f/include", "-DNDEBUG", "-o", "build/.objs/math_tools/linux/x86_64/release/src/tools/math/src/kinematic_function.cpp.o", "src/tools/math/src/kinematic_function.cpp"],
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/camera/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/hik_camera_sdk/include", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-DNDEBUG", "-o", "build/.objs/camera/linux/x86_64/release/src/hardware/camera/src/main.cpp.o", "src/hardware/camera/src/main.cpp"],
+  "file": "src/hardware/camera/src/main.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/camera/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/hik_camera_sdk/include", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-DNDEBUG", "-o", "build/.objs/camera/linux/x86_64/release/src/hardware/camera/src/hikrobot.cpp.o", "src/hardware/camera/src/hikrobot.cpp"],
+  "file": "src/hardware/camera/src/hikrobot.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/camera/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/hik_camera_sdk/include", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-DNDEBUG", "-o", "build/.objs/camera/linux/x86_64/release/src/hardware/camera/src/camera.cpp.o", "src/hardware/camera/src/camera.cpp"],
+  "file": "src/hardware/camera/src/camera.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/n/nameof/0.10.4/5bba5bf6c8774dfdbb87f6491b2b1501/include", "-DNDEBUG", "-o", "build/.objs/basic_tools/linux/x86_64/release/src/tools/basic/src/thread_safe_any_map.cpp.o", "src/tools/basic/src/thread_safe_any_map.cpp"],
+  "file": "src/tools/basic/src/thread_safe_any_map.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/n/nameof/0.10.4/5bba5bf6c8774dfdbb87f6491b2b1501/include", "-DNDEBUG", "-o", "build/.objs/basic_tools/linux/x86_64/release/src/tools/basic/src/image_tools.cpp.o", "src/tools/basic/src/image_tools.cpp"],
+  "file": "src/tools/basic/src/image_tools.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/msgs", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/messages/linux/x86_64/release/src/msgs/src/dummy.cpp.o", "src/msgs/src/dummy.cpp"],
+  "file": "src/msgs/src/dummy.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/math/include", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-DNDEBUG", "-o", "build/.objs/math_tools/linux/x86_64/release/src/tools/math/src/kinematic_function.cpp.o", "src/tools/math/src/kinematic_function.cpp"],
   "file": "src/tools/math/src/kinematic_function.cpp"
 },
 {
   "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/math/include", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/y/yaml_cpp_struct/v1.0.4/43cc9ffaed1c4db7ab6db326180e3835/include", "-I", "/home/aaa/.xmake/packages/m/magic_enum/v0.9.7/a06ef69469b3498cb370c6dd16ff4d1e/include", "-I", "/home/aaa/.xmake/packages/m/magic_enum/v0.9.7/a06ef69469b3498cb370c6dd16ff4d1e/include/magic_enum", "-I", "/home/aaa/.xmake/packages/v/visit_struct/v1.1.0/5d58dab1e3c6474cae5aceb713fe073f/include", "-DNDEBUG", "-o", "build/.objs/math_tools/linux/x86_64/release/src/tools/math/src/ekf_models.cpp.o", "src/tools/math/src/ekf_models.cpp"],
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/math/include", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-DNDEBUG", "-o", "build/.objs/math_tools/linux/x86_64/release/src/tools/math/src/ekf_models.cpp.o", "src/tools/math/src/ekf_models.cpp"],
   "file": "src/tools/math/src/ekf_models.cpp"
 },
 {
   "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/math/include", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/y/yaml_cpp_struct/v1.0.4/43cc9ffaed1c4db7ab6db326180e3835/include", "-I", "/home/aaa/.xmake/packages/m/magic_enum/v0.9.7/a06ef69469b3498cb370c6dd16ff4d1e/include", "-I", "/home/aaa/.xmake/packages/m/magic_enum/v0.9.7/a06ef69469b3498cb370c6dd16ff4d1e/include/magic_enum", "-I", "/home/aaa/.xmake/packages/v/visit_struct/v1.1.0/5d58dab1e3c6474cae5aceb713fe073f/include", "-DNDEBUG", "-o", "build/.objs/math_tools/linux/x86_64/release/src/tools/math/src/ballistic_trajectory.cpp.o", "src/tools/math/src/ballistic_trajectory.cpp"],
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/tools/math/include", "-Isrc/tools/basic/include", "-Isrc/msgs", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-DNDEBUG", "-o", "build/.objs/math_tools/linux/x86_64/release/src/tools/math/src/ballistic_trajectory.cpp.o", "src/tools/math/src/ballistic_trajectory.cpp"],
   "file": "src/tools/math/src/ballistic_trajectory.cpp"
 }]
