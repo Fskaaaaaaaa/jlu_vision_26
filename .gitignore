@@ -11,4 +11,6 @@ src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/
 # MacOS Cache
 .DS_Store
 
+# compile_commands.json
+compile_commands.json
 
