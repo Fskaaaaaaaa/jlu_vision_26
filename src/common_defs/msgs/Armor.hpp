@@ -1,13 +1,14 @@
 // Copyright (c) 2026 Fsk. All Rights Reserved.
 #pragma once
+#include "msgs/Basic.hpp"
 #include <iceoryx_hoofs/cxx/string.hpp>
 #include <iceoryx_hoofs/cxx/vector.hpp>
 
 namespace msgs {
 struct Armor {
-  iox::cxx::string<10> armor_number;
+  int armor_type;
   double distance_to_image_center;
-  iox::cxx::vector<double, 3> rvec;
-  iox::cxx::vector<double, 3> tvec;
+  Vector3d tvec;
+  Vector4d quaternion;
 };
 } // namespace msgs

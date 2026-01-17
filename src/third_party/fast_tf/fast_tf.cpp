@@ -403,6 +403,7 @@ Eigen::Isometry3d transform_buffer::get(const std::string &_target_frame,
   const auto end_time = clock_t::now() + _tolerance;
 
   std::unique_lock<std::mutex> l{m_};
+  // NOTE:操，难怪tf查询这么慢
   // find the correct iterators
   auto target = find(_target_frame);
   auto source = find(_source_frame);

@@ -1,7 +1,5 @@
-target("messages")
--- set_kind("headonly")
+target("common_defs")
 set_kind("static")
--- add_headerfiles("msgs/*.hpp")
 add_includedirs(".", { public = true })
 add_files("src/*.cpp")
 add_rules("iceoryx_deps")

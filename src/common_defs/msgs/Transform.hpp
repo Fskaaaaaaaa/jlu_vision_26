@@ -1,14 +1,20 @@
 // Copyright (c) 2026 Feng. All Rights Reserved.
+#pragma once
 #include "Basic.hpp"
-#include <Eigen/Dense>
+#include "iox/vector.hpp"
 #include <iceoryx_hoofs/cxx/string.hpp>
 #include <iceoryx_hoofs/cxx/vector.hpp>
 
 namespace msgs {
-struct TransForm { // 必须配合Header一起使用
-  iox::cxx::string<10> child_frame_id;
+struct Transform {
+  iox::string<10> child_frame_id;
   Vector3d translate;
   Vector4d quaterniond;
-  bool is_static;
+};
+
+struct StaticTransformRequest {};
+
+struct StaticTransformResponse {
+  iox::vector<Transform, 10> transforms;
 };
 } // namespace msgs
