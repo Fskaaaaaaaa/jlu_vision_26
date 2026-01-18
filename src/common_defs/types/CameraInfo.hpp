@@ -13,7 +13,9 @@ namespace types {
 struct CameraInfo {
   CameraInfo(const iox::popo::Sample<const msgs::CameraInfo, const msgs::Header>
                  &sample);
-  Eigen::Matrix3d getCamMatEigen();
+  Eigen::Matrix3d getCameraEigenMatrix();
+  int view_width_px;
+  int view_height_px;
   cv::Mat camera_matrix_ = cv::Mat_<double>(3, 3);
   cv::Mat distortion_coefficients_ = cv::Mat_<double>(1, 5);
 };

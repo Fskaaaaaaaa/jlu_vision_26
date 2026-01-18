@@ -20,8 +20,8 @@
 namespace tf {
 class TransformListener {
 public:
-  explicit TransformListener(fast_tf::detail::transform_buffer &buffer,
-                             quill::Logger *logger);
+  explicit TransformListener(quill::Logger *logger,
+                             fast_tf::detail::transform_buffer &buffer);
   bool init();
 
 private:

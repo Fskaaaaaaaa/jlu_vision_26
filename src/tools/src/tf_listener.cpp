@@ -6,7 +6,7 @@
 #include "types/Transform.hpp"
 
 tf::TransformListener::TransformListener(
-    fast_tf::detail::transform_buffer &buffer, quill::Logger *logger)
+    quill::Logger *logger, fast_tf::detail::transform_buffer &buffer)
     : buffer_(buffer), logger_(logger),
       dynamic_tf_subscriber_({"tf", "dynamic", "data"}),
       static_tf_subscriber_({"tf", "static", "data"}) {}

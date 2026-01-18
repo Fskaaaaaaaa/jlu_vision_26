@@ -8,8 +8,8 @@
 
 ## 发布：
 
-- 捕获的图像
-- 相机内参外参
+- 捕获的图像{camera, image_raw, data}
+- 相机内参外参 {camera, camera_info, data}
 
 ## 提供服务：
 

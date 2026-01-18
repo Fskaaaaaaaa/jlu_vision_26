@@ -1,6 +1,9 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #include "types/Transform.hpp"
 
+#include <Eigen/src/Geometry/Quaternion.h>
+#include <numbers>
+
 types::Transform::Transform(
     const iox::popo::Sample<const msgs::Transform, const msgs::Header>
         &sample) {
@@ -22,4 +25,16 @@ Eigen::Isometry3d types::Transform::getIsometry3d() {
   I.prerotate(this->quaterniond);
   I.translate(this->tvec); // 旋转后的坐标系作为基准来移动
   return I;
+}
+
+types::Vector4d types::TransformConfig::getQuaterniond() {
+  Eigen::AngleAxisd roll_angle(rpy_angle.roll * 2 * std::numbers::pi / 360,
+                               Eigen::Vector3d::UnitX());
+  Eigen::AngleAxisd pitch_angle(rpy_angle.pitch * 2 * std::numbers::pi / 360,
+                                Eigen::Vector3d::UnitY());
+  Eigen::AngleAxisd yaw_angle(rpy_angle.yaw * 2 * std::numbers::pi / 360,
+                              Eigen::Vector3d::UnitZ());
+  Eigen::Quaterniond q{yaw_angle * pitch_angle * roll_angle};
+  q.normalize();
+  return {.x = q.x(), .y = q.y(), .z = q.z(), .w = q.w()};
 }

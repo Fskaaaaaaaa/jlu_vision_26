@@ -1,6 +1,6 @@
 #pragma once
 
-namespace msgs {
+namespace types {
 struct Point2d {
   double x;
   double y;
@@ -21,5 +21,9 @@ struct Vector4d {
   double z;
   double w;
 };
-
-} // namespace msgs
+struct RpyAngle {
+  double roll;
+  double pitch;
+  double yaw;
+};
+} // namespace types

@@ -1,0 +1,15 @@
+log_level: Debug
+publish_interval_ms: 1000
+
+static_broudcaster_conf:
+  transforms:
+    - parent_frame_id: map
+      child_frame_id: odom
+      tvec:
+        x: 0.1
+        y: 0.1
+        z: 0.1
+      rpy_angle:
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0

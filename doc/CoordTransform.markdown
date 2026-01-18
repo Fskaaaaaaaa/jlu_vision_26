@@ -7,7 +7,7 @@
 
 订阅话题：
 
-- {"tf", "dynamic", "data"}
+- {"tf", "dynamic", "dat a"}
 
 - {"tf", "static", "data"}
 

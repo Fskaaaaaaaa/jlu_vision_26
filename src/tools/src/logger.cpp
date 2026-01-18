@@ -1,6 +1,8 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #include "basic/logger.hpp"
+#include "quill/Backend.h"
 
+#include <mutex>
 #include <nameof.hpp>
 #include <quill/Frontend.h>
 #include <quill/sinks/ConsoleSink.h>
@@ -12,8 +14,8 @@ quill::Logger *tools::getLogger(const std::string &program_name,
   auto console_sink =
       quill::Frontend::create_or_get_sink<quill::ConsoleSink>("console");
   auto file_sink = quill::Frontend::create_or_get_sink<quill::FileSink>(
-      "logs/" + program_name + "/" + program_name +
-          std::string(nameof::nameof_enum(level)) + ".log",
+      "logs/" + program_name + "/" + std::string(nameof::nameof_enum(level)) +
+          ".log",
       std::invoke([]() {
         quill::FileSinkConfig cfg;
         cfg.set_open_mode('w');
@@ -24,8 +26,13 @@ quill::Logger *tools::getLogger(const std::string &program_name,
       quill::FileEventNotifier{});
   quill::Logger *logger = quill::Frontend::create_or_get_logger(
       program_name, {std::move(console_sink), std::move(file_sink)});
-
-  // Change the LogLevel to print everything
   logger->set_log_level(level);
   return logger;
 };
+
+quill::Logger *tools::initAndGetLogger(const std::string &program_name,
+                                       const quill::LogLevel level) {
+  static std::once_flag flag;
+  std::call_once(flag, [&]() { quill::Backend::start(); });
+  return getLogger(program_name, level);
+}

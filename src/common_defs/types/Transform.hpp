@@ -3,8 +3,10 @@
 
 #include "msgs/Header.hpp"
 #include "msgs/Transform.hpp"
+#include "types/Basic.hpp"
 
 #include <Eigen/Dense>
+#include <array>
 #include <iceoryx_posh/popo/sample.hpp>
 
 #include <chrono>
@@ -19,5 +21,12 @@ struct Transform {
   std::chrono::time_point<std::chrono::system_clock> stamp;
   Eigen::Vector3d tvec;
   Eigen::Quaterniond quaterniond;
+};
+struct TransformConfig {
+  std::string parent_frame_id;
+  std::string child_frame_id;
+  Vector3d tvec;
+  RpyAngle rpy_angle;
+  Vector4d getQuaterniond();
 };
 } // namespace types

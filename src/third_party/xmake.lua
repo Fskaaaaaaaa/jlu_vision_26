@@ -5,6 +5,7 @@ on_load(function(target)
 	target:add("linkdirs", path.join(open3d_root, "lib"))
 	target:add("links", "Open3D")
 	target:add("rpathdirs", path.join(open3d_root, "lib"))
+	target:add("packages", "glfw")
 end)
 -- NOTE: 注意open3d依赖clang工具链的libc++，记得装一下
 -- 另外open3d的二进制库太大了，传不了github，拉取构建的时候自己下吧

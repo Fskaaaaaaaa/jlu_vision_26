@@ -12,5 +12,7 @@ struct LoggerConfig {
 
 quill::Logger *getLogger(const std::string &program_name,
                          const quill::LogLevel level);
+quill::Logger *initAndGetLogger(const std::string &program_name,
+                                const quill::LogLevel level);
 
 } // namespace tools

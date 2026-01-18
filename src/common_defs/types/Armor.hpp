@@ -2,14 +2,14 @@
 
 namespace types {
 enum class ArmorType {
-  one,
-  two,
-  three,
-  four,
-  sentry,
-  outpost,
-  base,
-  negative,
+  One,
+  Two,
+  Three,
+  Four,
+  Sentry,
+  Outpost,
+  Base,
+  Negative,
 };
 struct Armor {
   ArmorType type;
