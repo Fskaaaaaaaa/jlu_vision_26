@@ -1,6 +1,7 @@
 #include "galaxy.hpp"
 
 #include "GxIAPI.h"
+#include "confs/CameraParams.hpp"
 #include "quill/LogMacros.h"
 #include "quill/Logger.h"
 #include <cstdlib>
@@ -9,7 +10,7 @@
 
 hardware::Galaxy::Galaxy(quill::Logger *logger,
                          const confs::CameraParams &camera_params)
-    : logger_(logger) {
+    : logger_(logger), camera_params_({0, 0}), buffer_inited_(false) {
   LOG_INFO(logger_, "starting galaxy camera.");
   GX_STATUS status;
   // Init lib
@@ -41,25 +42,38 @@ hardware::Galaxy::Galaxy(quill::Logger *logger,
   GXGetInt(camera_handle_, GX_INT_HEIGHT, &img_info_.nHeightValue);
   GXGetInt(camera_handle_, GX_INT_HEIGHT_MAX, &img_info_.nHeightMax);
 
-  GXSendCommand(camera_handle_, GX_COMMAND_ACQUISITION_START); // 发送控制命令
+  // Set default exp gain
+  this->changeExposureGain(camera_params.exposure_time, camera_params.gain);
+  this->camera_params_ = camera_params;
+  // 设置帧率(为了解决缓冲区满导致的抽搐问题)
+  GXSetEnum(camera_handle_, GX_ENUM_ACQUISITION_FRAME_RATE_MODE,
+            GX_ACQUISITION_FRAME_RATE_MODE_ON);
+  GXSetFloat(camera_handle_, GX_FLOAT_ACQUISITION_FRAME_RATE,
+             camera_params_.frame_rate);
+
+  // 开始采集
+  GXSendCommand(camera_handle_,
+                GX_COMMAND_ACQUISITION_START); // 发送控制命令
 }
 
 int hardware::Galaxy::captureImage(unsigned char *buffer,
                                    std::size_t buffer_size) {
   GX_FRAME_DATA bayer_frame{};
   GX_STATUS status;
-  std::vector<char> bayer_buffer_holder;
 
   // Initialize frame   初始化帧
   int64_t payloadSize;
   GXGetInt(camera_handle_, GX_INT_PAYLOAD_SIZE, &payloadSize);
+  if (!buffer_inited_) {
+    this->bayer_buffer_holder_.reserve(payloadSize);
+    buffer_inited_ = true;
+  }
   if (buffer_size < payloadSize) {
     LOG_ERROR(logger_, "Insufficient buffer size! require {}, actual {}",
               payloadSize, buffer_size);
     return EXIT_FAILURE;
   }
-  bayer_buffer_holder.reserve(payloadSize);
-  bayer_frame.pImgBuf = bayer_buffer_holder.data();
+  bayer_frame.pImgBuf = bayer_buffer_holder_.data();
 
   if (fail_conut_ > 5) {
     LOG_ERROR(this->logger_, "Retry camera!");
@@ -95,7 +109,7 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
   LOG_DEBUG(logger_, "Current device bandwidth: {}", link_cur);
 
   // Fetch image
-  status = GXGetImage(camera_handle_, &bayer_frame, 700); // 直接获取一帧图像
+  status = GXGetImage(camera_handle_, &bayer_frame, 500); // 直接获取一帧图像
 
   if (!GX_SUCCESS(status)) {
     LOG_WARNING(logger_, "Get buffer failed, status = {}", status);

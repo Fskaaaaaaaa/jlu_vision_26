@@ -35,4 +35,4 @@ count = 10
 
 [[segment.mempool]]
 size = 8388608     # 8 MB payload
-count = 5
+count = 10

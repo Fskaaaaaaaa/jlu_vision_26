@@ -23,5 +23,7 @@ private:
     int64_t nWidthValue, nWidthMax;
     int64_t nHeightValue, nHeightMax;
   } img_info_;
+  std::vector<char> bayer_buffer_holder_;
+  bool buffer_inited_;
 };
 } // namespace hardware

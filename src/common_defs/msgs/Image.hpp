@@ -20,7 +20,7 @@ constexpr int getElemSize(int type) {
 
 template <int WIDTH, int HEIGHT, int CV_TYPE> struct Image {
   static constexpr int cols{WIDTH};
-  static constexpr int rols{HEIGHT};
+  static constexpr int rows{HEIGHT};
   static constexpr int cv_type{CV_TYPE};
   static constexpr int data_size{impl::getElemSize(CV_TYPE) * WIDTH * HEIGHT};
   unsigned char data[impl::getElemSize(CV_TYPE) * WIDTH * HEIGHT];

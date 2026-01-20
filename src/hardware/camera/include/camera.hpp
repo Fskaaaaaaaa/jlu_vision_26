@@ -1,7 +1,6 @@
 #pragma once
 #include "basic/time_tools.hpp"
 #include "configs.hpp"
-#include "confs/CameraParams.hpp"
 #include "iceoryx_posh/popo/listener.hpp"
 #include "msgs/CameraInfo.hpp"
 #include "msgs/CameraParams.hpp"
@@ -28,6 +27,18 @@ public:
   virtual int changeExposureGain(double exposure, double gain) = 0;
 };
 
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
+// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
 class Camera {
 public:
   Camera(quill::Logger *logger, const CameraConfigs &configs);
