@@ -29,6 +29,8 @@ int main(int argc, char *argv[]) {
   options.add_options()("c,config", "Path of config yaml file",
                         cxxopts::value<std::string>()->default_value(
                             "configs/status_feedback/rmviz3d.yaml"))(
+      "l,log", "Path of log dir",
+      cxxopts::value<std::string>()->default_value("logs/rmviz3d"))(
       "h,help", "Print usage.");
   auto result = options.parse(argc, argv);
   if (result.count("help")) {
@@ -36,6 +38,7 @@ int main(int argc, char *argv[]) {
     std::exit(EXIT_SUCCESS);
   }
   auto config_path = result["config"].as<std::string>();
+  auto log_path = result["log"].as<std::string>();
   std::ifstream ifs(config_path);
   if (!ifs) {
     std::cerr << "Invalid config path!" << std::endl;
@@ -48,7 +51,7 @@ int main(int argc, char *argv[]) {
   }
   fb::VisualizationConfigs config = config_opt.value();
 
-  auto *logger = tools::initAndGetLogger(APP_NAME, config.log_level);
+  auto *logger = tools::initAndGetLogger(APP_NAME, config.log_level, log_path);
   iox::runtime::PoshRuntime::initRuntime(APP_NAME);
 
   open3d::visualization::Visualizer visualizer;

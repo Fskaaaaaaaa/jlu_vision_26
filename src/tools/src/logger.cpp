@@ -10,12 +10,12 @@
 #include <string>
 
 quill::Logger *tools::getLogger(const std::string &program_name,
-                                const quill::LogLevel level) {
+                                const quill::LogLevel level,
+                                const std::string &log_path) {
   auto console_sink =
       quill::Frontend::create_or_get_sink<quill::ConsoleSink>("console");
   auto file_sink = quill::Frontend::create_or_get_sink<quill::FileSink>(
-      "logs/" + program_name + "/" + std::string(nameof::nameof_enum(level)) +
-          ".log",
+      log_path + "/" + std::string(nameof::nameof_enum(level)) + ".log",
       std::invoke([]() {
         quill::FileSinkConfig cfg;
         cfg.set_open_mode('w');
@@ -31,8 +31,9 @@ quill::Logger *tools::getLogger(const std::string &program_name,
 };
 
 quill::Logger *tools::initAndGetLogger(const std::string &program_name,
-                                       const quill::LogLevel level) {
+                                       const quill::LogLevel level,
+                                       const std::string &log_path) {
   static std::once_flag flag;
   std::call_once(flag, [&]() { quill::Backend::start(); });
-  return getLogger(program_name, level);
+  return getLogger(program_name, level, log_path);
 }

@@ -2,6 +2,7 @@
 #pragma once
 #include "configs.hpp"
 #include "fast_tf/fast_tf.hpp"
+#include "hardware/cam_info_listener.hpp"
 #include "transform/tf_listener.hpp"
 
 #include "open3d/geometry/Geometry3D.h"

@@ -22,7 +22,7 @@ template <int WIDTH, int HEIGHT, int CV_TYPE> struct Image {
   static constexpr int cols{WIDTH};
   static constexpr int rols{HEIGHT};
   static constexpr int cv_type{CV_TYPE};
-  int data_size{impl::getElemSize(CV_TYPE) * WIDTH * HEIGHT};
+  static constexpr int data_size{impl::getElemSize(CV_TYPE) * WIDTH * HEIGHT};
   unsigned char data[impl::getElemSize(CV_TYPE) * WIDTH * HEIGHT];
 
   static_assert(WIDTH > 0 && HEIGHT > 0, "Width/Height must be positive!");

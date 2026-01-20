@@ -23,10 +23,9 @@ namespace hardware {
 class CameraBase {
 public:
   virtual ~CameraBase() = default;
-  virtual int read(unsigned char *buffer, std::size_t buffer_size) = 0;
+  virtual int captureImage(unsigned char *buffer, std::size_t buffer_size) = 0;
   // NOTE: 从得到的工业相机sdk定义的图像类型写入缓冲区（ioxsample）
-  virtual int changeGain(double new_gain) = 0;
-  virtual int changeExposure(int new_exp) = 0;
+  virtual int changeExposureGain(double exposure, double gain) = 0;
 };
 
 class Camera {
@@ -34,10 +33,10 @@ public:
   Camera(quill::Logger *logger, const CameraConfigs &configs);
 
 private:
-  int publishImage();
+  bool publishImage();
   bool publishCamInfo();
   static void onCameraParamRecievedCallback(
-      iox::popo::Subscriber<msgs::CameraInfo, msgs::Header> *subscriber,
+      iox::popo::Subscriber<msgs::CameraParams, msgs::Header> *subscriber,
       Camera *self);
 
   quill::Logger *logger_;
@@ -47,7 +46,7 @@ private:
   std::jthread image_read_pub_thread_;
   iox::popo::Publisher<msgs::CameraInfo, msgs::Header> cam_info_pub_;
   std::jthread cam_info_pub_thread_;
-  iox::popo::Subscriber<msgs::CameraParams, msgs::Header> cam_param_sub_;
+  iox::popo::Subscriber<msgs::CameraParams, msgs::Header> cam_params_sub_;
   iox::popo::Listener cam_param_change_listener_;
 };
 

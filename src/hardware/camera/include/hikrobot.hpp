@@ -11,7 +11,7 @@
 namespace hardware {
 class HikRobot : public CameraBase {
 public:
-  HikRobot(double exposure_ms, double gain, const std::string &vid_pid);
+  HikRobot(quill::Logger *logger, const confs::CameraParams &camera_params);
   ~HikRobot() override;
   // void read(cv::Mat &img,
   //           std::chrono::steady_clock::time_point &timestamp) override;

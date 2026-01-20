@@ -3,6 +3,8 @@
 #include "quill/Logger.h"
 #include "quill/core/LogLevel.h"
 
+#include <string>
+
 namespace tools {
 
 struct LoggerConfig {
@@ -11,8 +13,10 @@ struct LoggerConfig {
 };
 
 quill::Logger *getLogger(const std::string &program_name,
-                         const quill::LogLevel level);
+                         const quill::LogLevel level,
+                         const std::string &log_path);
 quill::Logger *initAndGetLogger(const std::string &program_name,
-                                const quill::LogLevel level);
+                                const quill::LogLevel level,
+                                const std::string &log_path);
 
 } // namespace tools

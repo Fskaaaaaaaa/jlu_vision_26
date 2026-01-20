@@ -14,6 +14,7 @@
 
 #include <chrono>
 #include <fstream>
+#include <string>
 #include <thread>
 
 constexpr char APP_NAME[] = "static_tf_bc";
@@ -26,6 +27,8 @@ int main(int argc, char *argv[]) {
   options.add_options()("c,config", "Path of config yaml file",
                         cxxopts::value<std::string>()->default_value(
                             "configs/coord_transform/static_tf_bc.yaml"))(
+      "l,log", "Path of log dir",
+      cxxopts::value<std::string>()->default_value("logs/static_tf_bc"))(
       "h,help", "Print usage.");
   auto result = options.parse(argc, argv);
   if (result.count("help")) {
@@ -33,6 +36,7 @@ int main(int argc, char *argv[]) {
     std::exit(EXIT_SUCCESS);
   }
   auto config_path = result["config"].as<std::string>();
+  auto log_path = result["log"].as<std::string>();
   std::ifstream ifs(config_path);
   if (!ifs) {
     std::cerr << "Invalid config path!" << std::endl;
@@ -45,7 +49,7 @@ int main(int argc, char *argv[]) {
   }
   tf::StaticBroudcasterConfigs configs = configs_opt.value();
 
-  auto *logger = tools::initAndGetLogger(APP_NAME, configs.log_level);
+  auto *logger = tools::initAndGetLogger(APP_NAME, configs.log_level, log_path);
   iox::runtime::PoshRuntime::initRuntime(APP_NAME);
   tf::StaticBroudcaster broadcaster{logger, configs.static_broudcaster_conf};
   while (!iox::hasTerminationRequested()) {

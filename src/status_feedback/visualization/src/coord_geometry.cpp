@@ -40,7 +40,8 @@ fb::CoordGeometry::CoordGeometry(
     name_geom_ptrs.emplace(frame_id, frame_ptr);
   }
   if (config_.draw_camera_visualization) {
-    auto cam_info = hw::CameraInfoListener(logger_, config_.camera_name).get();
+    auto cam_info =
+        hardware::CameraInfoListener(logger_, config_.camera_name).get();
     this->camera_visualization_ =
         open3d::geometry::LineSet::CreateCameraVisualization(
             cam_info.view_width_px, cam_info.view_height_px,

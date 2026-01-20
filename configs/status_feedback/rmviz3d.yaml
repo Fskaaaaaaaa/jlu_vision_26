@@ -1,4 +1,4 @@
-log_level: Debug
+log_level: Info
 coord_conf:
   frame_size: 1.0
   frame_ids: ["map", "odom", "camera"] 
@@ -6,6 +6,6 @@ coord_conf:
   tf_query_time_tolerance_ms: 1
   draw_frame_trajectory: true
   trajectory_frame_id: "odom"
-  draw_camera_visualization: false
-  camera_frame_id: "camera"
+  draw_camera_visualization: true
   camera_name: "camera0"
+  camera_frame_id: "camera"

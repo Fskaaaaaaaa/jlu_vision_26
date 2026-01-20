@@ -13,11 +13,12 @@
 
 #include <atomic>
 
-namespace hw {
+namespace hardware {
 class CameraInfoListener {
 public:
   CameraInfoListener(quill::Logger *logger,
                      const std::string &camera_name = "camera0");
+  ~CameraInfoListener();
   types::CameraInfo get();
 
 private:
@@ -31,4 +32,4 @@ private:
   std::atomic<bool> cam_info_ok_;
   types::CameraInfo cam_info_;
 };
-} // namespace hw
+} // namespace hardware
