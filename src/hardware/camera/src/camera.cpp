@@ -1,16 +1,11 @@
+
 #include "camera.hpp"
-
-#include <stdexcept>
-
+#include "configs.hpp"
+#include "galaxy.hpp"
 #include "hikrobot.hpp"
-// #include "mindvision/mindvision.hpp"
-#include "tools/yaml.hpp"
 
 namespace hardware {
-Camera::Camera(const std::string &config_path) {
-  auto yaml = tools::load(config_path);
-  auto camera_name = tools::read<std::string>(yaml, "camera_name");
-  auto exposure_ms = tools::read<double>(yaml, "exposure_ms");
+Camera::Camera(const CameraConfigs &configs) {
 
   // if (camera_name == "mindvision") {
   //   auto gamma = tools::read<double>(yaml, "gamma");

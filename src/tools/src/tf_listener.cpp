@@ -1,9 +1,14 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #include "transform/tf_listener.hpp"
 #include "msgs/Header.hpp"
+#include "types/Transform.hpp"
+
 #include "quill/LogMacros.h"
 #include "quill/Logger.h"
-#include "types/Transform.hpp"
+
+#include <cstdlib>
+#include <stdexcept>
+#include <variant>
 
 tf::TransformListener::TransformListener(
     quill::Logger *logger, fast_tf::detail::transform_buffer &buffer)
@@ -21,16 +26,24 @@ void tf::TransformListener::onTransFormReceivedCallback(
             subscriber->getServiceDescription().getInstanceIDString();
         types::Transform tf{sample};
         // store the sample in the corresponding cache
-        if (instanceString == iox::capro::IdString_t("static")) {
-          self->buffer_.set(tf.parent_frame_id, tf.child_frame_id, tf.stamp,
-                            tf.getIsometry3d(), true);
-          LOG_DEBUG(self->logger_, "recieve static tf msg from {} to {}",
-                    tf.parent_frame_id, tf.child_frame_id);
-        } else if (instanceString == iox::capro::IdString_t("dynamic")) {
-          self->buffer_.set(tf.parent_frame_id, tf.child_frame_id, tf.stamp,
-                            tf.getIsometry3d(), false);
-          LOG_DEBUG(self->logger_, "recieve dynamic tf msg from {} to {}",
-                    tf.parent_frame_id, tf.child_frame_id);
+        try {
+          if (instanceString == iox::capro::IdString_t("static")) {
+            self->buffer_.set(tf.parent_frame_id, tf.child_frame_id, tf.stamp,
+                              tf.getIsometry3d(), true);
+            LOG_DEBUG(self->logger_, "recieve static tf msg from {} to {}",
+                      tf.parent_frame_id, tf.child_frame_id);
+          } else if (instanceString == iox::capro::IdString_t("dynamic")) {
+            self->buffer_.set(tf.parent_frame_id, tf.child_frame_id, tf.stamp,
+                              tf.getIsometry3d(), false);
+            LOG_DEBUG(self->logger_, "recieve dynamic tf msg from {} to {}",
+                      tf.parent_frame_id, tf.child_frame_id);
+          }
+        } catch (const std::runtime_error &e) {
+          LOG_CRITICAL(self->logger_, "runtime_error: {}", e.what());
+          std::exit(EXIT_FAILURE);
+        } catch (const std::bad_variant_access &e) {
+          LOG_CRITICAL(self->logger_, "bad_variant_access: {}", e.what());
+          std::exit(EXIT_FAILURE);
         }
       })) {
   } // end of while

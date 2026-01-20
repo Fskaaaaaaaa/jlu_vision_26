@@ -1,8 +1,10 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #include "basic/logger.hpp"
 #include "configs.hpp"
-#include "coord_drawer.hpp"
+#include "coord_geometry.hpp"
+#include "open3d/geometry/Geometry3D.h"
 
+#include <memory>
 #include <open3d/Open3D.h>
 
 #include <cxxopts.hpp>
@@ -17,6 +19,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <thread>
+#include <unordered_map>
 
 constexpr char APP_NAME[] = "rmviz3d";
 
@@ -49,12 +52,20 @@ int main(int argc, char *argv[]) {
   iox::runtime::PoshRuntime::initRuntime(APP_NAME);
 
   open3d::visualization::Visualizer visualizer;
-  visualizer.CreateVisualizerWindow(APP_NAME);
+  visualizer.CreateVisualizerWindow(APP_NAME, 1920, 1080);
 
-  fb::CoordDrawer coord_drawer{logger, config.coord_drawer_conf, visualizer};
+  std::unordered_map<std::string, std::shared_ptr<open3d::geometry::Geometry3D>>
+      geometrys;
+  fb::CoordGeometry coord_geometry{logger, config.coord_conf, geometrys};
 
+  for (auto &&[name, geometry] : geometrys) {
+    visualizer.AddGeometry(geometry);
+  }
   while (visualizer.PollEvents()) {
-    coord_drawer.updateCoordGeometry(visualizer);
+    coord_geometry.update(geometrys);
+    for (auto &&[name, geometry] : geometrys) {
+      visualizer.UpdateGeometry(geometry);
+    }
     visualizer.UpdateRender();
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }

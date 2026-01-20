@@ -5,23 +5,25 @@
 #include <string>
 #include <vector>
 namespace fb {
-struct CoordDrawerConfig {
-  std::vector<std::string> visualized_frame_ids = {"map", "odom", "gimbal",
-                                                   "camera", "camera_optical"};
+struct CoordGeometryConfig {
   double frame_size = 1.;
-  int tf_query_time_tolerance_ms = 100;
+  std::vector<std::string> frame_ids = {"map", "odom", "gimbal", "camera",
+                                        "camera_optical"};
   std::string static_frame_id = "map";
+  int tf_query_time_tolerance_ms = 100;
+  bool draw_frame_trajectory = true;
+  std::string trajectory_frame_id = "odom";
   bool draw_camera_visualization = true;
   std::string camera_frame_id = "camera_optical";
-  bool draw_frame_trajectory = true;
-  std::string trajectory_drawed_frame_id = "odom";
+  std::string camera_name = "camera_optical";
 };
 struct ArmorDrawerConfig {};
 struct BulletDrawerConfig {};
 struct BuffDrawerConfig {};
 
 struct VisualizationConfigs {
-  CoordDrawerConfig coord_drawer_conf;
+  CoordGeometryConfig coord_conf;
+  // CameraGeometryConfig cam_conf;
   // ArmorDrawerConfig armor_conf;
   // BuffDrawerConfig buff_conf;
   // BulletDrawerConfig bullet_conf;

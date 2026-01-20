@@ -1,10 +1,11 @@
 log_level: Debug
-coord_drawer_conf:
-  visualized_frame_ids: ["map", "odom"] #["map","odom","camera"]
+coord_conf:
   frame_size: 1.0
-  tf_query_time_tolerance_ms: 1
+  frame_ids: ["map", "odom", "camera"] 
   static_frame_id: "map"
+  tf_query_time_tolerance_ms: 1
+  draw_frame_trajectory: true
+  trajectory_frame_id: "odom"
   draw_camera_visualization: false
   camera_frame_id: "camera"
-  draw_frame_trajectory: false
-  trajectory_drawed_frame_id: "odom"
+  camera_name: "camera0"

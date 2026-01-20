@@ -8,9 +8,11 @@
 
 ## 发布：
 
-- 捕获的图像{camera, image_raw, data}
-- 相机内参外参 {camera, camera_info, data}
+- 捕获的图像{image_raw, camera_name, data}
+- 相机内参外参 {camera_info, camera_name, data}
+- instance字段区分不同相机来源，为以后可能的多相机做准备
 
-## 提供服务：
+## 订阅话题：
 
-- 更改增益/曝光
+- 更改增益/曝光{camera_param, camera_name, data}
+- 本打算用server/client搞的，但感觉相机节点没什么好返回的，莫不如简单一点

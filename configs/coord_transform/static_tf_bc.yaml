@@ -6,10 +6,20 @@ static_broudcaster_conf:
     - parent_frame_id: map
       child_frame_id: odom
       tvec:
-        x: 0.1
-        y: 0.1
-        z: 0.1
+        x: 1.0
+        y: 1.0
+        z: -1.0
       rpy_angle:
-        roll: 0.0
+        roll: 5.0
+        pitch: 100.0
+        yaw: 0.0
+    - parent_frame_id: map
+      child_frame_id: camera
+      tvec:
+        x: 1.0
+        y: -1.0
+        z: -1.0
+      rpy_angle:
+        roll: 5.0
         pitch: 0.0
         yaw: 0.0

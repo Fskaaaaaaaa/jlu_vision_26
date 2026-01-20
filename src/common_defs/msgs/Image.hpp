@@ -1,5 +1,6 @@
 // Copyright (c) 2026 Fsk. All Rights Reserved.
 #pragma once
+#include <fcntl.h>
 #include <opencv2/core/hal/interface.h>
 
 namespace msgs {
@@ -18,9 +19,9 @@ constexpr int getElemSize(int type) {
 } // namespace impl
 
 template <int WIDTH, int HEIGHT, int CV_TYPE> struct Image {
-  int cols{WIDTH};
-  int rols{HEIGHT};
-  int cv_type{CV_TYPE};
+  static constexpr int cols{WIDTH};
+  static constexpr int rols{HEIGHT};
+  static constexpr int cv_type{CV_TYPE};
   int data_size{impl::getElemSize(CV_TYPE) * WIDTH * HEIGHT};
   unsigned char data[impl::getElemSize(CV_TYPE) * WIDTH * HEIGHT];
 

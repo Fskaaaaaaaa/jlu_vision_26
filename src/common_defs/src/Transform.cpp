@@ -1,7 +1,7 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #include "types/Transform.hpp"
+#include "confs/Transform.hpp"
 
-#include <Eigen/src/Geometry/Quaternion.h>
 #include <numbers>
 
 types::Transform::Transform(
@@ -27,7 +27,7 @@ Eigen::Isometry3d types::Transform::getIsometry3d() {
   return I;
 }
 
-types::Vector4d types::TransformConfig::getQuaterniond() {
+confs::Vector4d confs::Transform::getQuaterniond() {
   Eigen::AngleAxisd roll_angle(rpy_angle.roll * 2 * std::numbers::pi / 360,
                                Eigen::Vector3d::UnitX());
   Eigen::AngleAxisd pitch_angle(rpy_angle.pitch * 2 * std::numbers::pi / 360,

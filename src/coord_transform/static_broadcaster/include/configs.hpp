@@ -1,5 +1,6 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #pragma once
+#include "confs/Transform.hpp"
 #include "types/Transform.hpp"
 
 #include <quill/core/LogLevel.h>
@@ -7,7 +8,7 @@
 
 namespace tf {
 struct StaticBroudcasterConfig {
-  std::vector<types::TransformConfig> transforms = {};
+  std::vector<confs::Transform> transforms = {};
 };
 struct StaticBroudcasterConfigs {
   quill::LogLevel log_level = quill::LogLevel::Info;

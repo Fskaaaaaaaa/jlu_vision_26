@@ -1,6 +1,4 @@
-#ifndef IO__HIKROBOT_HPP
-#define IO__HIKROBOT_HPP
-
+#pragma once
 #include <atomic>
 #include <chrono>
 #include <opencv2/opencv.hpp>
@@ -9,15 +7,14 @@
 
 #include "MvCameraControl.h"
 #include "camera.hpp"
-#include "tools/thread_safe_queue.hpp"
 
-namespace io {
+namespace hardware {
 class HikRobot : public CameraBase {
 public:
   HikRobot(double exposure_ms, double gain, const std::string &vid_pid);
   ~HikRobot() override;
-  void read(cv::Mat &img,
-            std::chrono::steady_clock::time_point &timestamp) override;
+  // void read(cv::Mat &img,
+  //           std::chrono::steady_clock::time_point &timestamp) override;
 
 private:
   struct CameraData {
@@ -35,7 +32,6 @@ private:
   std::thread capture_thread_;
   std::atomic<bool> capturing_;
   std::atomic<bool> capture_quit_;
-  tools::ThreadSafeQueue<CameraData> queue_;
 
   int vid_, pid_;
 
@@ -49,6 +45,4 @@ private:
   void reset_usb() const;
 };
 
-} // namespace io
-
-#endif // IO__HIKROBOT_HPP
+} // namespace hardware

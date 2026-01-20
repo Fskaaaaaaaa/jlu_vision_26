@@ -22,11 +22,4 @@ struct Transform {
   Eigen::Vector3d tvec;
   Eigen::Quaterniond quaterniond;
 };
-struct TransformConfig {
-  std::string parent_frame_id;
-  std::string child_frame_id;
-  Vector3d tvec;
-  RpyAngle rpy_angle;
-  Vector4d getQuaterniond();
-};
 } // namespace types
