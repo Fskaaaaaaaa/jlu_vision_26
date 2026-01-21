@@ -9,8 +9,9 @@ namespace hardware {
 class XRobot : public ImuBase {
 public:
   XRobot(quill::Logger *logger, ImuConfig config);
-  void populateAndPublish(
-      iox::popo::Sample<msgs::ImuData, msgs::Header> &sample) override;
+  ~XRobot();
+  bool
+  getImuData(iox::popo::Sample<msgs::ImuData, msgs::Header> &sample) override;
 
 private:
   quill::Logger *logger_;

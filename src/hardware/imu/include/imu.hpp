@@ -15,14 +15,13 @@ namespace hardware {
 class ImuBase {
 public:
   virtual ~ImuBase() = default;
-  virtual void populateAndPublish(
-      iox::popo::Sample<msgs::ImuData, msgs::Header> &sample) = 0;
+  virtual bool
+  getImuData(iox::popo::Sample<msgs::ImuData, msgs::Header> &sample) = 0;
 };
 
 class Imu {
 public:
   Imu(quill::Logger *logger, const ImuConfigs &configs);
-  ~Imu();
   void publishImuData();
 
 private:

@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cxxopts.hpp>
 #include <iceoryx_posh/runtime/posh_runtime.hpp>
+#include <iceoryx_posh/runtime/posh_runtime_single_process.hpp>
 #include <iox/signal_watcher.hpp>
 #include <quill/Backend.h>
 #include <quill/LogMacros.h>
@@ -17,7 +18,7 @@
 #include <string>
 #include <thread>
 
-constexpr char APP_NAME[] = "imu_node";
+constexpr char APP_NAME[] = "imu";
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(
@@ -51,6 +52,26 @@ int main(int argc, char *argv[]) {
   auto *logger = tools::initAndGetLogger(APP_NAME, configs.log_level, log_path);
   iox::runtime::PoshRuntime::initRuntime(APP_NAME);
   hardware::Imu imu{logger, configs};
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
+  // BUG: 有概率imu串口关不掉/后台程序残留导致重启时iox重名panic
   while (!iox::hasTerminationRequested()) {
     imu.publishImuData();
     std::this_thread::sleep_for(

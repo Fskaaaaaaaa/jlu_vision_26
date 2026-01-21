@@ -5,6 +5,8 @@
 #include <numbers>
 #include <utility>
 
+#include <Eigen/Dense>
+
 namespace tools {
 inline double limitRadian(double angle,
                           std::pair<double, double> range = {
@@ -32,6 +34,18 @@ inline double radian2Angle(double radian) {
 
 inline double limitZeroThres(double in, double zero_thres, double max) {
   return std::min(in < zero_thres ? 0. : in, max);
+}
+
+inline Eigen::Quaterniond rpyToQuaterniond(const Eigen::Vector3d &rpy_angle) {
+  Eigen::AngleAxisd roll_angle(angle2Radian(rpy_angle.x()),
+                               Eigen::Vector3d::UnitX());
+  Eigen::AngleAxisd pitch_angle(angle2Radian(rpy_angle.y()),
+                                Eigen::Vector3d::UnitY());
+  Eigen::AngleAxisd yaw_angle(angle2Radian(rpy_angle.z()),
+                              Eigen::Vector3d::UnitZ());
+  Eigen::Quaterniond q{yaw_angle * pitch_angle * roll_angle};
+  q.normalize();
+  return q;
 }
 
 } // namespace tools

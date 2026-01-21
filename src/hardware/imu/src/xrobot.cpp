@@ -2,7 +2,6 @@
 
 #include "iox/string.hpp"
 #include "quill/LogMacros.h"
-#include "quill/core/ThreadContextManager.h"
 
 #include <fcntl.h>
 #include <stdbool.h>
@@ -14,8 +13,6 @@
 #include <unistd.h>
 
 #define DATA_LENGTH sizeof(Data)
-
-const char *serial_port = "/dev/ttyACM0";
 
 typedef struct __attribute__((packed)) {
   float x;
@@ -140,9 +137,26 @@ int open_serial_port(const char *port) {
 }
 
 hardware::XRobot::XRobot(quill::Logger *logger, ImuConfig config)
-    : logger_(logger), config_(config) {}
+    : logger_(logger), config_(config) {
+  serial_fd_ = open_serial_port(config_.imu_serial_port.c_str());
+  if (serial_fd_ < 0) {
+    LOG_CRITICAL(logger_, "Failed to open serial port.");
+    throw std::runtime_error("Serial port initialization failed.");
+  }
+  // 新增：初始化同步相关变量
+  first_imu_time_ = 0;
+  first_local_time_ = 0;
+  has_sync_ = false;
+}
 
-void hardware::XRobot::populateAndPublish(
+hardware::XRobot::~XRobot() {
+  if (serial_fd_ >= 0) {
+    close(serial_fd_);
+    LOG_INFO(logger_, "imu closed!");
+  }
+}
+
+bool hardware::XRobot::getImuData(
     iox::popo::Sample<msgs::ImuData, msgs::Header> &sample) {
   size_t bytes_read;
   Data received_data;
@@ -176,7 +190,7 @@ void hardware::XRobot::populateAndPublish(
       first_imu_time_ = imu_time_us;
       first_local_time_ = local_time_us;
       has_sync_ = true;
-      LOG_INFO(this->logger_, "Sync ref: imu_time=%llu, local_time=%llu",
+      LOG_INFO(this->logger_, "Sync ref: imu_time={}, local_time={}",
                (unsigned long long)first_imu_time_,
                (unsigned long long)first_local_time_);
     }
@@ -185,7 +199,7 @@ void hardware::XRobot::populateAndPublish(
     uint64_t aligned_time_us =
         first_local_time_ + (imu_time_us - first_imu_time_);
 
-    // 填充ROS header.stamp
+    // 填充header.stamp
     sample.getUserHeader().stamp_ns = aligned_time_us * 1000;
     sample.getUserHeader().frame_id = {iox::TruncateToCapacity,
                                        config_.imu_frame_id.c_str()};
@@ -201,19 +215,18 @@ void hardware::XRobot::populateAndPublish(
     sample->linear_acceleration.y = received_data.accl_.y;
     sample->linear_acceleration.z = received_data.accl_.z;
 
-    // 发布消息
-    sample.publish();
     auto yaw = received_data.eulr_.yaw;
     auto pitch = received_data.eulr_.pit;
     auto roll = received_data.eulr_.rol;
 
-    LOG_INFO(this->logger_,
-             "imu_time(us):{}, unix_time(us):{}, yaw: {}, pitch: "
-             "{}, roll: {}",
-             (unsigned long long)imu_time_us,
-             (unsigned long long)aligned_time_us, yaw, pitch, roll);
+    LOG_DEBUG(this->logger_,
+              "imu_time(us):{}, unix_time(us):{}, yaw: {}, pitch: "
+              "{}, roll: {}",
+              (unsigned long long)imu_time_us,
+              (unsigned long long)aligned_time_us, yaw, pitch, roll);
+    return true;
   } else {
-    std::cerr << "CRC check failed." << std::endl;
     LOG_ERROR(logger_, "CRC check failed.");
+    return false;
   }
 }

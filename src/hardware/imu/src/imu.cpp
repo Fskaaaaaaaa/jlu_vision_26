@@ -1,7 +1,6 @@
 #include "imu.hpp"
 #include "configs.hpp"
 #include "iceoryx_posh/popo/sample.hpp"
-#include "iox/signal_watcher.hpp"
 #include "msgs/Header.hpp"
 #include "msgs/ImuData.hpp"
 #include "xrobot.hpp"
@@ -10,9 +9,7 @@
 #include "quill/LogMacros.h"
 #include "quill/core/ThreadContextManager.h"
 
-#include <chrono>
 #include <memory>
-#include <thread>
 
 hardware::Imu::Imu(quill::Logger *logger, const ImuConfigs &configs)
     : logger_(logger), configs_(configs),
@@ -32,12 +29,13 @@ hardware::Imu::Imu(quill::Logger *logger, const ImuConfigs &configs)
   }
 }
 
-hardware::Imu::~Imu() { this->imu_data_pub_.stopOffer(); };
-
 void hardware::Imu::publishImuData() {
-  while (!this->imu_data_pub_.loan().and_then(
-      [&](iox::popo::Sample<msgs::ImuData, msgs::Header> &sample) {
-        this->imu_->populateAndPublish(sample);
-      })) {
-  }
+  // return;
+  this->imu_data_pub_.loan()
+      .and_then([&](iox::popo::Sample<msgs::ImuData, msgs::Header> &sample) {
+        if (this->imu_->getImuData(sample))
+          sample.publish();
+      })
+      .or_else(
+          [&](auto) { LOG_ERROR(logger_, "unable to loan mem, retrying..."); });
 }
