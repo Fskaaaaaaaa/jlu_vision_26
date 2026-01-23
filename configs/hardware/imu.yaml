@@ -1,4 +1,4 @@
-log_level: Debug
+log_level: Info
 imu_type: xr
 imu_name: imu0
 imu_data_publish_interval_ms: 1

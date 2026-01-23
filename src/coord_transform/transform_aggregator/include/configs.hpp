@@ -18,7 +18,8 @@ struct ImuIntegratorConfig {
   double prior_noise_rpy;
   double prior_noise_xyz;
   double bias_noise;
-  int bias_factor_interval_ms;
+  int update_interval_ms;
+  bool use_imu_rpy;
 };
 struct TransformAggregatorConfigs {
   quill::LogLevel log_level;

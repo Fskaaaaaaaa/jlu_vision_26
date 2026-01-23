@@ -3,7 +3,6 @@
 #include "basic/time_tools.hpp"
 #include "configs.hpp"
 #include "iceoryx_posh/internal/popo/base_subscriber.hpp"
-#include "iceoryx_posh/popo/notification_callback.hpp"
 #include "imu_integrator.hpp"
 #include "math/angle_tools.hpp"
 #include "msgs/Basic.hpp"
@@ -17,8 +16,9 @@
 #include "quill/LogMacros.h"
 #include "quill/core/ThreadContextManager.h"
 
+#include <cmath>
 #include <cstdlib>
-#include <mutex>
+#include <sstream>
 
 tf::TransformAggregator::TransformAggregator(
     quill::Logger *logger, const TransformAggregatorConfigs &configs)
@@ -26,7 +26,8 @@ tf::TransformAggregator::TransformAggregator(
       imu_integrator_(logger, configs_.imu_conf),
       imu_data_sub_({"imu_data",
                      {iox::TruncateToCapacity, configs.imu_name.c_str()},
-                     "data"}),
+                     "data"},
+                    {1, 0}),
       imu_reset_sub_({"imu_control",
                       {iox::TruncateToCapacity, configs.imu_name.c_str()},
                       "reset"}),
@@ -52,6 +53,7 @@ tf::TransformAggregator::TransformAggregator(
         LOG_CRITICAL(logger_, " unable to attach imu reset event!");
         std::exit(EXIT_FAILURE);
       });
+  LOG_INFO(logger_, "success attech imu reset event.");
   this->imu_listener_
       .attachEvent(imu_data_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
                    iox::popo::createNotificationCallback(
@@ -60,6 +62,7 @@ tf::TransformAggregator::TransformAggregator(
         LOG_CRITICAL(logger_, " unable to attach imu data event!");
         std::exit(EXIT_FAILURE);
       });
+  LOG_INFO(logger_, "success attech imu data event.");
 }
 void tf::TransformAggregator::onImuDataReceivedCallback(
     iox::popo::Subscriber<msgs::ImuData, msgs::Header> *subscriber,
@@ -77,8 +80,12 @@ void tf::TransformAggregator::onImuDataReceivedCallback(
               imu_data.angular_velocity,
               tools::nanoSecToChronoPoint(
                   imu_data_sample.getUserHeader().stamp_ns));
+          LOG_TRACE_L1(self->logger_, "transform: \n{}",
+                       (std::stringstream{} << transform.matrix()).str());
+          // transform.translation() = Eigen::Vector3d::Identity();
+          // FIXME: 似乎直接积分得到的平移就爆掉了，所以优化时速度会爆掉
           self->imu_quaternion0_ = Eigen::Quaterniond{transform.rotation()};
-          self->imu_vel0_ = vel;
+          // self->imu_vel0_ = vel;
           // NOTE:
           // 为了避免云台/速度非0时使用全0值重置坐标系变换后出现“imu斜着上天”的情况
           // 在保证imu非收到重置请求一直由imu_data回调驱动积分的情况下，
@@ -87,12 +94,12 @@ void tf::TransformAggregator::onImuDataReceivedCallback(
               .and_then([&](iox::popo::Sample<msgs::Transform, msgs::Header>
                                 &tf_sample) {
                 tf_sample.getUserHeader().frame_id =
-                    imu_data_sample.getUserHeader().frame_id;
+                    iox::string<10>{iox::TruncateToCapacity,
+                                    self->configs_.map_frame_id.c_str()};
                 tf_sample.getUserHeader().stamp_ns =
                     imu_data_sample.getUserHeader().stamp_ns;
                 tf_sample->child_frame_id =
-                    iox::string<10>{iox::TruncateToCapacity,
-                                    self->configs_.map_frame_id.c_str()};
+                    imu_data_sample.getUserHeader().frame_id;
                 tf_sample->quaterniond.w = self->imu_quaternion0_.w();
                 tf_sample->quaterniond.y = self->imu_quaternion0_.y();
                 tf_sample->quaterniond.x = self->imu_quaternion0_.x();

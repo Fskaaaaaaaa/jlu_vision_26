@@ -1,4 +1,5 @@
 #include "xrobot.hpp"
+#include "basic/time_tools.hpp"
 
 #include "iox/string.hpp"
 #include "quill/LogMacros.h"
@@ -200,7 +201,8 @@ bool hardware::XRobot::getImuData(
         first_local_time_ + (imu_time_us - first_imu_time_);
 
     // 填充header.stamp
-    sample.getUserHeader().stamp_ns = aligned_time_us * 1000;
+    // sample.getUserHeader().stamp_ns = aligned_time_us * 1000;
+    sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
     sample.getUserHeader().frame_id = {iox::TruncateToCapacity,
                                        config_.imu_frame_id.c_str()};
 
