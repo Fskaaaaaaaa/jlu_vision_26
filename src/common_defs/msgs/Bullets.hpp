@@ -6,7 +6,8 @@
 
 namespace msgs {
 
-template <std::uint64_t SIZE> struct Bullets {
+template <std::uint64_t SIZE>
+struct [[deprecated("Use continuous published bullet instead.")]] Bullets {
   iox::cxx::vector<Bullet, SIZE> bullets;
 };
 

@@ -1,7 +1,8 @@
 // Copyright (c) 2026 Feng. All Rights Reserved.
 #pragma once
+
 #include "Basic.hpp"
-#include "iox/vector.hpp"
+
 #include <iceoryx_hoofs/cxx/string.hpp>
 #include <iceoryx_hoofs/cxx/vector.hpp>
 
@@ -12,9 +13,4 @@ struct Transform {
   Vector4d quaterniond;
 };
 
-struct StaticTransformRequest {};
-
-struct StaticTransformResponse {
-  iox::vector<Transform, 10> transforms;
-};
 } // namespace msgs

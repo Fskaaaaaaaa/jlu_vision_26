@@ -4,6 +4,8 @@
 #include "coord_geometry.hpp"
 #include "open3d/geometry/Geometry3D.h"
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <open3d/Open3D.h>
 
@@ -57,20 +59,37 @@ int main(int argc, char *argv[]) {
   open3d::visualization::Visualizer visualizer;
   visualizer.CreateVisualizerWindow(APP_NAME, 1920, 1080);
 
-  std::unordered_map<std::string, std::shared_ptr<open3d::geometry::Geometry3D>>
-      geometrys;
-  fb::CoordGeometry coord_geometry{logger, config.coord_conf, geometrys};
+  std::set<std::shared_ptr<open3d::geometry::Geometry3D>> geometry_ptrs;
+  fb::CoordGeometry coord_geometry{logger, config.coord_conf, geometry_ptrs};
 
-  for (auto &&[name, geometry] : geometrys) {
+  for (auto &&geometry : geometry_ptrs)
     visualizer.AddGeometry(geometry);
-  }
+
   while (visualizer.PollEvents()) {
-    coord_geometry.update(geometrys);
-    for (auto &&[name, geometry] : geometrys) {
+    auto gps_before_update = geometry_ptrs;
+    // NOTE: 各个组在这里update
+    coord_geometry.update(geometry_ptrs);
+
+    // 添加新增的
+    std::set<std::shared_ptr<open3d::geometry::Geometry3D>> increases;
+    std::ranges::set_difference(geometry_ptrs, gps_before_update,
+                                std::inserter(increases, increases.begin()));
+    for (auto &&increased_gp : increases)
+      visualizer.AddGeometry(increased_gp);
+
+    // 去掉删除的
+    std::set<std::shared_ptr<open3d::geometry::Geometry3D>> decreases;
+    std::ranges::set_difference(gps_before_update, geometry_ptrs,
+                                std::inserter(decreases, decreases.begin()));
+    for (auto &&decreased_gp : decreases)
+      visualizer.RemoveGeometry(decreased_gp);
+
+    // 对现有的进行更新
+    for (auto &&geometry : geometry_ptrs)
       visualizer.UpdateGeometry(geometry);
-    }
     visualizer.UpdateRender();
-    std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(config.render_interval_ms));
   }
   return 0;
 }

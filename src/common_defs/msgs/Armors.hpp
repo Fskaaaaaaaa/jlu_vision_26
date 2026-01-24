@@ -6,7 +6,9 @@
 
 namespace msgs {
 
-template <std::uint64_t SIZE> struct Armors {
+template <std::uint64_t SIZE>
+struct [[deprecated("Use continuous published armor instead.")]]
+Armors {
   iox::cxx::vector<Armor, SIZE> armors;
 };
 
