@@ -2,11 +2,14 @@
 
 #include "open3d/geometry/Geometry3D.h"
 #include <Eigen/Dense>
+
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 namespace fb {
 //  NOTE: 解决O3D没有绝对变换的问题。当作仿函数使用。
+//  存储物体初始状态作为变换起点。重名同类型物体共用一个初态。
 class GeometryTransformManager {
 public:
   GeometryTransformManager() = default;
@@ -14,7 +17,6 @@ public:
                   const Eigen::Isometry3d &transform_in_world);
 
 private:
-  std::unordered_map<std::string, Eigen::Isometry3d> last_transforms_cache_;
-  // std::unordered_map<typename Key, typename Tp>
+  std::unordered_map<std::string, std::vector<Eigen::Vector3d>> cache_;
 };
 } // namespace fb

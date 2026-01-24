@@ -2,6 +2,7 @@
 #pragma once
 
 #include "configs.hpp"
+#include "geometry_transform_manager.hpp"
 #include "msgs/Armor.hpp"
 #include "msgs/Header.hpp"
 #include "open3d/geometry/TriangleMesh.h"
@@ -14,7 +15,6 @@
 
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 #include <vector>
 
 namespace fb {
@@ -36,6 +36,8 @@ private:
   iox::popo::Listener armor_listener_;
   std::vector<types::Armor> armors_cache_;
   std::mutex armors_mtx_;
+  GeometryTransformManager transform_;
   std::shared_ptr<open3d::geometry::TriangleMesh> armor_mesh_;
+  std::set<std::string> last_armor_ids_;
 };
 } // namespace fb

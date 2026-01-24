@@ -1,4 +1,4 @@
-log_level: Info
+log_level: Debug
 publish_interval_ms: 1000
 
 static_broudcaster_conf:
@@ -7,11 +7,11 @@ static_broudcaster_conf:
       child_frame_id: odom
       tvec:
         x: 1.0
-        y: 1.0
+        y: 3.0
         z: -1.0
       rpy_angle:
         roll: 5.0
-        pitch: 100.0
+        pitch: 10.0
         yaw: 0.0
     - parent_frame_id: map
       child_frame_id: camera

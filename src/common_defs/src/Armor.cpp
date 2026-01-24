@@ -21,3 +21,21 @@ types::Armor::Armor(
 Eigen::Vector3d types::Armor::getRpy() {
   return this->orientation.matrix().eulerAngles(0, 1, 2);
 }
+
+msgs::Armor types::Armor::toMsg() {
+  return {.armor_type = static_cast<int>(this->type),
+          .armor_color = static_cast<int>(this->color),
+          .distance_to_image_center = this->distance_to_image_center,
+          .position =
+              {
+                  this->position.x(),
+                  this->position.y(),
+                  this->position.z(),
+              },
+          .orientation = {
+              this->orientation.x(),
+              this->orientation.y(),
+              this->orientation.z(),
+              this->orientation.w(),
+          }};
+}

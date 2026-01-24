@@ -47,6 +47,7 @@ add_requires("cxxopts")
 add_requires("quill")
 -- add_requires("magic_enum")
 add_requires("nameof")
+add_requires("ftxui")
 -- add_requires("g2o")
 -- FIXME: g2o官方package的deps缺少fmt和spdlog导致链接不通过,
 -- 得手动添加到～/.xmake/repositories/xmake-repo/packages/g/g2o/xmake.lua

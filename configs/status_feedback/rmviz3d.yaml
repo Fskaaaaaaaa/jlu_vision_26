@@ -1,11 +1,15 @@
 log_level: Info
+render_interval_ms: 10
 coord_conf:
   frame_size: 1.0
-  frame_ids: ["map", "imu"] 
+  frame_ids: ["map", "odom"] 
   static_frame_id: "map"
   tf_query_time_tolerance_ms: 1
   draw_frame_trajectory: true
-  trajectory_frame_id: "imu"
+  trajectory_frame_id: "odom"
   draw_camera_visualization: false
   camera_name: "camera0"
   camera_frame_id: "camera"
+armor_conf:
+  path_to_armor_stl: assets/armor_small.stl
+  service_instance_event: [armors, detector, data]

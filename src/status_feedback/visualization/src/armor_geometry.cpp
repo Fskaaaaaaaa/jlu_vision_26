@@ -15,7 +15,9 @@
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
 
+#include <algorithm>
 #include <cstdlib>
+#include <iterator>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -59,8 +61,7 @@ void fb::ArmorGeometry::onArmorReceivedCallback(
                 iox::TruncateToCapacity,
                 self->config_.service_instance_event.at(1).c_str()}) {
           types::Armor armor{sample};
-
-          self->armors_cache_.emplace_back(armor);
+          self->armors_cache_.emplace_back(types::Armor{sample});
         }
       })) {
   } // end of cache update
@@ -70,43 +71,48 @@ void fb::ArmorGeometry::onArmorReceivedCallback(
 }
 
 void fb::ArmorGeometry::update(
-    std::set<std::shared_ptr<open3d::geometry::Geometry3D>> &name_geom_ptrs) {
-  std::unordered_map<std::string, Eigen::Isometry3d> tmp_map;
+    std::set<std::shared_ptr<open3d::geometry::Geometry3D>> &geom_ptrs) {
   std::scoped_lock lk{armors_mtx_};
+  std::set<std::string> current_armor_ids;
   for (auto &&armor : armors_cache_) {
     auto armor_id = rfl::enum_to_string(armor.type) + '_' +
                     rfl::enum_to_string(armor.color);
-
+    current_armor_ids.emplace(armor_id);
     Eigen::Isometry3d T{Eigen::Isometry3d::Identity()};
     T.pretranslate(armor.position);
     T.rotate(armor.orientation.matrix());
-    if (!name_geom_ptrs.contains(armor_id)) {
-      auto armor_mesh =
+    bool is_in_rander_set{false};
+    for (auto &&geo_ptr : geom_ptrs)
+      if (geo_ptr->GetName() == armor_id) {
+        transform_(geo_ptr, T);
+        is_in_rander_set = true;
+        break;
+      }
+    // 创建新增的装甲板
+    if (!is_in_rander_set) {
+      auto new_armor =
           std::make_shared<open3d::geometry::TriangleMesh>(*armor_mesh_);
+      new_armor->SetName(armor_id);
       const std::unordered_map<types::ArmorColor, Eigen::Vector3d> color_map{
           {types::ArmorColor::Blue, {0, 0, 255}},
           {types::ArmorColor::Red, {255, 0, 0}},
           {types::ArmorColor::Extinguished, {0, 0, 0}}};
-      armor_mesh->PaintUniformColor(color_map.at(armor.color));
-      armor_mesh->ComputeVertexNormals();
-      armor_mesh->Transform(T.matrix());
-      name_geom_ptrs.emplace(armor_id, armor_mesh);
-    } else {
-      name_geom_ptrs.at(armor_id)->Transform(
-          T.matrix() *
-          last_update_armor_id_transforms_.at(armor_id).matrix().inverse());
-      last_update_armor_id_transforms_.erase(armor_id);
+      new_armor->PaintUniformColor(color_map.at(armor.color));
+      new_armor->ComputeVertexNormals();
+      transform_(new_armor, T);
+      geom_ptrs.emplace(new_armor);
     }
-    tmp_map.emplace(armor_id, T);
   }
-  for (auto &&disappear_armor : last_update_armor_id_transforms_) {
-    auto disappear_T = Eigen::Isometry3d::Identity();
-    disappear_T.translate(Eigen::Vector3d{999, 999, 999});
-    name_geom_ptrs.at(disappear_armor.first)
-        ->Transform(disappear_T.matrix() *
-                    last_update_armor_id_transforms_.at(disappear_armor.first)
-                        .matrix()
-                        .inverse());
-  }
-  last_update_armor_id_transforms_ = tmp_map;
+  // 删掉消失的装甲板
+  std::set<std::string> decrease;
+  std::ranges::set_difference(last_armor_ids_, current_armor_ids,
+                              std::inserter(decrease, decrease.begin()));
+  for (auto &&dec_armor_id : decrease)
+    for (auto it = geom_ptrs.begin(); it != geom_ptrs.end();)
+      if ((*it)->GetName() == dec_armor_id) {
+        it = geom_ptrs.erase(it);
+      } else {
+        it++;
+      }
+  last_armor_ids_ = current_armor_ids;
 }

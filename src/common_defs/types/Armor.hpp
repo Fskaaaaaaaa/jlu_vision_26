@@ -27,6 +27,7 @@ enum class ArmorColor {
 struct Armor {
   Armor(const iox::popo::Sample<const msgs::Armor, const msgs::Header> &sample);
   Eigen::Vector3d getRpy();
+  msgs::Armor toMsg();
   std::chrono::system_clock::time_point stamp;
   std::string frame_id;
   ArmorType type;
