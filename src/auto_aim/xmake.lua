@@ -12,4 +12,6 @@ add_packages("ftxui")
 add_deps("common_defs")
 add_deps("tools")
 add_rules("iceoryx_deps")
+add_links("atomic")
+-- NOTE: 貌似不手动链接原子标准库，ld会找不到16位atomic实现
 target_end()

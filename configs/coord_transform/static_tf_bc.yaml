@@ -1,4 +1,4 @@
-log_level: Debug
+log_level: Info
 publish_interval_ms: 1000
 
 static_broudcaster_conf:

@@ -1,9 +1,14 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #pragma once
 
-#include <cstdint>
+#include "KinematicFunctions.hpp"
+
+#include "iox/variant.hpp"
 namespace msgs {
 struct Target {
-  std::uint32_t target_type;
+  int type;
+  iox::variant<BaseKinematicFunc, RobotKinematicFunc, OutpostKinematicFunc,
+               SmallBuffKinematicFunc, BigBuffKinematicFunc>
+      parametric_func;
 };
 } // namespace msgs

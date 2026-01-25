@@ -22,6 +22,7 @@ struct CoordGeometryConfig {
 struct ArmorGeometryConfig {
   std::string path_to_armor_stl;
   std::array<std::string, 3> service_instance_event;
+  double armor_scale;
 };
 
 struct VisualizationConfigs {

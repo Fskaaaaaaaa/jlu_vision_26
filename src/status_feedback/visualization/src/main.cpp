@@ -89,6 +89,8 @@ int main(int argc, char *argv[]) {
     // 对现有的进行更新
     for (auto &&geometry : geometry_ptrs)
       visualizer.UpdateGeometry(geometry);
+    LOG_TRACE_L1(logger, "render geometry vector size: {}",
+                 geometry_ptrs.size());
     visualizer.UpdateRender();
     std::this_thread::sleep_for(
         std::chrono::milliseconds(config.render_interval_ms));

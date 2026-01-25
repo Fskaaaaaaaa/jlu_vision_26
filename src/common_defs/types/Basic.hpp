@@ -10,6 +10,10 @@ struct Point3d {
   double y;
   double z;
 };
+struct Vector2d {
+  double x;
+  double y;
+};
 struct Vector3d {
   double x;
   double y;

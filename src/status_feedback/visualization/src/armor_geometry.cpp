@@ -21,6 +21,7 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 fb::ArmorGeometry::ArmorGeometry(quill::Logger *logger,
                                  const ArmorGeometryConfig &config)
@@ -34,6 +35,7 @@ fb::ArmorGeometry::ArmorGeometry(quill::Logger *logger,
   LOG_INFO(logger_, "start armor_geometry.");
 
   this->armor_mesh_ = open3d::io::CreateMeshFromFile(config_.path_to_armor_stl);
+  armor_mesh_->Scale(config_.armor_scale, {0, 0, 0});
   if (armor_mesh_ == nullptr) {
     LOG_CRITICAL(logger_, "unable to load armor stl!");
     std::exit(EXIT_FAILURE);
@@ -53,20 +55,24 @@ void fb::ArmorGeometry::onArmorReceivedCallback(
     iox::popo::Subscriber<msgs::Armor, msgs::Header> *subscriber,
     ArmorGeometry *self) {
   std::scoped_lock lk{self->armors_mtx_};
+  std::vector<types::Armor> receive_armors;
   while (subscriber->take().and_then( // 缓存全部队列
-      [self, subscriber](const iox::popo::Sample<const msgs::Armor,
-                                                 const msgs::Header> &sample) {
+      [&](const iox::popo::Sample<const msgs::Armor, const msgs::Header>
+              &sample) {
         if (subscriber->getServiceDescription().getInstanceIDString() ==
             iox::capro::IdString_t{
                 iox::TruncateToCapacity,
                 self->config_.service_instance_event.at(1).c_str()}) {
           types::Armor armor{sample};
-          self->armors_cache_.emplace_back(types::Armor{sample});
+          receive_armors.emplace_back(types::Armor{sample});
         }
       })) {
   } // end of cache update
-  LOG_DEBUG(self->logger_, "armor cache updated. size: {}",
-            self->armors_cache_.size());
+  if (!receive_armors.empty()) {
+    self->armors_cache_ = receive_armors;
+    LOG_DEBUG(self->logger_, "armor cache updated. size: {}",
+              self->armors_cache_.size());
+  }
   return;
 }
 
@@ -77,6 +83,17 @@ void fb::ArmorGeometry::update(
   for (auto &&armor : armors_cache_) {
     auto armor_id = rfl::enum_to_string(armor.type) + '_' +
                     rfl::enum_to_string(armor.color);
+    bool has_same_id{false};
+    do {
+      has_same_id = false;
+      for (const auto &other_id : current_armor_ids) {
+        if (other_id == armor_id) {
+          has_same_id = true;
+          armor_id += '_';
+          break;
+        }
+      }
+    } while (has_same_id);
     current_armor_ids.emplace(armor_id);
     Eigen::Isometry3d T{Eigen::Isometry3d::Identity()};
     T.pretranslate(armor.position);
@@ -94,8 +111,8 @@ void fb::ArmorGeometry::update(
           std::make_shared<open3d::geometry::TriangleMesh>(*armor_mesh_);
       new_armor->SetName(armor_id);
       const std::unordered_map<types::ArmorColor, Eigen::Vector3d> color_map{
-          {types::ArmorColor::Blue, {0, 0, 255}},
-          {types::ArmorColor::Red, {255, 0, 0}},
+          {types::ArmorColor::Blue, {0, 0, 1}},
+          {types::ArmorColor::Red, {1, 0, 0}},
           {types::ArmorColor::Extinguished, {0, 0, 0}}};
       new_armor->PaintUniformColor(color_map.at(armor.color));
       new_armor->ComputeVertexNormals();
@@ -107,6 +124,7 @@ void fb::ArmorGeometry::update(
   std::set<std::string> decrease;
   std::ranges::set_difference(last_armor_ids_, current_armor_ids,
                               std::inserter(decrease, decrease.begin()));
+  LOG_DEBUG(logger_, "decrease {} armor(s).", decrease.size());
   for (auto &&dec_armor_id : decrease)
     for (auto it = geom_ptrs.begin(); it != geom_ptrs.end();)
       if ((*it)->GetName() == dec_armor_id) {

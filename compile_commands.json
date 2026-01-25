@@ -1,26 +1,6 @@
 [
 {
   "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/coord_transform/transform_aggregator/include", "-I/usr/local/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-DNDEBUG", "-o", "build/.objs/tf_agg/linux/x86_64/release/src/coord_transform/transform_aggregator/src/imu_integrator.cpp.o", "src/coord_transform/transform_aggregator/src/imu_integrator.cpp"],
-  "file": "src/coord_transform/transform_aggregator/src/imu_integrator.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/coord_transform/transform_aggregator/include", "-I/usr/local/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-DNDEBUG", "-o", "build/.objs/tf_agg/linux/x86_64/release/src/coord_transform/transform_aggregator/src/transform_aggregator.cpp.o", "src/coord_transform/transform_aggregator/src/transform_aggregator.cpp"],
-  "file": "src/coord_transform/transform_aggregator/src/transform_aggregator.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/coord_transform/transform_aggregator/include", "-I/usr/local/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-DNDEBUG", "-o", "build/.objs/tf_agg/linux/x86_64/release/src/coord_transform/transform_aggregator/src/main.cpp.o", "src/coord_transform/transform_aggregator/src/main.cpp"],
-  "file": "src/coord_transform/transform_aggregator/src/main.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/fast_tf/linux/x86_64/release/src/third_party/fast_tf/fast_tf.cpp.o", "src/third_party/fast_tf/fast_tf.cpp"],
-  "file": "src/third_party/fast_tf/fast_tf.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
   "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/camera/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/galaxy_camera_sdk/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/hik_camera_sdk/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-DNDEBUG", "-o", "build/.objs/camera/linux/x86_64/release/src/hardware/camera/src/galaxy.cpp.o", "src/hardware/camera/src/galaxy.cpp"],
   "file": "src/hardware/camera/src/galaxy.cpp"
 },
@@ -38,21 +18,6 @@
   "directory": "/home/aaa/RM/hyaku_shiki",
   "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/camera/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/galaxy_camera_sdk/include", "-I/home/aaa/RM/hyaku_shiki/src/third_party/hik_camera_sdk/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-DNDEBUG", "-o", "build/.objs/camera/linux/x86_64/release/src/hardware/camera/src/camera.cpp.o", "src/hardware/camera/src/camera.cpp"],
   "file": "src/hardware/camera/src/camera.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/imu/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-DNDEBUG", "-o", "build/.objs/imu/linux/x86_64/release/src/hardware/imu/src/imu.cpp.o", "src/hardware/imu/src/imu.cpp"],
-  "file": "src/hardware/imu/src/imu.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/imu/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-DNDEBUG", "-o", "build/.objs/imu/linux/x86_64/release/src/hardware/imu/src/xrobot.cpp.o", "src/hardware/imu/src/xrobot.cpp"],
-  "file": "src/hardware/imu/src/xrobot.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/imu/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-DNDEBUG", "-o", "build/.objs/imu/linux/x86_64/release/src/hardware/imu/src/main.cpp.o", "src/hardware/imu/src/main.cpp"],
-  "file": "src/hardware/imu/src/main.cpp"
 },
 {
   "directory": "/home/aaa/RM/hyaku_shiki",
@@ -121,6 +86,16 @@
 },
 {
   "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/auto_aim/fake_armors_publisher/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/f/ftxui/v6.1.9/e32f75b14e2841348a64fa1d2a17499f/include", "-DNDEBUG", "-o", "build/.objs/fake_ap/linux/x86_64/release/src/auto_aim/fake_armors_publisher/src/robot.cpp.o", "src/auto_aim/fake_armors_publisher/src/robot.cpp"],
+  "file": "src/auto_aim/fake_armors_publisher/src/robot.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/auto_aim/fake_armors_publisher/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/f/ftxui/v6.1.9/e32f75b14e2841348a64fa1d2a17499f/include", "-DNDEBUG", "-o", "build/.objs/fake_ap/linux/x86_64/release/src/auto_aim/fake_armors_publisher/src/main.cpp.o", "src/auto_aim/fake_armors_publisher/src/main.cpp"],
+  "file": "src/auto_aim/fake_armors_publisher/src/main.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
   "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/coord_transform/static_broadcaster/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-DNDEBUG", "-o", "build/.objs/static_tf_bc/linux/x86_64/release/src/coord_transform/static_broadcaster/src/static_broadcaster.cpp.o", "src/coord_transform/static_broadcaster/src/static_broadcaster.cpp"],
   "file": "src/coord_transform/static_broadcaster/src/static_broadcaster.cpp"
 },
@@ -128,6 +103,61 @@
   "directory": "/home/aaa/RM/hyaku_shiki",
   "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/coord_transform/static_broadcaster/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-DNDEBUG", "-o", "build/.objs/static_tf_bc/linux/x86_64/release/src/coord_transform/static_broadcaster/src/main.cpp.o", "src/coord_transform/static_broadcaster/src/main.cpp"],
   "file": "src/coord_transform/static_broadcaster/src/main.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/coord_transform/transform_aggregator/include", "-I/usr/local/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-DNDEBUG", "-o", "build/.objs/tf_agg/linux/x86_64/release/src/coord_transform/transform_aggregator/src/imu_integrator.cpp.o", "src/coord_transform/transform_aggregator/src/imu_integrator.cpp"],
+  "file": "src/coord_transform/transform_aggregator/src/imu_integrator.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/coord_transform/transform_aggregator/include", "-I/usr/local/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-DNDEBUG", "-o", "build/.objs/tf_agg/linux/x86_64/release/src/coord_transform/transform_aggregator/src/transform_aggregator.cpp.o", "src/coord_transform/transform_aggregator/src/transform_aggregator.cpp"],
+  "file": "src/coord_transform/transform_aggregator/src/transform_aggregator.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/coord_transform/transform_aggregator/include", "-I/usr/local/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-DNDEBUG", "-o", "build/.objs/tf_agg/linux/x86_64/release/src/coord_transform/transform_aggregator/src/main.cpp.o", "src/coord_transform/transform_aggregator/src/main.cpp"],
+  "file": "src/coord_transform/transform_aggregator/src/main.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/fast_tf/linux/x86_64/release/src/third_party/fast_tf/fast_tf.cpp.o", "src/third_party/fast_tf/fast_tf.cpp"],
+  "file": "src/third_party/fast_tf/fast_tf.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/imu/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-DNDEBUG", "-o", "build/.objs/imu/linux/x86_64/release/src/hardware/imu/src/imu.cpp.o", "src/hardware/imu/src/imu.cpp"],
+  "file": "src/hardware/imu/src/imu.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/imu/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-DNDEBUG", "-o", "build/.objs/imu/linux/x86_64/release/src/hardware/imu/src/xrobot.cpp.o", "src/hardware/imu/src/xrobot.cpp"],
+  "file": "src/hardware/imu/src/xrobot.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/hardware/imu/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-DNDEBUG", "-o", "build/.objs/imu/linux/x86_64/release/src/hardware/imu/src/main.cpp.o", "src/hardware/imu/src/main.cpp"],
+  "file": "src/hardware/imu/src/main.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/tiny_api.cpp.o", "src/third_party/tinympc/tiny_api.cpp"],
+  "file": "src/third_party/tinympc/tiny_api.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/admm.cpp.o", "src/third_party/tinympc/admm.cpp"],
+  "file": "src/third_party/tinympc/admm.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/codegen.cpp.o", "src/third_party/tinympc/codegen.cpp"],
+  "file": "src/third_party/tinympc/codegen.cpp"
+},
+{
+  "directory": "/home/aaa/RM/hyaku_shiki",
+  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/rho_benchmark.cpp.o", "src/third_party/tinympc/rho_benchmark.cpp"],
+  "file": "src/third_party/tinympc/rho_benchmark.cpp"
 },
 {
   "directory": "/home/aaa/RM/hyaku_shiki",
@@ -153,29 +183,4 @@
   "directory": "/home/aaa/RM/hyaku_shiki",
   "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/common_defs", "-I/usr/local/include", "-I/usr/local/include/iceoryx/v", "-I", "/usr/include/opencv4", "-I", "/usr/include/x86_64-linux-gnu", "-I", "/usr/include/libdrm", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/common_defs/linux/x86_64/release/src/common_defs/src/ImuData.cpp.o", "src/common_defs/src/ImuData.cpp"],
   "file": "src/common_defs/src/ImuData.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/auto_aim/fake_armors_publisher/include", "-I/usr/local/include/iceoryx/v", "-Isrc/tools", "-Isrc/common_defs", "-Isrc/third_party/fast_tf", "-I", "/usr/include/eigen3", "-I", "/home/aaa/.xmake/packages/r/reflect-cpp/v0.22.0/995a971237a846a086fdbaf17ce7fad1/include", "-I", "/home/aaa/.xmake/packages/y/yyjson/0.12.0/320fdcac3d9048e1b0e4c184a10ac0bc/include", "-I", "/home/aaa/.xmake/packages/c/ctre/v3.9.0/7f35b3d6d8ab4933b64409ba67b4dcff/include", "-I", "/home/aaa/.xmake/packages/c/cxxopts/v3.3.1/ba2729780ce049eb8105afd13b05d095/include", "-I", "/home/aaa/.xmake/packages/q/quill/v11.0.2/a6fce71208bf429aa0541275738cff3c/include", "-I", "/home/aaa/.xmake/packages/y/yaml-cpp/0.8.0/c41b70635ed74ae9a0628bd794bd504b/include", "-DNDEBUG", "-o", "build/.objs/fake_ap/linux/x86_64/release/src/auto_aim/fake_armors_publisher/src/main.cpp.o", "src/auto_aim/fake_armors_publisher/src/main.cpp"],
-  "file": "src/auto_aim/fake_armors_publisher/src/main.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/tiny_api.cpp.o", "src/third_party/tinympc/tiny_api.cpp"],
-  "file": "src/third_party/tinympc/tiny_api.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/admm.cpp.o", "src/third_party/tinympc/admm.cpp"],
-  "file": "src/third_party/tinympc/admm.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/codegen.cpp.o", "src/third_party/tinympc/codegen.cpp"],
-  "file": "src/third_party/tinympc/codegen.cpp"
-},
-{
-  "directory": "/home/aaa/RM/hyaku_shiki",
-  "arguments": ["/usr/bin/g++", "-c", "-m64", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-O3", "-std=c++20", "-Isrc/third_party/tinympc", "-I", "/usr/include/eigen3", "-DNDEBUG", "-o", "build/.objs/tinympc/linux/x86_64/release/src/third_party/tinympc/rho_benchmark.cpp.o", "src/third_party/tinympc/rho_benchmark.cpp"],
-  "file": "src/third_party/tinympc/rho_benchmark.cpp"
 }]

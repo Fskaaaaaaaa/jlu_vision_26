@@ -12,4 +12,5 @@ coord_conf:
   camera_frame_id: "camera"
 armor_conf:
   path_to_armor_stl: assets/armor_small.stl
-  service_instance_event: [armors, detector, data]
+  service_instance_event: [armors, fake_ap, data]
+  armor_scale: 0.005

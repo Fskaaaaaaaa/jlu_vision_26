@@ -20,7 +20,7 @@ inline double limitRadian(double angle,
   return angle + low; // 回到 (low, high]
 }
 
-inline double shortestAngularDistance(double from, double to) {
+inline double shortestRadianDistance(double from, double to) {
   return limitRadian(to - from);
 }
 
@@ -37,15 +37,19 @@ inline double limitZeroThres(double in, double zero_thres, double max) {
 }
 
 inline Eigen::Quaterniond rpyToQuaterniond(const Eigen::Vector3d &rpy_angle) {
-  Eigen::AngleAxisd roll_angle(angle2Radian(rpy_angle.x()),
-                               Eigen::Vector3d::UnitX());
-  Eigen::AngleAxisd pitch_angle(angle2Radian(rpy_angle.y()),
-                                Eigen::Vector3d::UnitY());
-  Eigen::AngleAxisd yaw_angle(angle2Radian(rpy_angle.z()),
-                              Eigen::Vector3d::UnitZ());
-  Eigen::Quaterniond q{yaw_angle * pitch_angle * roll_angle};
+  Eigen::AngleAxisd roll(rpy_angle.x(), Eigen::Vector3d::UnitX());
+  Eigen::AngleAxisd pitch(rpy_angle.y(), Eigen::Vector3d::UnitY());
+  Eigen::AngleAxisd yaw(rpy_angle.z(), Eigen::Vector3d::UnitZ());
+  Eigen::Quaterniond q{yaw * pitch * roll};
   q.normalize();
   return q;
+}
+
+inline Eigen::Quaterniond
+rpyAngleToQuaterniond(const Eigen::Vector3d &rpy_angle) {
+  return rpyAngleToQuaterniond({angle2Radian(rpy_angle.x()),
+                                angle2Radian(rpy_angle.y()),
+                                angle2Radian(rpy_angle.z())});
 }
 
 } // namespace tools

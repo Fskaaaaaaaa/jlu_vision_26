@@ -36,7 +36,7 @@ tf::TransformAggregator::TransformAggregator(
                     {iox::TruncateToCapacity, configs.imu_name.c_str()},
                     "data"}) {
   LOG_INFO(logger_, "TransformAggregator start!");
-  this->imu_quaternion0_ = tools::rpyToQuaterniond(
+  this->imu_quaternion0_ = tools::rpyAngleToQuaterniond(
       {configs_.imu_initial_angle.roll, configs_.imu_initial_angle.pitch,
        configs_.imu_initial_angle.yaw});
   this->imu_translation0_ = {configs_.imu_initial_trans.x,
