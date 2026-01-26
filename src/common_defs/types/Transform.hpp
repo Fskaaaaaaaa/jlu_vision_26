@@ -3,10 +3,8 @@
 
 #include "msgs/Header.hpp"
 #include "msgs/Transform.hpp"
-#include "types/Basic.hpp"
 
 #include <Eigen/Dense>
-#include <array>
 #include <iceoryx_posh/popo/sample.hpp>
 
 #include <chrono>

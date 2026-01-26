@@ -2,7 +2,7 @@
 #pragma once
 #include "configs.hpp"
 #include "fast_tf/fast_tf.hpp"
-#include "geometry_transform_manager.hpp"
+#include "open3d_tools.hpp"
 #include "transform/tf_listener.hpp"
 
 #include "open3d/geometry/Geometry3D.h"

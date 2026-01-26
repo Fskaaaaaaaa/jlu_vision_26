@@ -1,6 +1,8 @@
 #pragma once
 
 #include "open3d/geometry/Geometry3D.h"
+#include "open3d/geometry/TriangleMesh.h"
+
 #include <Eigen/Dense>
 
 #include <memory>
@@ -19,4 +21,8 @@ public:
 private:
   std::unordered_map<std::string, std::vector<Eigen::Vector3d>> cache_;
 };
+
+// WARNING: vibe coding!
+std::shared_ptr<open3d::geometry::TriangleMesh> mergeTriangleMeshes(
+    const std::vector<std::shared_ptr<open3d::geometry::TriangleMesh>> &meshes);
 } // namespace fb

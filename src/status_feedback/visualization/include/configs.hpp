@@ -1,5 +1,6 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #pragma once
+#include "confs/IceoryxServiceDescription.hpp"
 
 #include <array>
 #include <quill/core/LogLevel.h>
@@ -25,11 +26,17 @@ struct ArmorGeometryConfig {
   double armor_scale;
 };
 
+struct TargetGeometryConfig {
+  confs::IceoryxServiceDescription msg_source;
+  bool show_vel_arrow;
+  double target_scale;
+  double arrow_scale;
+};
+
 struct VisualizationConfigs {
   CoordGeometryConfig coord_conf;
   ArmorGeometryConfig armor_conf;
-  // CameraGeometryConfig cam_conf;
-  // ArmorDrawerConfig armor_conf;
+  TargetGeometryConfig target_conf;
   // BuffDrawerConfig buff_conf;
   // BulletDrawerConfig bullet_conf;
 

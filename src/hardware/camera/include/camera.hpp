@@ -27,18 +27,6 @@ public:
   virtual int changeExposureGain(double exposure, double gain) = 0;
 };
 
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
-// BUG: 相机节点写的一坨！！设置的帧率一旦到100帧以上就会卡死+抽搐！！！
 class Camera {
 public:
   Camera(quill::Logger *logger, const CameraConfigs &configs);
@@ -57,7 +45,8 @@ private:
   std::jthread image_read_pub_thread_;
   iox::popo::Publisher<msgs::CameraInfo, msgs::Header> cam_info_pub_;
   std::jthread cam_info_pub_thread_;
-  iox::popo::Subscriber<msgs::CameraParams, msgs::Header> cam_params_sub_;
+  iox::popo::Subscriber<msgs::CameraParams, msgs::Header>
+      cam_params_change_sub_;
   iox::popo::Listener cam_param_change_listener_;
 };
 

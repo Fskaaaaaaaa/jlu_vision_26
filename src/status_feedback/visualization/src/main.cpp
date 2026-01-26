@@ -4,6 +4,7 @@
 #include "configs.hpp"
 #include "coord_geometry.hpp"
 #include "open3d/geometry/Geometry3D.h"
+#include "target_geometry.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -62,15 +63,17 @@ int main(int argc, char *argv[]) {
   std::set<std::shared_ptr<open3d::geometry::Geometry3D>> geometry_ptrs;
   fb::CoordGeometry coord_geometry{logger, config.coord_conf, geometry_ptrs};
   fb::ArmorGeometry arrmor_geometry{logger, config.armor_conf};
+  fb::TargetGeometry target_geometry{logger, config.target_conf};
 
   for (auto &&geometry : geometry_ptrs)
     visualizer.AddGeometry(geometry);
 
   while (visualizer.PollEvents()) {
     auto gps_before_update = geometry_ptrs;
-    arrmor_geometry.update(geometry_ptrs);
     // NOTE: 各个组在这里update
+    arrmor_geometry.update(geometry_ptrs);
     coord_geometry.update(geometry_ptrs);
+    target_geometry.update(geometry_ptrs);
 
     // 添加新增的
     std::set<std::shared_ptr<open3d::geometry::Geometry3D>> increases;

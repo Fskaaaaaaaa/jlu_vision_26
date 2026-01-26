@@ -2,7 +2,7 @@ log_level: Info
 render_interval_ms: 10
 coord_conf:
   frame_size: 1.0
-  frame_ids: ["map", "odom"] 
+  frame_ids: [] #["map", "odom"] 
   static_frame_id: "map"
   tf_query_time_tolerance_ms: 1
   draw_frame_trajectory: true
@@ -14,3 +14,11 @@ armor_conf:
   path_to_armor_stl: assets/armor_small.stl
   service_instance_event: [armors, fake_ap, data]
   armor_scale: 0.005
+target_conf:
+  msg_source:
+    service: target
+    instance: fake_tp
+    event: data
+  show_vel_arrow: true
+  target_scale: 0.1
+  arrow_scale: 0.1

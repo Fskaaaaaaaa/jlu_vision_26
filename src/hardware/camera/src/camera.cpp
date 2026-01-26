@@ -29,17 +29,20 @@ hardware::Camera::Camera(quill::Logger *logger, const CameraConfigs &configs)
       cam_info_pub_({"camera_info",
                      {iox::TruncateToCapacity, configs_.camera_name.c_str()},
                      "data"}),
-      cam_params_sub_({"camera_params",
-                       {iox::TruncateToCapacity, configs_.camera_name.c_str()},
-                       "data"}) {
+      cam_params_change_sub_(
+          {"camera_params",
+           {iox::TruncateToCapacity, configs_.camera_name.c_str()},
+           "data"}) {
   // init camera
   switch (configs_.camera_type) {
   case CameraType::galaxy:
     this->camera_ = std::make_unique<Galaxy>(logger, configs_.camera_params);
     break;
   case CameraType::hik:
+    // TODO
     break;
   case CameraType::usb:
+    // TODO
     break;
   default:
     LOG_CRITICAL(logger_, "Unknown camera type!");
@@ -64,7 +67,8 @@ hardware::Camera::Camera(quill::Logger *logger, const CameraConfigs &configs)
     LOG_INFO(logger_, "CameraInfo pub thread stop!");
   }};
   cam_param_change_listener_
-      .attachEvent(cam_params_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
+      .attachEvent(cam_params_change_sub_,
+                   iox::popo::SubscriberEvent::DATA_RECEIVED,
                    iox::popo::createNotificationCallback(
                        onCameraParamRecievedCallback, *this))
       .or_else([&](auto) {
@@ -84,7 +88,6 @@ bool hardware::Camera::publishImage() {
         status = this->camera_->captureImage(sample->data, sample->data_size);
         if (status == 0) {
           sample.publish();
-          LOG_DEBUG(logger_, "new image published.");
         } else {
           LOG_WARNING(logger_, "something wrong on getting image!");
         }

@@ -2,9 +2,14 @@
 
 #include "GxIAPI.h"
 #include "confs/CameraParams.hpp"
+#include "opencv2/core/hal/interface.h"
+#include "opencv2/core/mat.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 #include "quill/LogMacros.h"
 #include "quill/Logger.h"
 #include <cstdlib>
+#include <unordered_map>
 
 #define GX_SUCCESS(X) (X == GX_STATUS_SUCCESS)
 
@@ -138,19 +143,29 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
                  bayer_frame.nPixelFormat);
     return EXIT_FAILURE;
   }
-
-  status =
-      DxRaw8toRGB24(bayer_frame.pImgBuf, buffer, bayer_frame.nWidth,
-                    bayer_frame.nHeight, RAW2RGB_NEIGHBOUR, bayer_type, false);
-
-  if (!GX_SUCCESS(status)) {
-    LOG_ERROR(logger_, "Failed to convert Bayer to RGB, status = {}", status);
-    return EXIT_FAILURE;
-  }
-
+  const static std::unordered_map<DX_PIXEL_COLOR_FILTER,
+                                  cv::ColorConversionCodes>
+      type_map{
+          {BAYERGB, cv::COLOR_BayerGB2BGR},
+          {BAYERGR, cv::COLOR_BayerGR2BGR},
+          {BAYERRG, cv::COLOR_BayerRG2BGR},
+          {BAYERBG, cv::COLOR_BayerBG2BGR},
+      };
+  // status =
+  //     DxRaw8toRGB24(bayer_frame.pImgBuf, buffer, bayer_frame.nWidth,
+  //                   bayer_frame.nHeight, RAW2RGB_NEIGHBOUR, bayer_type,
+  //                   false);
+  cv::cvtColor(
+      cv::Mat{bayer_frame.nHeight, bayer_frame.nWidth, CV_8U,
+              bayer_frame.pImgBuf},
+      cv::Mat{bayer_frame.nHeight, bayer_frame.nWidth, CV_8UC3, buffer},
+      type_map.at(bayer_type));
+  // if (!GX_SUCCESS(status)) {
+  //   LOG_ERROR(logger_, "Failed to convert Bayer to RGB, status = {}",
+  //   status); return EXIT_FAILURE;
+  // }
   LOG_DEBUG(logger_, "Get image: {}x{}", bayer_frame.nWidth,
             bayer_frame.nHeight);
-
   fail_conut_ = 0;
   return EXIT_SUCCESS;
 }

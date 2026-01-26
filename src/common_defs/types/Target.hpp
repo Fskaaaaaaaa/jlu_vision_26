@@ -25,6 +25,7 @@ struct Target {
   std::string frame_id;
   std::chrono::system_clock::time_point stamp;
   TargetType type;
-  std::function<std::vector<Eigen::Vector3d>(double t)> kinematic_function;
+  Eigen::Isometry3d center_pose;
+  std::function<std::vector<Eigen::Isometry3d>(double dt)> kinematic_function;
 };
 } // namespace types

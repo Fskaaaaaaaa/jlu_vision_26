@@ -2,7 +2,7 @@ log_level: Info
 camera_type: galaxy
 camera_name: camera0
 camera_frame_id: camera_optical
-image_publish_interval_ms: 0 # 很玄学，循环等待时间非零时订阅端就会出现秒量级的延迟
+image_publish_interval_ms: 1 
 cam_info_publish_interval_ms: 1000
 camera_info:
   view_width_px: 1440
@@ -12,4 +12,4 @@ camera_info:
 camera_params:
   exposure_time: 3000
   gain: 15.0
-  frame_rate: 100
+  frame_rate: 150

@@ -34,6 +34,8 @@ struct SmallBuffKinematicFunc {
   double radius;
 };
 struct BigBuffKinematicFunc {
+  Vector3d center_xyz;
+  double initial_phase;
   // TODO
 };
 

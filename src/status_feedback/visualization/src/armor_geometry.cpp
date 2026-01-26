@@ -54,7 +54,6 @@ fb::ArmorGeometry::ArmorGeometry(quill::Logger *logger,
 void fb::ArmorGeometry::onArmorReceivedCallback(
     iox::popo::Subscriber<msgs::Armor, msgs::Header> *subscriber,
     ArmorGeometry *self) {
-  std::scoped_lock lk{self->armors_mtx_};
   std::vector<types::Armor> receive_armors;
   while (subscriber->take().and_then( // 缓存全部队列
       [&](const iox::popo::Sample<const msgs::Armor, const msgs::Header>
@@ -69,6 +68,7 @@ void fb::ArmorGeometry::onArmorReceivedCallback(
       })) {
   } // end of cache update
   if (!receive_armors.empty()) {
+    std::scoped_lock lk{self->armors_mtx_};
     self->armors_cache_ = receive_armors;
     LOG_DEBUG(self->logger_, "armor cache updated. size: {}",
               self->armors_cache_.size());
