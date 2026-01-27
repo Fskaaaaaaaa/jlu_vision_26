@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
       "imu_name, reset} to reset translation of this transform.");
   options.add_options()("c,config", "Path of config yaml file",
                         cxxopts::value<std::string>()->default_value(
-                            "configs/coord_transform/tf_agg.yaml"))(
+                            "configs/odom_coord/tf_agg.yaml"))(
       "l,log", "Path of log dir",
       cxxopts::value<std::string>()->default_value("logs/tf_agg"))(
       "h,help", "Print usage.");

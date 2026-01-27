@@ -9,8 +9,8 @@
 namespace msgs {
 struct Transform {
   iox::string<10> child_frame_id;
-  Vector3d translate;
-  Vector4d quaterniond;
+  Vector3d translation;
+  Vector4d rotation;
 };
 
 } // namespace msgs

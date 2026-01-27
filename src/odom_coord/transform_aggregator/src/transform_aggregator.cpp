@@ -100,13 +100,13 @@ void tf::TransformAggregator::onImuDataReceivedCallback(
                     imu_data_sample.getUserHeader().stamp_ns;
                 tf_sample->child_frame_id =
                     imu_data_sample.getUserHeader().frame_id;
-                tf_sample->quaterniond.w = self->imu_quaternion0_.w();
-                tf_sample->quaterniond.y = self->imu_quaternion0_.y();
-                tf_sample->quaterniond.x = self->imu_quaternion0_.x();
-                tf_sample->quaterniond.z = self->imu_quaternion0_.z();
-                tf_sample->translate.x = transform.translation().x();
-                tf_sample->translate.y = transform.translation().y();
-                tf_sample->translate.z = transform.translation().z();
+                tf_sample->rotation.w = self->imu_quaternion0_.w();
+                tf_sample->rotation.y = self->imu_quaternion0_.y();
+                tf_sample->rotation.x = self->imu_quaternion0_.x();
+                tf_sample->rotation.z = self->imu_quaternion0_.z();
+                tf_sample->translation.x = transform.translation().x();
+                tf_sample->translation.y = transform.translation().y();
+                tf_sample->translation.z = transform.translation().z();
                 tf_sample.publish();
                 LOG_DEBUG(self->logger_, "transform {} to imu published.",
                           self->configs_.map_frame_id);

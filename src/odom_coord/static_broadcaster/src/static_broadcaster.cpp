@@ -23,14 +23,14 @@ void tf::StaticBroudcaster::publishTransforms() {
               sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
               sample->child_frame_id = {iox::TruncateToCapacity,
                                         transform.child_frame_id.c_str()};
-              sample->translate.x = transform.tvec.x;
-              sample->translate.y = transform.tvec.y;
-              sample->translate.z = transform.tvec.z;
+              sample->translation.x = transform.translation.x;
+              sample->translation.y = transform.translation.y;
+              sample->translation.z = transform.translation.z;
               auto q = transform.getQuaterniond();
-              sample->quaterniond.x = q.x;
-              sample->quaterniond.y = q.y;
-              sample->quaterniond.z = q.z;
-              sample->quaterniond.w = q.w;
+              sample->rotation.x = q.x;
+              sample->rotation.y = q.y;
+              sample->rotation.z = q.z;
+              sample->rotation.w = q.w;
               sample.publish();
               LOG_DEBUG(logger_, "publish transform {} to {}.",
                         transform.parent_frame_id, transform.child_frame_id);

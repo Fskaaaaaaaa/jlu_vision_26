@@ -11,19 +11,19 @@ types::Transform::Transform(
   this->child_frame_id = sample->child_frame_id.c_str();
   this->stamp = std::chrono::time_point<std::chrono::system_clock>{
       std::chrono::nanoseconds{sample.getUserHeader().stamp_ns}};
-  this->tvec.x() = sample->translate.x;
-  this->tvec.y() = sample->translate.y;
-  this->tvec.z() = sample->translate.z;
-  this->quaterniond.x() = sample->quaterniond.x;
-  this->quaterniond.y() = sample->quaterniond.y;
-  this->quaterniond.z() = sample->quaterniond.z;
-  this->quaterniond.w() = sample->quaterniond.w;
+  this->translation.x() = sample->translation.x;
+  this->translation.y() = sample->translation.y;
+  this->translation.z() = sample->translation.z;
+  this->rotation.x() = sample->rotation.x;
+  this->rotation.y() = sample->rotation.y;
+  this->rotation.z() = sample->rotation.z;
+  this->rotation.w() = sample->rotation.w;
 }
 
 Eigen::Isometry3d types::Transform::getIsometry3d() {
   Eigen::Isometry3d I = Eigen::Isometry3d::Identity();
-  I.prerotate(this->quaterniond);
-  I.translate(this->tvec); // 旋转后的坐标系作为基准来移动
+  I.prerotate(this->rotation);
+  I.translate(this->translation); // 旋转后的坐标系作为基准来移动
   return I;
 }
 

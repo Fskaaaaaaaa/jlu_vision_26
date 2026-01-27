@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
       "coordinate transforms at topic {tf, static, data } in a low frequency.");
   options.add_options()("c,config", "Path of config yaml file",
                         cxxopts::value<std::string>()->default_value(
-                            "configs/coord_transform/static_tf_bc.yaml"))(
+                            "configs/odom_coord/static_tf_bc.yaml"))(
       "l,log", "Path of log dir",
       cxxopts::value<std::string>()->default_value("logs/static_tf_bc"))(
       "h,help", "Print usage.");

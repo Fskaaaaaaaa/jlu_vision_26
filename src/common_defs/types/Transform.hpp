@@ -17,7 +17,7 @@ struct Transform {
   std::string parent_frame_id;
   std::string child_frame_id;
   std::chrono::time_point<std::chrono::system_clock> stamp;
-  Eigen::Vector3d tvec;
-  Eigen::Quaterniond quaterniond;
+  Eigen::Vector3d translation;
+  Eigen::Quaterniond rotation;
 };
 } // namespace types

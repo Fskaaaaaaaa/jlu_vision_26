@@ -7,7 +7,7 @@ namespace confs {
 struct Transform {
   std::string parent_frame_id;
   std::string child_frame_id;
-  Vector3d tvec;
+  Vector3d translation;
   RpyAngle rpy_angle;
   Vector4d getQuaterniond();
 };
