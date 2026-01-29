@@ -9,6 +9,5 @@ struct IceoryxServiceDescription {
   std::string service;
   std::string instance;
   std::string event;
-  iox::capro::ServiceDescription get();
 };
 } // namespace confs

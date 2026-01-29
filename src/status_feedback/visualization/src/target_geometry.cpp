@@ -14,6 +14,7 @@
 #include "msgs/Target.hpp"
 #include "open3d_tools.hpp"
 #include "types/ArmorPoints.hpp"
+#include "types/IceoryxServiceDescription.hpp"
 #include "types/Target.hpp"
 
 #include "iceoryx_posh/internal/popo/base_subscriber.hpp"
@@ -32,7 +33,9 @@
 
 fb::TargetGeometry::TargetGeometry(quill::Logger *logger,
                                    const TargetGeometryConfig &config)
-    : logger_(logger), config_(config), target_sub_(config_.msg_source.get()) {
+    : logger_(logger), config_(config),
+      target_sub_(
+          types::IceoryxServiceDescription{config_.msg_source}.description) {
   LOG_INFO(logger_, "start target_geometry.");
   this->target_listener_
       .attachEvent(target_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,

@@ -2,7 +2,7 @@ log_level: Info
 render_interval_ms: 10
 coord_conf:
   frame_size: 1.0
-  frame_ids: [] #["map", "odom"] 
+  frame_ids: ["map"] #["map", "odom"] 
   static_frame_id: "map"
   tf_query_time_tolerance_ms: 1
   draw_frame_trajectory: true
