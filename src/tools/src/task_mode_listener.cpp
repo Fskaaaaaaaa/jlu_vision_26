@@ -7,6 +7,7 @@
 
 #include "iceoryx_posh/popo/sample.hpp"
 #include "quill/LogMacros.h"
+#include "rfl/enums.hpp"
 
 #include <cstdlib>
 
@@ -41,7 +42,7 @@ void hardware::TaskModeListener::onTaskModeReceiveCallback(
         if (mode != self->current_mode_.load()) {
           self->current_mode_.store(mode);
           LOG_TRACE_L1(self->logger_, "task mode change, current mode: {}",
-                       self->current_mode_.load());
+                       rfl::enum_to_string(self->current_mode_.load()));
         }
       })) {
   } // end of while

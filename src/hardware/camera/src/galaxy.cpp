@@ -5,7 +5,6 @@
 #include "opencv2/core/hal/interface.h"
 #include "opencv2/core/mat.hpp"
 #include "opencv2/imgproc.hpp"
-#include "opencv2/opencv.hpp"
 #include "quill/LogMacros.h"
 #include "quill/Logger.h"
 #include <cstdlib>
@@ -67,15 +66,15 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
   GX_STATUS status;
 
   // Initialize frame   初始化帧
-  int64_t payloadSize;
-  GXGetInt(camera_handle_, GX_INT_PAYLOAD_SIZE, &payloadSize);
+  int64_t payload_size;
+  GXGetInt(camera_handle_, GX_INT_PAYLOAD_SIZE, &payload_size);
   if (!buffer_inited_) {
-    this->bayer_buffer_holder_.reserve(payloadSize);
+    this->bayer_buffer_holder_.reserve(payload_size);
     buffer_inited_ = true;
   }
-  if (buffer_size < payloadSize) {
+  if (buffer_size < payload_size) {
     LOG_ERROR(logger_, "Insufficient buffer size! require {}, actual {}",
-              payloadSize, buffer_size);
+              payload_size, buffer_size);
     return EXIT_FAILURE;
   }
   bayer_frame.pImgBuf = bayer_buffer_holder_.data();

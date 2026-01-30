@@ -20,19 +20,14 @@ struct SerialConfig {
   serial::parity_t parity;
 };
 struct IecoryxConfig {
-  confs::IceoryxServiceDescription serial_send_topic;
-  confs::IceoryxServiceDescription gimbal_status_topic;
+  confs::IceoryxServiceDescription aim_command_topic;
+  confs::IceoryxServiceDescription gimbal_info_topic;
   confs::IceoryxServiceDescription enemy_color_topic;
   confs::IceoryxServiceDescription task_mode_topic;
-};
-struct DefaultConfig {
-  types::TaskMode mode;
-  types::EnemyColor enemy_color;
 };
 struct SerialConfigs {
   SerialConfig serial_conf;
   IecoryxConfig iceoryx_conf;
-  DefaultConfig default_conf;
   quill::LogLevel log_level;
 };
 

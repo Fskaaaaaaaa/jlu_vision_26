@@ -1,6 +1,5 @@
 #pragma once
 
-#include "types/EnemyColor.hpp"
 namespace msgs {
 
 struct EnemyColor {

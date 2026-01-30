@@ -2,9 +2,10 @@
 #pragma once
 
 namespace msgs {
-struct GimbalRpy {
-  double roll;
-  double pitch;
-  double yaw;
+struct GimbalInfo {
+  float roll;
+  float pitch;
+  float yaw;
+  float bullet_speed;
 };
 } // namespace msgs
