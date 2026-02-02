@@ -51,3 +51,7 @@ void hardware::TaskModeListener::onTaskModeReceiveCallback(
 bool hardware::TaskModeListener::isOnTask() {
   return current_mode_.load() == target_mode_;
 }
+
+bool hardware::TaskModeListener::isTask(types::TaskMode task) {
+  return current_mode_.load() == task;
+}

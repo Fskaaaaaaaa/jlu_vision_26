@@ -4,6 +4,7 @@
 #include "iceoryx_posh/popo/listener.hpp"
 #include "iceoryx_posh/popo/subscriber.hpp"
 #include "msgs/AimCommand.hpp"
+#include "msgs/BulletId.hpp"
 #include "msgs/EnemyColor.hpp"
 #include "msgs/GimbalInfo.hpp"
 #include "msgs/Header.hpp"
@@ -12,9 +13,11 @@
 #include "iceoryx_posh/popo/publisher.hpp"
 #include "quill/Logger.h"
 #include "serial/serial.h"
+#include <atomic>
 #include <thread>
 
 namespace hardware {
+
 class Serial {
 public:
   Serial(quill::Logger *logger, const SerialConfigs &configs);
@@ -25,6 +28,7 @@ private:
   static void onAimCommandReceivedCallback(
       iox::popo::Subscriber<msgs::AimCommand, msgs::Header> *subscriber,
       Serial *self);
+  void receiveData();
 
   quill::Logger *logger_;
   SerialConfigs configs_;
@@ -32,8 +36,10 @@ private:
   std::jthread receive_thread_;
   iox::popo::Publisher<msgs::TaskMode, msgs::Header> task_mode_pub_;
   iox::popo::Publisher<msgs::GimbalInfo, msgs::Header> gimbal_info_pub_;
-  iox::popo::Subscriber<msgs::EnemyColor, msgs::Header> enemy_color_pub_;
+  iox::popo::Publisher<msgs::EnemyColor, msgs::Header> enemy_color_pub_;
+  iox::popo::Publisher<msgs::BulletId, msgs::Header> bullet_id_pub_;
   iox::popo::Subscriber<msgs::AimCommand, msgs::Header> aim_cmd_sub_;
   iox::popo::Listener aim_cmd_listener_;
 };
+
 } // namespace hardware

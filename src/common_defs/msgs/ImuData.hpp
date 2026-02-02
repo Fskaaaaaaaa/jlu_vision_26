@@ -3,9 +3,11 @@
 #include "Basic.hpp"
 
 namespace msgs {
+
 struct ImuData {
   Vector4d orientation;
   Vector3d angular_velocity;
   Vector3d linear_acceleration;
 };
+
 } // namespace msgs

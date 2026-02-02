@@ -12,5 +12,6 @@ struct AimCommand {
   float pitch;
   float pitch_vel;
   float pitch_acc;
+  unsigned int bullet_id;
 };
 } // namespace msgs

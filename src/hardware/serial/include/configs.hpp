@@ -24,6 +24,7 @@ struct IecoryxConfig {
   confs::IceoryxServiceDescription gimbal_info_topic;
   confs::IceoryxServiceDescription enemy_color_topic;
   confs::IceoryxServiceDescription task_mode_topic;
+  confs::IceoryxServiceDescription bullet_id_topic;
 };
 struct SerialConfigs {
   SerialConfig serial_conf;

@@ -6,6 +6,8 @@ struct GimbalInfo {
   float roll;
   float pitch;
   float yaw;
+  float pitch_vel;
+  float yaw_vel;
   float bullet_speed;
 };
 } // namespace msgs
