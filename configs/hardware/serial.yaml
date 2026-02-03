@@ -1,0 +1,31 @@
+log_level: Debug
+frame_id: "serial"
+
+iceoryx_conf:
+  aim_command_topic:
+    service: aim_command
+    instance: ballistic
+    event: data
+  gimbal_info_topic:
+    service: gimbal_info
+    instance: serial
+    event: data
+  enemy_color_topic:
+    service: enemy_color
+    instance: serial
+    event: data
+  task_mode_topic:
+    service: task_mode
+    instance: serial
+    event: data
+  bullet_id_topic:
+    service: bullet_id
+    instance: serial
+    event: data
+
+serial_conf:
+  device_name: /dev/gimbal
+  baudrate: 115200
+  stopbits: stopbits_one 
+  flowcontrol: flowcontrol_none 
+  parity: parity_none 

@@ -28,7 +28,7 @@ private:
   static void onAimCommandReceivedCallback(
       iox::popo::Subscriber<msgs::AimCommand, msgs::Header> *subscriber,
       Serial *self);
-  void receiveData();
+  void receiveThread();
 
   quill::Logger *logger_;
   SerialConfigs configs_;

@@ -29,6 +29,8 @@ struct IecoryxConfig {
 struct SerialConfigs {
   SerialConfig serial_conf;
   IecoryxConfig iceoryx_conf;
+  std::string frame_id;
+  // bool publish_latency_ms;
   quill::LogLevel log_level;
 };
 
