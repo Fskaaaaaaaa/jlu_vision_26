@@ -110,10 +110,10 @@ void fb::ArmorGeometry::update(
       auto new_armor =
           std::make_shared<open3d::geometry::TriangleMesh>(*armor_mesh_);
       new_armor->SetName(armor_id);
-      const std::unordered_map<types::ArmorColor, Eigen::Vector3d> color_map{
-          {types::ArmorColor::Blue, {0, 0, 1}},
-          {types::ArmorColor::Red, {1, 0, 0}},
-          {types::ArmorColor::Extinguished, {0, 0, 0}}};
+      const std::unordered_map<types::Color, Eigen::Vector3d> color_map{
+          {types::Color::Blue, {0, 0, 1}},
+          {types::Color::Red, {1, 0, 0}},
+          {types::Color::Extinguished, {0, 0, 0}}};
       new_armor->PaintUniformColor(color_map.at(armor.color));
       new_armor->ComputeVertexNormals();
       transform_(new_armor, T);

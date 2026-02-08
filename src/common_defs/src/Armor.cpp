@@ -8,7 +8,7 @@ types::Armor::Armor(
   this->frame_id = sample.getUserHeader().frame_id.c_str();
   this->distance_to_image_center = sample->distance_to_image_center;
   this->type = static_cast<types::ArmorType>(sample->armor_type);
-  this->color = static_cast<types::ArmorColor>(sample->armor_color);
+  this->color = static_cast<types::Color>(sample->armor_color);
   this->orientation.w() = sample->orientation.w;
   this->orientation.x() = sample->orientation.x;
   this->orientation.y() = sample->orientation.y;

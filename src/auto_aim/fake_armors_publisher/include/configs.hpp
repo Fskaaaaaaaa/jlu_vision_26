@@ -27,7 +27,7 @@ struct RobotConfig {
   bool hidden_invisible_armors;
   double facing_armor_cos_incidence;
   types::ArmorType armor_type;
-  types::ArmorColor armor_color;
+  types::Color armor_color;
   std::array<double, 2> camera_pos;
   ArmorsPublisherConfig pub_conf;
 };

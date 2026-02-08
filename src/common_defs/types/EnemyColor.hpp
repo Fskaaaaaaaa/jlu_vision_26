@@ -6,5 +6,6 @@ enum class EnemyColor {
   Red,
   Blue,
 };
+// TODO 应该将aromr和litbar的颜色都统一到这里来
 
-}
+} // namespace types

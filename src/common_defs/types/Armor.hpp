@@ -19,7 +19,7 @@ enum class ArmorType {
   Base,
   Negative,
 };
-enum class ArmorColor {
+enum class Color {
   Red,
   Blue,
   Extinguished,
@@ -31,7 +31,7 @@ struct Armor {
   std::chrono::system_clock::time_point stamp;
   std::string frame_id;
   ArmorType type;
-  ArmorColor color;
+  Color color;
   double distance_to_image_center;
   Eigen::Quaterniond orientation;
   Eigen::Vector3d position;
