@@ -1,9 +1,13 @@
 #pragma once
 
+#include "basic/thread_safe_queue.hpp"
+#include "configs.hpp"
+#include "quill/Logger.h"
 #include "types.hpp"
+#include "yolo.hpp"
 
 #include <chrono>
-#include <concepts>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -12,58 +16,65 @@ namespace auto_aim {
 using ArmorsStamp =
     std::pair<std::vector<Armor>, std::chrono::system_clock::time_point>;
 
-// NOTE: 传统深度单多线程排列组合起来内部实现差距太大，这里选择仅约束下接口
-template <typename DetectorType>
-concept STDetectorInterface =
-    requires(DetectorType detector, const cv::Mat &img) {
-      { detector.detect(img) } -> std::same_as<std::vector<Armor>>;
-    };
-template <typename DetectorType>
-concept MTDetectorInterface =
-    requires(DetectorType detector, const cv::Mat &img,
-             std::chrono::system_clock::time_point stamp) {
-      { detector.push(img, stamp) } -> std::same_as<bool>;
-      { detector.pop() } -> std::same_as<ArmorsStamp>;
-    };
+class STDetector {
+public:
+  virtual std::vector<Armor> detect(const cv::Mat &bgr_img) = 0;
+};
+
+class MTDetector {
+public:
+  virtual bool push(const cv::Mat &bgr_img,
+                    std::chrono::system_clock::time_point stamp) = 0;
+  virtual ArmorsStamp pop() = 0;
+};
 
 ////////////////////////////////////////////////////////
-
-class STDetectorTrad {
+// 传统算法的单/多线程识别
+// TODO
+class STDetectorTrad : public STDetector {
 public:
-  std::vector<Armor> detect(const cv::Mat &bgr_img);
+  std::vector<Armor> detect(const cv::Mat &bgr_img) override;
 
 private:
 };
-static_assert(STDetectorInterface<STDetectorTrad>);
 
-class MTDetectorTrad {
+class MTDetectorTrad : MTDetector {
 public:
   bool push(const cv::Mat &bgr_img,
-            std::chrono::system_clock::time_point stamp);
-  ArmorsStamp pop();
+            std::chrono::system_clock::time_point stamp) override;
+  ArmorsStamp pop() override;
 
 private:
 };
-static_assert(MTDetectorInterface<MTDetectorTrad>);
 
 ////////////////////////////////////////////////////////
+// 深度学习的单/多线程识别
 
-class STDetectorDL {
+class STDetectorDL : public STDetector {
 public:
-  std::vector<Armor> detect(const cv::Mat &bgr_img);
+  STDetectorDL(quill::Logger *logger, YOLOVersion yolo_version,
+               const YOLOConfig &yolo_config);
+  std::vector<Armor> detect(const cv::Mat &bgr_img) override;
 
 private:
+  quill::Logger *logger_;
+  std::unique_ptr<YOLOBase> yolo_;
 };
-static_assert(STDetectorInterface<STDetectorDL>);
 
-class MTDetectorDL {
+class MTDetectorDL : public MTDetector {
 public:
+  MTDetectorDL(quill::Logger *logger, YOLOVersion yolo_version,
+               const YOLOConfig &yolo_config, int queue_size);
   bool push(const cv::Mat &bgr_img,
-            std::chrono::system_clock::time_point stamp);
-  ArmorsStamp pop();
+            std::chrono::system_clock::time_point stamp) override;
+  ArmorsStamp pop() override;
 
 private:
+  quill::Logger *logger_;
+  std::unique_ptr<YOLOBase> yolo_;
+  tools::ThreadSafeQueue<std::tuple<
+      cv::Mat, std::chrono::system_clock::time_point, ov::InferRequest>>
+      queue_;
 };
-static_assert(MTDetectorInterface<MTDetectorDL>);
 
 } // namespace auto_aim

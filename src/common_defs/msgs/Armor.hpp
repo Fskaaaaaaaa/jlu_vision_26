@@ -12,5 +12,7 @@ struct Armor {
   double distance_to_image_center;
   Point3d position;
   Vector4d orientation;
+  float confidence;
+  bool key_frame;
 };
 } // namespace msgs

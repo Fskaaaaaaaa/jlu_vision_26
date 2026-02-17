@@ -4,25 +4,53 @@
 #include "types.hpp"
 
 #include "quill/Logger.h"
+#include "types/Armor.hpp"
 #include <openvino/openvino.hpp>
+#include <unordered_map>
 #include <vector>
 
 namespace auto_aim {
-class YOLOv5 {
+
+class YOLOBase {
 public:
-  YOLOv5(quill::Logger *logger, const YOLOv5Config &config);
-  ov::Tensor preProcess(const cv::Mat &bgr_image);
-  ov::InferRequest requestInfer(const ov::Tensor &input_tensor);
+  virtual ov::Tensor preProcess(const cv::Mat &bgr_image) = 0;
+  virtual ov::InferRequest requestInfer(const ov::Tensor &input_tensor) = 0;
+  virtual std::vector<Armor> postProcess(const ov::Tensor &output_tensor,
+                                         cv::Size input_image_size) = 0;
+};
+
+class YOLOv5 : public YOLOBase {
+public:
+  YOLOv5(quill::Logger *logger, const YOLOConfig &config);
+  ov::Tensor preProcess(const cv::Mat &bgr_image) override;
   // NOTE: 只是返回请求，阻塞推理还是并发要自己调用
+  ov::InferRequest requestInfer(const ov::Tensor &input_tensor) override;
   std::vector<Armor> postProcess(const ov::Tensor &output_tensor,
-                                 cv::Size input_image_size);
+                                 cv::Size input_image_size) override;
 
 private:
   double sigmoid(double x);
 
   quill::Logger *logger_;
-  YOLOv5Config config_;
-  static constexpr int yolo_input_size = 640.;
+  YOLOConfig config_;
+  static constexpr int yolo_input_size = 640;
+  const std::unordered_map<int, types::ArmorType> type_map_{
+      {0, types::ArmorType::Sentry},
+      {1, types::ArmorType::One},
+      {2, types::ArmorType::Two},
+      {3, types::ArmorType::Three},
+      {4, types::ArmorType::Four},
+      {5, types::ArmorType::Negative}, // NOTE: 没保留5号的定义，视为无效装甲板
+      {6, types::ArmorType::Outpost},
+      {7, types::ArmorType::Base},
+      {8, types::ArmorType::Negative},
+  };
+  const std::unordered_map<int, types::EnemyColor> color_map_{
+      {0, types::EnemyColor::Blue},
+      {1, types::EnemyColor::Red},
+      {2, types::EnemyColor::Extinguished},
+      // XXX: 熄灭装甲板的判断应该再检查一下
+  };
 
   ov::Core core_;
   ov::CompiledModel compiled_model_;

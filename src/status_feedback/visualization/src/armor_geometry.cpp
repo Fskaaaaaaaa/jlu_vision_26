@@ -14,6 +14,7 @@
 #include "open3d/io/TriangleMeshIO.h"
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
+#include "types/EnemyColor.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -110,10 +111,10 @@ void fb::ArmorGeometry::update(
       auto new_armor =
           std::make_shared<open3d::geometry::TriangleMesh>(*armor_mesh_);
       new_armor->SetName(armor_id);
-      const std::unordered_map<types::Color, Eigen::Vector3d> color_map{
-          {types::Color::Blue, {0, 0, 1}},
-          {types::Color::Red, {1, 0, 0}},
-          {types::Color::Extinguished, {0, 0, 0}}};
+      const std::unordered_map<types::EnemyColor, Eigen::Vector3d> color_map{
+          {types::EnemyColor::Blue, {0, 0, 1}},
+          {types::EnemyColor::Red, {1, 0, 0}},
+          {types::EnemyColor ::Extinguished, {0, 0, 0}}};
       new_armor->PaintUniformColor(color_map.at(armor.color));
       new_armor->ComputeVertexNormals();
       transform_(new_armor, T);

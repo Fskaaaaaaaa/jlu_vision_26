@@ -2,6 +2,7 @@
 #pragma once
 
 #include "types/Armor.hpp"
+#include "types/EnemyColor.hpp"
 
 #include "quill/core/LogLevel.h"
 
@@ -27,7 +28,7 @@ struct RobotConfig {
   bool hidden_invisible_armors;
   double facing_armor_cos_incidence;
   types::ArmorType armor_type;
-  types::Color armor_color;
+  types::EnemyColor armor_color;
   std::array<double, 2> camera_pos;
   ArmorsPublisherConfig pub_conf;
 };
