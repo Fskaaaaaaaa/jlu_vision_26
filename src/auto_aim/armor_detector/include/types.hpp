@@ -1,6 +1,8 @@
 #pragma once
 
+#include "opencv2/core/types.hpp"
 #include "types/Armor.hpp"
+#include "types/ArmorPoints.hpp"
 #include "types/EnemyColor.hpp"
 
 #include <Eigen/Dense>
@@ -26,6 +28,7 @@ struct LightBar : public cv::RotatedRect {
   double width;
   cv::Point2f axis;
   float tilt_angle;
+  bool pca_ok;
 };
 
 struct Armor : public ::types::Armor {

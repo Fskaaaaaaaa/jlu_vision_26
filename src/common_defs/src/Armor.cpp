@@ -21,7 +21,7 @@ types::Armor::Armor(
   this->key_frame = sample->key_frame;
 }
 
-Eigen::Vector3d types::Armor::getRpy() {
+Eigen::Vector3d types::Armor::getRpy() const {
   return this->orientation.matrix().eulerAngles(0, 1, 2);
 }
 

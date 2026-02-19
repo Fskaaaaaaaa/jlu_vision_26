@@ -90,29 +90,33 @@ auto_aim::YOLOv5::postProcess(const ov::Tensor &output_tensor,
     auto x_scale = static_cast<double>(yolo_input_size) / image_size.height;
     auto y_scale = static_cast<double>(yolo_input_size) / image_size.width;
     auto scale = std::min(x_scale, y_scale);
+    // NOTE: 1 2
+    //       0 3
+    //       从济喵的顺序改成君瞄的顺序了
     std::array<cv::Point2f, 4> armor_key_points = {
+        cv::Point2f(output.at<float>(r, 2) / scale,
+                    output.at<float>(r, 3) / scale),
         cv::Point2f(output.at<float>(r, 0) / scale,
                     output.at<float>(r, 1) / scale),
         cv::Point2f(output.at<float>(r, 6) / scale,
                     output.at<float>(r, 7) / scale),
         cv::Point2f(output.at<float>(r, 4) / scale,
                     output.at<float>(r, 5) / scale),
-        cv::Point2f(output.at<float>(r, 2) / scale,
-                    output.at<float>(r, 3) / scale),
     };
+    // 由于cv的nms没有rretc的，得先打擂台算下外接矩形
     float min_x = armor_key_points[0].x;
     float max_x = armor_key_points[0].x;
     float min_y = armor_key_points[0].y;
     float max_y = armor_key_points[0].y;
-    for (int i = 1; i < armor_key_points.size(); i++) {
-      if (armor_key_points[i].x < min_x)
-        min_x = armor_key_points[i].x;
-      if (armor_key_points[i].x > max_x)
-        max_x = armor_key_points[i].x;
-      if (armor_key_points[i].y < min_y)
-        min_y = armor_key_points[i].y;
-      if (armor_key_points[i].y > max_y)
-        max_y = armor_key_points[i].y;
+    for (auto &&armor_key_point : armor_key_points) {
+      if (armor_key_point.x < min_x)
+        min_x = armor_key_point.x;
+      if (armor_key_point.x > max_x)
+        max_x = armor_key_point.x;
+      if (armor_key_point.y < min_y)
+        min_y = armor_key_point.y;
+      if (armor_key_point.y > max_y)
+        max_y = armor_key_point.y;
     }
     cv::Rect rect(min_x, min_y, max_x - min_x, max_y - min_y);
     color_ids.emplace_back(color_id_x);

@@ -1,4 +1,3 @@
-// Copyright (c) 2025 Feng. All Rights Reserved.
 #pragma once
 
 #include <utility>

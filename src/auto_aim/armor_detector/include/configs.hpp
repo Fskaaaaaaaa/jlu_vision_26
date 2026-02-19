@@ -59,37 +59,34 @@ struct LightCornerCorrectorConfig {
   float search_end_ratio = 1.2 / 2.;
 };
 
-struct DetectorConfigs {
-  quill::LogLevel log_level;
-  bool show_debug_images;
-  bool use_muti_thread;
-  int queue_size;
-  confs::CameraParams camera_params;
-  // NOTE: 注意模式切换回自瞄时，要给相机发送更改参数的请求
-  YOLOVersion yolo_version;
-  YOLOConfig yolo_conf;
-  TraditionalConfig trad_conf;
-  LightCornerCorrectorConfig pca_conf;
-};
-
-struct PnpConfig {
-  // TODO
+struct PnPConfig {
+  bool use_generic_mode;
+  double project_error_ratio_thres;
+  double roll_thres_degree;
+  float frame_axes_length;
+  int frame_axes_circle_radius;
+  int frame_axes_circle_thickness;
 };
 struct BaConfig {
   // TODO
 };
-struct SolverConfigs {
-  quill::LogLevel log_level;
-  PnpConfig pnp_conf;
-  BaConfig ba_conf;
-};
 
-struct NodeConfigs {
+struct DetectorConfigs {
+  quill::LogLevel detector_log_level;
+  quill::LogLevel solver_log_level;
+  confs::CameraParams camera_params;
+  // NOTE: 注意模式切换回自瞄时，要给相机发送更改参数的请求
+  bool show_detect_result_image;
+  bool show_pnp_result_image;
+  bool use_muti_thread;
+  int queue_size;
   confs::IceoryxServiceDescription image_topic;
   confs::IceoryxServiceDescription camera_param_topic;
   confs::IceoryxServiceDescription armors_topic;
-  DetectorConfigs detector_confs;
-  SolverConfigs solver_confs;
+  YOLOVersion yolo_version;
+  YOLOConfig yolo_conf;
+  TraditionalConfig trad_conf;
+  LightCornerCorrectorConfig pca_conf;
 };
 
 } // namespace auto_aim

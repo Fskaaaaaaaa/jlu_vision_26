@@ -1,19 +1,36 @@
-// #pragma once
-//
-// #include "colors.hpp"
-//
-// #include <Eigen/Dense>
-// #include <array>
-// #include <opencv2/core.hpp>
-// #include <yaml_config_loader.hpp>
-//
-// namespace tools {
-//
-// void draw_points(cv::Mat &img, const std::vector<cv::Point> &points,
-//                  const cv::Scalar &color, int thickness = 2);
-// void draw_points(cv::Mat &img, const std::vector<cv::Point2f> &points,
-//                  const cv::Scalar &color, int thickness = 2);
-//
+#pragma once
+
+#include "colors.hpp"
+
+#include <Eigen/Dense>
+#include <opencv2/opencv.hpp>
+
+namespace tools {
+
+inline void drawPoints(cv::Mat &img, const std::vector<cv::Point> &points,
+                       const cv::Scalar &color = Color::bgr::RED,
+                       int thickness = 2) {
+  std::vector<std::vector<cv::Point>> contours = {points};
+  cv::drawContours(img, contours, -1, color, thickness);
+}
+
+inline void drawPoints(cv::Mat &img, const std::vector<cv::Point2f> &points,
+                       const cv::Scalar &color = Color::bgr::RED,
+                       int thickness = 2) {
+  std::vector<cv::Point> int_points(points.begin(), points.end());
+  drawPoints(img, int_points, color, thickness);
+}
+
+inline void drawText(cv::Mat &img, const std::string &text,
+                     const cv::Point &point,
+                     const cv::Scalar &color = Color::bgr::RED,
+                     double font_scale = 1.0, int thickness = 2) {
+  cv::putText(img, text, point, cv::FONT_HERSHEY_SIMPLEX, font_scale, color,
+              thickness);
+}
+
+} // namespace tools
+
 // class ArmorDrawer {
 // public:
 //   ArmorDrawer(const std::array<double, 9> &camera_matrix,

@@ -1,6 +1,11 @@
 #include "types.hpp"
+#include "opencv2/core/types.hpp"
+#include "types/Armor.hpp"
+#include "types/ArmorPoints.hpp"
 
 #include <numeric>
+#include <unordered_map>
+#include <vector>
 
 auto_aim::LightBar::LightBar(const std::vector<cv::Point> &contour)
 
@@ -56,13 +61,13 @@ auto_aim::Armor::Armor(const LightBar &l1, const LightBar &l2) {
 
 // NOTE:
 // 关键点顺序
-// 0 1
-// 3 2
+// 1 2
+// 1 3
 auto_aim::Armor::Armor(const std::array<cv::Point2f, 4> &key_points,
                        float confidence, types::ArmorType armor_type,
                        types::EnemyColor color)
-    : left_light(key_points.at(0), key_points.at(3)),
-      right_light(key_points.at(1), key_points.at(2)),
+    : left_light(key_points.at(1), key_points.at(0)),
+      right_light(key_points.at(2), key_points.at(3)),
       center((left_light.center + right_light.center) / 2.) {
   this->confidence = confidence;
   this->type = armor_type;

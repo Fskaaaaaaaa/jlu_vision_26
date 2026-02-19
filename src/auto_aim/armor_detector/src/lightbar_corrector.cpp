@@ -41,7 +41,7 @@ bool auto_aim::LightCornerCorrector::correctCorners(Armor &armor,
       lightbar.bottom = bottom.value();
       bottom_ok = true;
     }
-    return top_ok && bottom_ok;
+    return lightbar.pca_ok = top_ok && bottom_ok;
   };
 
   return process_lightbar(armor.left_light, gray_img) &&

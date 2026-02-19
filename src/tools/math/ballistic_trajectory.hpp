@@ -1,7 +1,9 @@
 #pragma once
 
 #include "ballistic_models.hpp"
+
 #include <Eigen/Eigen>
+
 #include <tuple>
 
 namespace rm_ultra_tools {

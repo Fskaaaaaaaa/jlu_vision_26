@@ -52,4 +52,8 @@ rpyAngleToQuaterniond(const Eigen::Vector3d &rpy_angle) {
                                 angle2Radian(rpy_angle.z())});
 }
 
+inline Eigen::Vector3d rotationMatrixToRPY(const Eigen::Matrix3d &R) {
+  return R.eulerAngles(0, 1, 2);
+}
+
 } // namespace tools

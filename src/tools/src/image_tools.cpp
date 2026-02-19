@@ -1,33 +1,7 @@
-// #include "rm_ultra_tools/image_tools.hpp"
-// #include "rm_ultra_tools/coordinate_tools.hpp"
+// #include "basic/image_tools.hpp"
 //
-// #include <cmath>
 // #include <opencv2/opencv.hpp>
-// #include <rclcpp/logger.hpp>
-// #include <rclcpp/logging.hpp>
-// #include <rclcpp/time.hpp>
-// #include <tf2/LinearMath/Matrix3x3.hpp>
-// #include <tf2/LinearMath/Quaternion.hpp>
-// #include <tf2/convert.hpp>
-// #include <tf2/time.hpp>
-// #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-// #include <tf2_ros/buffer_interface.h>
-// #include <vector>
-//
-// namespace rm_ultra_tools {
-//
-// void drawPoints(cv::Mat &img, const std::vector<cv::Point> &points,
-//                 const cv::Scalar &color, int thickness) {
-//   std::vector<std::vector<cv::Point>> contours = {points};
-//   cv::drawContours(img, contours, -1, color, thickness);
-// }
-//
-// void drawPoints(cv::Mat &img, const std::vector<cv::Point2f> &points,
-//                 const cv::Scalar &color, int thickness) {
-//   std::vector<cv::Point> int_points(points.begin(), points.end());
-//   drawPoints(img, int_points, color, thickness);
-// }
-//
+
 // ArmorDrawer::ArmorDrawer(const std::array<double, 9> &camera_matrix,
 //                          const std::vector<double> &distortion_coefficients,
 //                          std::shared_ptr<tf2_ros::Buffer> tf2_buffer,
