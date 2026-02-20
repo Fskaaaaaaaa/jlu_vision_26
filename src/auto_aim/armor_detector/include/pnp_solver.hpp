@@ -5,7 +5,6 @@
 #include "opencv2/core/mat.hpp"
 #include "quill/Logger.h"
 #include "types.hpp"
-#include "types/ArmorType.hpp"
 #include "types/CameraInfo.hpp"
 
 #include "opencv2/core/types.hpp"

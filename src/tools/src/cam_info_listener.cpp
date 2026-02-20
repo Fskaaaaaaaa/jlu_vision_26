@@ -40,7 +40,8 @@ hardware::CameraInfoListener::~CameraInfoListener() {
 void hardware::CameraInfoListener::onCamInfoReceivedCallback(
     iox::popo::Subscriber<msgs::CameraInfo, msgs::Header> *subscriber,
     CameraInfoListener *self) {
-  LOG_DEBUG(self->logger_, "Callback: self = {}", static_cast<void *>(self));
+  LOG_DEBUG(self->logger_, "[cam_info_listener]: Callback: self = {}",
+            static_cast<void *>(self));
   subscriber->take().and_then(
       [subscriber, self](const iox::popo::Sample<const msgs::CameraInfo,
                                                  const msgs::Header> &sample) {

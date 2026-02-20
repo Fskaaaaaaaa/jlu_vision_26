@@ -2,9 +2,10 @@
 
 #include "basic/thread_safe_queue.hpp"
 #include "configs.hpp"
-#include "quill/Logger.h"
 #include "types.hpp"
 #include "yolo.hpp"
+
+#include "quill/Logger.h"
 
 #include <chrono>
 #include <memory>

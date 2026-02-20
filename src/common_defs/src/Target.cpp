@@ -9,6 +9,7 @@
 types::Target::Target(
     const iox::popo::Sample<const msgs::Target, const msgs::Header> &sample)
 
+    // XXX: 这里不应该包含Header部分
     : frame_id(std::string{sample.getUserHeader().frame_id.c_str()}),
       stamp(std::chrono::nanoseconds{sample.getUserHeader().stamp_ns}),
       type(static_cast<types::TargetType>(sample->type)) {

@@ -6,6 +6,7 @@
 
 #include "quill/core/LogLevel.h"
 
+#include <array>
 #include <string>
 
 namespace auto_aim {
@@ -68,7 +69,14 @@ struct PnPConfig {
   int frame_axes_circle_thickness;
 };
 struct BaConfig {
-  // TODO
+  double measurement_noise_px_xy;
+  struct {
+    double roll;
+    double pitch;
+    double yaw;
+    double xyz;
+  } prior_noise;
+  bool print_result;
 };
 
 struct DetectorConfigs {
@@ -76,17 +84,23 @@ struct DetectorConfigs {
   quill::LogLevel solver_log_level;
   confs::CameraParams camera_params;
   // NOTE: 注意模式切换回自瞄时，要给相机发送更改参数的请求
-  bool show_detect_result_image;
-  bool show_pnp_result_image;
   bool use_muti_thread;
   int queue_size;
-  confs::IceoryxServiceDescription image_topic;
-  confs::IceoryxServiceDescription camera_param_topic;
+  bool awalys_on_task;
+  bool show_detect_result_image;
+  bool show_pca_result_image;
+  bool show_pnp_result_image;
+  bool show_ba_result_image;
+  // confs::IceoryxServiceDescription image_topic;
+  // confs::IceoryxServiceDescription camera_param_topic;
+  std::string camera_name; // NOTE: 这些话题都是固定的，只要相机名称就够了
   confs::IceoryxServiceDescription armors_topic;
   YOLOVersion yolo_version;
   YOLOConfig yolo_conf;
   TraditionalConfig trad_conf;
   LightCornerCorrectorConfig pca_conf;
+  PnPConfig pnp_conf;
+  BaConfig ba_conf;
 };
 
 } // namespace auto_aim

@@ -64,8 +64,7 @@ void auto_aim::PnPSolver::sortPnPResult(const Armor &armor,
   auto error1 = pnp_result.project_errors.at(1);
   auto ratio = error1 / error0;
   if (ratio > config_.project_error_ratio_thres) {
-    LOG_DEBUG(logger_,
-              "[sortPnPResult]: large reprojection error ratio: {}. abandon.",
+    LOG_DEBUG(logger_, "[sortPnPResult]: large reprojection error ratio: {}.",
               ratio);
     return;
   }
@@ -79,14 +78,14 @@ void auto_aim::PnPSolver::sortPnPResult(const Armor &armor,
   Eigen::Matrix3d R0, R1;
   cv::cv2eigen(R0_cv, R0);
   cv::cv2eigen(R1_cv, R1);
-  // NOTE: 从z朝前的相机系拧回z朝上的云台系
-  Eigen::Matrix3d R_camera_to_gimbal = Eigen::Matrix3d::Zero();
-  R_camera_to_gimbal << 0, 0, 1, -1, 0, 0, 0, -1, 0;
-  Eigen::Vector3d rpy0 = tools::rotationMatrixToRPY(R_camera_to_gimbal * R0);
-  Eigen::Vector3d rpy1 = tools::rotationMatrixToRPY(R_camera_to_gimbal * R1);
+  // NOTE: 从z朝前的相机系拧回z朝上的ROS系
+  Eigen::Matrix3d R_camera_to_ros = Eigen::Matrix3d::Zero();
+  R_camera_to_ros << 0, 0, 1, -1, 0, 0, 0, -1, 0;
+  Eigen::Vector3d rpy0 = tools::rotationMatrixToRPY(R_camera_to_ros * R0);
+  Eigen::Vector3d rpy1 = tools::rotationMatrixToRPY(R_camera_to_ros * R1);
   if (rpy0(0) > tools::angle2Radian(config_.roll_thres_degree) ||
       rpy1(0) > tools::angle2Radian(config_.roll_thres_degree)) {
-    LOG_DEBUG(logger_, "[sortPnPResult]: large roll: {}. abandon.", rpy0(0));
+    LOG_DEBUG(logger_, "[sortPnPResult]: large roll: {}.", rpy0(0));
     return;
   }
 
@@ -98,7 +97,7 @@ void auto_aim::PnPSolver::sortPnPResult(const Armor &armor,
   double armor_angle = angle + 90.;
   if (armor.type == types::ArmorType::Outpost)
     armor_angle = -armor_angle;
-  // NOTE: 因为装甲板是向内倾斜的（前哨除外）
+  // NOTE: 因为装甲板是向内倾斜的（前哨相反）
   // 如果装甲板左倾（angle > 0），选择Yaw为负的解
   // 如果装甲板右倾（angle < 0），选择Yaw为正的解
   if ((armor_angle > 0 && rpy0[2] > 0 && rpy1[2] < 0) ||
@@ -106,7 +105,7 @@ void auto_aim::PnPSolver::sortPnPResult(const Armor &armor,
     std::swap(rvec0, rvec1);
     std::swap(tvec0, tvec1);
     LOG_DEBUG(logger_,
-              "[sortPnPResult]: armor_angle: {}, PnP Solution 2 Selected.",
+              "[sortPnPResult]: armor_angle: {}, second PnP solution selected.",
               armor_angle);
   }
 }
@@ -120,18 +119,20 @@ float auto_aim::PnPSolver::calculateDistanceToCenter(
 
 void auto_aim::PnPSolver::drawFrameAxes(const PnPResult &pnp_result,
                                         cv::Mat &image) const {
-  cv::drawFrameAxes(image, camera_matrix_, distortion_coefficients_,
-                    pnp_result.rvecs.at(1), pnp_result.tvecs.at(1),
-                    config_.frame_axes_length);
+  std::vector<cv::Point2f> image_point;
+  if (config_.use_generic_mode) {
+    cv::drawFrameAxes(image, camera_matrix_, distortion_coefficients_,
+                      pnp_result.rvecs.at(1), pnp_result.tvecs.at(1),
+                      config_.frame_axes_length);
+    cv::projectPoints(std::vector{cv::Point3f{0, 0, 0}}, pnp_result.rvecs.at(1),
+                      pnp_result.tvecs.at(1), camera_matrix_,
+                      distortion_coefficients_, image_point);
+    cv::circle(image, image_point.at(0), config_.frame_axes_circle_radius,
+               tools::Color::bgr::RED, config_.frame_axes_circle_thickness);
+  }
   cv::drawFrameAxes(image, camera_matrix_, distortion_coefficients_,
                     pnp_result.rvecs.at(0), pnp_result.tvecs.at(0),
                     config_.frame_axes_length);
-  std::vector<cv::Point2f> image_point;
-  cv::projectPoints(std::vector{cv::Point3f{0, 0, 0}}, pnp_result.rvecs.at(1),
-                    pnp_result.tvecs.at(1), camera_matrix_,
-                    distortion_coefficients_, image_point);
-  cv::circle(image, image_point.at(0), config_.frame_axes_circle_radius,
-             tools::Color::bgr::RED, config_.frame_axes_circle_thickness);
   cv::projectPoints(std::vector{cv::Point3f{0, 0, 0}}, pnp_result.rvecs.at(0),
                     pnp_result.tvecs.at(0), camera_matrix_,
                     distortion_coefficients_, image_point);
