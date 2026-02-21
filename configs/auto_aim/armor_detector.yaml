@@ -8,7 +8,7 @@ queue_size: 16
 detect_when_idle: true
 use_DL: true
 use_pca: true
-use_ba: true
+use_ba: false
 show_detect_result: true
 show_optimize_result: true
 show_pnp_result: true
@@ -21,7 +21,7 @@ armors_topic:
 yolo_version: YOLOv5
 yolo_conf:
   device: CPU
-  model_path: assets/yolov5.xml
+  model_path: assets/0526.onnx
   use_latency_performancemode: false
   score_thresh: 0.7
   nms_iou_thresh: 0.3
