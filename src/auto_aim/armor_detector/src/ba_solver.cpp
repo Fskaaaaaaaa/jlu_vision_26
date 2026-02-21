@@ -1,15 +1,17 @@
-// Copyright (c) 2026 L. All Rights Reserved.
 #include "ba_solver.hpp"
 #include "math/angle_tools.hpp"
 #include "quill/LogMacros.h"
 #include "types/ArmorPoints.hpp"
 
-#include "opencv2/calib3d.hpp"
 #include "opencv2/core/eigen.hpp"
 #include "opencv2/core/types.hpp"
 #include <Eigen/Dense>
 #include <exception>
+#include <gtsam/geometry/Cal3DS2.h>
+#include <gtsam/geometry/PinholeCamera.h>
+#include <gtsam/geometry/Point2.h>
 #include <gtsam/geometry/Point3.h>
+#include <gtsam/geometry/Pose2.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Rot3.h>
 #include <gtsam/inference/Symbol.h>
@@ -21,13 +23,11 @@
 #include <vector>
 
 auto_aim::ProjectionFactor::ProjectionFactor(
-    const gtsam::SharedNoiseModel &model, const gtsam::Key &key,
-    const cv::Point3f &obj_point, const cv::Point2f &image_point,
-    const cv::Mat &camera_matrix, const cv::Mat &distortion_coefficients)
-    : auto_aim::ProjectionFactor::Base(model, key), obj_point_(obj_point),
-      img_point_(image_point), camera_matrix_(camera_matrix),
-      distortion_coefficients_(distortion_coefficients) {
-  Eigen::Matrix3d R_camera_to_ros = Eigen::Matrix3d::Zero();
+    const gtsam::SharedNoiseModel &model, gtsam::Key key,
+    const gtsam::Point3 &obj_point, const gtsam::Point2 &measurement,
+    const gtsam::Cal3DS2 &K)
+    : Base(model, key), point_(obj_point), measurement_(measurement), K_(K) {
+  Eigen::Matrix3d R_camera_to_ros;
   R_camera_to_ros << 0, 0, 1, -1, 0, 0, 0, -1, 0;
   R_ros_to_camera_ = R_camera_to_ros.inverse();
 }
@@ -35,21 +35,37 @@ auto_aim::ProjectionFactor::ProjectionFactor(
 gtsam::Vector
 auto_aim::ProjectionFactor::evaluateError(const gtsam::Pose3 &pose,
                                           gtsam::OptionalMatrixType H) const {
-  Eigen::Matrix3d rmat_in_ros = pose.rotation().matrix();
-  Eigen::Matrix3d rmat_in_camera = R_ros_to_camera_ * rmat_in_ros;
-  Eigen::Vector3d translation_in_camera = R_ros_to_camera_ * pose.translation();
-  cv::Mat rmat_in_camera_cv;
-  cv::eigen2cv(rmat_in_camera, rmat_in_camera_cv);
-  cv::Mat rvec, tvec;
-  cv::Rodrigues(rmat_in_camera_cv, rvec);
-  cv::eigen2cv(translation_in_camera, tvec);
-  std::vector<cv::Point2f> reproj_points;
-  cv::projectPoints(std::vector{obj_point_}, rvec, tvec, camera_matrix_,
-                    distortion_coefficients_, reproj_points);
-  // HACK: 这里最好用GTSAM的投影方法实现。
-  auto reproj_point = reproj_points.at(0);
-  auto error = reproj_point - img_point_;
-  return Eigen::Vector2d{error.x, error.y};
+
+  const gtsam::Pose3 T_ros_cam(gtsam::Rot3(R_ros_to_camera_),
+                               gtsam::Point3(0, 0, 0));
+  gtsam::Matrix66 H_compose;
+  gtsam::Pose3 T_armor_cam = T_ros_cam.compose(pose, H_compose);
+  gtsam::Matrix36 H_transform;
+  gtsam::Point3 p_cam = T_armor_cam.transformFrom(point_, H_transform);
+  if (p_cam.z() <= 1e-6) {
+    if (H)
+      *H = gtsam::Matrix::Zero(2, 6);
+    return gtsam::Vector2::Zero();
+  }
+  gtsam::Matrix23 H_norm;
+  gtsam::Point2 pn =
+      gtsam::PinholeCamera<gtsam::Cal3DS2>::Project(p_cam, H_norm);
+  if (H_norm.rows() != 2 || H_norm.cols() != 3) {
+    if (H)
+      *H = gtsam::Matrix::Zero(2, 6);
+    return gtsam::Vector2::Zero();
+  }
+  gtsam::Matrix22 H_calib;
+  gtsam::Point2 proj = K_.uncalibrate(pn, {}, H_calib);
+  if (H_calib.rows() != 2) {
+    if (H)
+      *H = gtsam::Matrix::Zero(2, 6);
+    return gtsam::Vector2::Zero();
+  }
+  if (H) {
+    *H = H_calib * H_norm * H_transform * H_compose;
+  }
+  return proj - measurement_;
 }
 
 auto_aim::BASolver::BASolver(quill::Logger *logger, const BaConfig &config,
@@ -63,7 +79,7 @@ bool auto_aim::BASolver::optimizeArmorPose(Armor &armor) const {
     // 获得ros系内装甲板的初始状态
     Eigen::Matrix3d R_camera_to_ros = Eigen::Matrix3d::Zero();
     R_camera_to_ros << 0, 0, 1, -1, 0, 0, 0, -1, 0;
-    Eigen::Matrix3d R_in_ros = R_camera_to_ros * armor.orientation;
+    Eigen::Matrix3d R_in_ros = R_camera_to_ros * armor.orientation.matrix();
     Eigen::Vector3d pose = R_camera_to_ros * armor.position;
     Eigen::Vector3d rpy = tools::rotationMatrixToRPY(R_in_ros);
     gtsam::Vector6 sigmas;
@@ -90,18 +106,34 @@ bool auto_aim::BASolver::optimizeArmorPose(Armor &armor) const {
         gtsam::noiseModel::Diagonal::Sigmas(
             gtsam::Vector2::Constant(config_.measurement_noise_px_xy));
     for (int i = 0; i < img_points.size(); i++) {
+      const auto &obj = obj_points.at(i);
+      const auto &img = img_points.at(i);
       graph.emplace_shared<ProjectionFactor>(
-          measurement_noise, X(0), obj_points.at(i), img_points.at(i),
-          camera_matrix_, distortion_coefficients_);
+          measurement_noise, X(0), gtsam::Point3{obj.x, obj.y, obj.z},
+          gtsam::Point2{img.x, img.y},
+          gtsam::Cal3DS2{
+              camera_matrix_.at<double>(0, 0),
+              camera_matrix_.at<double>(1, 1),
+              camera_matrix_.at<double>(0, 1),
+              camera_matrix_.at<double>(0, 2),
+              camera_matrix_.at<double>(1, 2),
+              distortion_coefficients_.at<double>(0),
+              distortion_coefficients_.at<double>(1),
+              distortion_coefficients_.at<double>(2),
+              distortion_coefficients_.at<double>(3),
+          });
     }
 
     // 使用LM进行优化
     gtsam::Values initial_value;
     initial_value.insert(X(0), initial_pose);
-    auto result =
-        gtsam::LevenbergMarquardtOptimizer(graph, initial_value).optimize();
+    gtsam::LevenbergMarquardtParams params;
     if (config_.print_result)
-      result.print();
+      params.setVerbosity("TERMINATION");
+    auto result =
+        gtsam::LevenbergMarquardtOptimizer(graph, initial_value, params)
+            .optimize();
+    // BUG: 因子定义有问题，优化器没有正常迭代
 
     // 获取优化结果
     auto optimized = result.at<gtsam::Pose3>(X(0));

@@ -12,7 +12,7 @@ namespace hardware {
 enum class CameraType {
   hik,
   galaxy,
-  usb,
+  video,
 };
 
 struct CameraConfigs {
@@ -24,6 +24,7 @@ struct CameraConfigs {
   int image_publish_interval_ms;
   int cam_info_publish_interval_ms;
   quill::LogLevel log_level;
+  std::string video_path;
 };
 
 } // namespace hardware

@@ -43,7 +43,8 @@ auto_aim::LightBar::LightBar(const cv::Point2f top, const cv::Point2f bottom,
   static_cast<cv::RotatedRect &>(*this) = cv::RotatedRect{
       (top + bottom) / 2.,
       {static_cast<float>(width), static_cast<float>(length)},
-      static_cast<float>(std::atan2(axis.y, axis.x) / std::numbers::pi * 180)};
+      static_cast<float>(std::atan2(axis.y, axis.x) / std::numbers::pi * 180) +
+          90};
   // XXX: 注意检查下anlge,貌似不对劲
   tilt_angle =
       std::atan2(std::abs(top.x - bottom.x), std::abs(top.y - bottom.y));

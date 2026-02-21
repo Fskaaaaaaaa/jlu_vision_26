@@ -19,6 +19,7 @@
 
 namespace hardware {
 
+// NOTE:应该有一个重启相机的接口，将统计错误数尝试重启写到Camera类里（而不是散在子类里）
 class CameraBase {
 public:
   virtual ~CameraBase() = default;

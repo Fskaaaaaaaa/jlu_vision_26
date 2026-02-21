@@ -106,9 +106,9 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
         auto debug_img_opt = this->afterDetect(image, armors, frame_id, stamp);
         if (debug_img_opt.has_value()) {
           const auto &img = debug_img_opt.value();
-          cv::resize(img, img, {}, 0.5, 0.5);
+          // cv::resize(img, img, {}, 0.5, 0.5);
           cv::imshow("detector", img);
-          cv::waitKey(1);
+          cv::waitKey(configs_.step_by_step_debug ? 0 : 1);
         }
         // NOTE: 不知道这里应不应该睡1ms防止空转干爆CPU
         std::this_thread::sleep_for(std::chrono::milliseconds{1});
@@ -118,9 +118,12 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
   LOG_INFO(logger_, "detector node inited!");
 }
 
+auto_aim::DetectorNode::~DetectorNode() { cv::destroyAllWindows(); }
+
 void auto_aim::DetectorNode::imageCallback(
     const cv::Mat &image, const std::string &frame_id,
     const std::chrono::system_clock::time_point &stamp) {
+  LOG_TRACE_L1(logger_, "new frame recieved.");
   if (configs_.use_muti_thread) {
     this->mt_detector_->push(image, frame_id, stamp);
     return;
@@ -129,9 +132,9 @@ void auto_aim::DetectorNode::imageCallback(
   auto debug_img_opt = this->afterDetect(image, armors, frame_id, stamp);
   if (debug_img_opt.has_value()) {
     const auto &img = debug_img_opt.value();
-    cv::resize(img, img, {}, 0.5, 0.5);
+    // cv::resize(img, img, {}, 0.5, 0.5);
     cv::imshow("detector", img);
-    cv::waitKey(1);
+    cv::waitKey(configs_.step_by_step_debug ? 0 : 1);
   }
 }
 
@@ -146,7 +149,7 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
     result_img = bgr_image.clone();
     if (configs_.show_detect_result)
       for (const auto &armor : armors)
-        this->drawArmor(armor, result_img, tools::Color::RED);
+        this->drawArmor(armor, result_img, tools::Color::bgr::RED, true);
   }
 
   cv::Mat gray_img;
@@ -177,7 +180,7 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
   this->publishArmors(armors);
   if (configs_.show_optimize_result)
     for (const auto &armor : armors)
-      this->drawArmor(armor, result_img, tools::Color::GREEN);
+      this->drawArmor(armor, result_img, tools::Color::bgr::GREEN);
   return debug ? std::optional{result_img} : std::nullopt;
 }
 
@@ -208,7 +211,8 @@ void auto_aim::DetectorNode::publishArmors(const std::vector<Armor> &armors) {
 }
 
 void auto_aim::DetectorNode::drawArmor(const Armor &armor, cv::Mat &image,
-                                       const cv::Scalar &color) {
+                                       const cv::Scalar &color,
+                                       bool draw_text) {
   const std::unordered_map<types::EnemyColor, cv::Scalar> lightbar_color_map{
       {types::EnemyColor::Red, tools::Color::bgr::RED},
       {types::EnemyColor::Blue, tools::Color::bgr::BLUE},
@@ -220,14 +224,24 @@ void auto_aim::DetectorNode::drawArmor(const Armor &armor, cv::Mat &image,
     cv::circle(image, light.top, 3, color, 1);
     cv::circle(image, light.bottom, 3, color, 1);
     cv::line(image, light.top, light.bottom, lightbar_color_map.at(armor.color),
-             1);
+             2);
   }
   // 给装甲板打叉
   cv::line(image, armor.left_light.top, armor.right_light.bottom, color, 2);
   cv::line(image, armor.left_light.bottom, armor.right_light.top, color, 2);
   // 绘制类别和置信度
-  cv::putText(
-      image, rfl::enum_to_string(armor.type) + std::to_string(armor.confidence),
-      armor.left_light.top, cv::FONT_HERSHEY_SIMPLEX, 0.8, tools::Color::PURPLE,
-      2);
+  if (draw_text) {
+    cv::putText(
+        image,
+        rfl::enum_to_string(armor.type) + std::to_string(armor.confidence),
+        armor.center, cv::FONT_HERSHEY_SIMPLEX, 0.8, tools::Color::PURPLE, 2);
+    cv::putText(image, "0", armor.left_light.bottom, cv::FONT_HERSHEY_SIMPLEX,
+                0.8, tools::Color::PURPLE, 2);
+    cv::putText(image, "1", armor.left_light.top, cv::FONT_HERSHEY_SIMPLEX, 0.8,
+                tools::Color::PURPLE, 2);
+    cv::putText(image, "2", armor.right_light.top, cv::FONT_HERSHEY_SIMPLEX,
+                0.8, tools::Color::PURPLE, 2);
+    cv::putText(image, "3", armor.right_light.bottom, cv::FONT_HERSHEY_SIMPLEX,
+                0.8, tools::Color::PURPLE, 2);
+  }
 }

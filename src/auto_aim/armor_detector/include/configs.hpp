@@ -64,8 +64,6 @@ struct PnPConfig {
   double project_error_ratio_thres;
   double roll_thres_degree;
   float frame_axes_length;
-  int frame_axes_circle_radius;
-  int frame_axes_circle_thickness;
 };
 struct BaConfig {
   double measurement_noise_px_xy;
@@ -91,6 +89,7 @@ struct DetectorConfigs {
   bool show_detect_result;   // detector直出的结果,红色
   bool show_optimize_result; // PCA、BA后的结果，绿色
   bool show_pnp_result;      // 绘制PNP两个解的坐标轴
+  bool step_by_step_debug;
   // confs::IceoryxServiceDescription image_topic;
   // confs::IceoryxServiceDescription camera_param_topic;
   std::string camera_name; // NOTE: 这些话题都是固定的，只要相机名称就够了

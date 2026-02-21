@@ -9,6 +9,7 @@
 #include "quill/Logger.h"
 #include <gtsam/base/Matrix.h>
 #include <gtsam/base/Vector.h>
+#include <gtsam/geometry/Cal3DS2.h>
 #include <gtsam/geometry/Pose2.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/nonlinear/NoiseModelFactorN.h>
@@ -34,20 +35,17 @@ class ProjectionFactor : public gtsam::NoiseModelFactorN<gtsam::Pose3> {
   using Base = gtsam::NoiseModelFactorN<gtsam::Pose3>;
 
 public:
-  ProjectionFactor(const gtsam::SharedNoiseModel &model, const gtsam::Key &key,
-                   const cv::Point3f &obj_point, const cv::Point2f &image_point,
-                   const cv::Mat &camera_matrix,
-                   const cv::Mat &distortion_coefficients);
+  ProjectionFactor(const gtsam::SharedNoiseModel &model, gtsam::Key key,
+                   const gtsam::Point3 &obj_point,
+                   const gtsam::Point2 &measurement, const gtsam::Cal3DS2 &K);
 
   gtsam::Vector evaluateError(const gtsam::Pose3 &pose,
                               gtsam::OptionalMatrixType H) const override;
 
 private:
-  cv::Point3f obj_point_;
-  cv::Point2f img_point_;
-  // NOTE: 引用BaSolver缓存的成员就好了，没必要再拷贝一份
-  const cv::Mat &camera_matrix_;
-  const cv::Mat &distortion_coefficients_;
+  gtsam::Point3 point_;
+  gtsam::Point2 measurement_;
+  gtsam::Cal3DS2 K_;
   // NOTE: 从z向前的pnp/project的相机系到z向上的ros系的旋转矩阵
   Eigen::Matrix3d R_ros_to_camera_;
 };

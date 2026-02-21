@@ -1,5 +1,6 @@
 #include "pnp_solver.hpp"
 #include "basic/colors.hpp"
+#include "basic/image_tools.hpp"
 #include "math/angle_tools.hpp"
 #include "types/ArmorPoints.hpp"
 
@@ -25,8 +26,8 @@ auto_aim::PnPSolver::solvePnP(Armor &armor) const {
   std::vector<cv::Point2f> image_points{
       {armor.left_light.bottom},
       {armor.left_light.top},
-      {armor.right_light.bottom},
       {armor.right_light.top},
+      {armor.right_light.bottom},
   };
   PnPResult result;
   if (config_.use_generic_mode) {
@@ -84,7 +85,8 @@ void auto_aim::PnPSolver::sortPnPResult(const Armor &armor,
   Eigen::Vector3d rpy1 = tools::rotationMatrixToRPY(R_camera_to_ros * R1);
   if (rpy0(0) > tools::angle2Radian(config_.roll_thres_degree) ||
       rpy1(0) > tools::angle2Radian(config_.roll_thres_degree)) {
-    LOG_DEBUG(logger_, "[sortPnPResult]: large roll: {}.", rpy0(0));
+    LOG_DEBUG(logger_, "[sortPnPResult]: large roll: roll0{}, roll1{}.",
+              rpy0(0), rpy1(0));
     return;
   }
 
@@ -118,23 +120,15 @@ float auto_aim::PnPSolver::calculateDistanceToCenter(
 
 void auto_aim::PnPSolver::drawFrameAxes(const PnPResult &pnp_result,
                                         cv::Mat &image) const {
-  std::vector<cv::Point2f> image_point;
+  std::vector<cv::Point2f> image_points;
+  const auto &object_points =
+      types::points::getArmorPointsCV(pnp_result.armor_type);
   if (config_.use_generic_mode) {
     cv::drawFrameAxes(image, camera_matrix_, distortion_coefficients_,
                       pnp_result.rvecs.at(1), pnp_result.tvecs.at(1),
                       config_.frame_axes_length);
-    cv::projectPoints(std::vector{cv::Point3f{0, 0, 0}}, pnp_result.rvecs.at(1),
-                      pnp_result.tvecs.at(1), camera_matrix_,
-                      distortion_coefficients_, image_point);
-    cv::circle(image, image_point.at(0), config_.frame_axes_circle_radius,
-               tools::Color::bgr::RED, config_.frame_axes_circle_thickness);
   }
   cv::drawFrameAxes(image, camera_matrix_, distortion_coefficients_,
                     pnp_result.rvecs.at(0), pnp_result.tvecs.at(0),
                     config_.frame_axes_length);
-  cv::projectPoints(std::vector{cv::Point3f{0, 0, 0}}, pnp_result.rvecs.at(0),
-                    pnp_result.tvecs.at(0), camera_matrix_,
-                    distortion_coefficients_, image_point);
-  cv::circle(image, image_point.at(0), config_.frame_axes_circle_radius,
-             tools::Color::bgr::GREEN, config_.frame_axes_circle_thickness);
 }

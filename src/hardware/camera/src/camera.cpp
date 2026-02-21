@@ -3,6 +3,7 @@
 #include "galaxy.hpp"
 // #include "hikrobot.hpp"
 
+#include "hikrobot.hpp"
 #include "iceoryx_posh/popo/listener.hpp"
 #include "iceoryx_posh/popo/sample.hpp"
 #include "iceoryx_posh/popo/subscriber.hpp"
@@ -14,6 +15,7 @@
 #include "msgs/Image.hpp"
 #include "quill/LogMacros.h"
 #include "quill/core/ThreadContextManager.h"
+#include "video_capture.hpp"
 
 #include <chrono>
 #include <cstdlib>
@@ -39,10 +41,10 @@ hardware::Camera::Camera(quill::Logger *logger, const CameraConfigs &configs)
     this->camera_ = std::make_unique<Galaxy>(logger, configs_.camera_params);
     break;
   case CameraType::hik:
-    // TODO
+    this->camera_ = std::make_unique<HikRobot>(logger, configs_.camera_params);
     break;
-  case CameraType::usb:
-    // TODO
+  case CameraType::video:
+    this->camera_ = std::make_unique<VideoCapture>(logger, configs_.video_path);
     break;
   default:
     LOG_CRITICAL(logger_, "Unknown camera type!");

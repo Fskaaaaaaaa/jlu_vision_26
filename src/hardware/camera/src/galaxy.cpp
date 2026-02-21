@@ -150,19 +150,11 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
           {BAYERRG, cv::COLOR_BayerRG2BGR},
           {BAYERBG, cv::COLOR_BayerBG2BGR},
       };
-  // status =
-  //     DxRaw8toRGB24(bayer_frame.pImgBuf, buffer, bayer_frame.nWidth,
-  //                   bayer_frame.nHeight, RAW2RGB_NEIGHBOUR, bayer_type,
-  //                   false);
   cv::cvtColor(
       cv::Mat{bayer_frame.nHeight, bayer_frame.nWidth, CV_8U,
               bayer_frame.pImgBuf},
       cv::Mat{bayer_frame.nHeight, bayer_frame.nWidth, CV_8UC3, buffer},
       type_map.at(bayer_type));
-  // if (!GX_SUCCESS(status)) {
-  //   LOG_ERROR(logger_, "Failed to convert Bayer to RGB, status = {}",
-  //   status); return EXIT_FAILURE;
-  // }
   LOG_DEBUG(logger_, "Get image: {}x{}", bayer_frame.nWidth,
             bayer_frame.nHeight);
   fail_conut_ = 0;

@@ -29,6 +29,7 @@ namespace auto_aim {
 class DetectorNode {
 public:
   DetectorNode(quill::Logger *logger, const DetectorConfigs &configs);
+  ~DetectorNode();
 
 private:
   void imageCallback(const cv::Mat &image, const std::string &frame_id,
@@ -40,7 +41,8 @@ private:
               const std::string &frame_id,
               const std::chrono::system_clock::time_point &stamp);
   void publishArmors(const std::vector<Armor> &armors);
-  void drawArmor(const Armor &armor, cv::Mat &image, const cv::Scalar &color);
+  void drawArmor(const Armor &armor, cv::Mat &image, const cv::Scalar &color,
+                 bool draw_text = false);
 
   quill::Logger *logger_;
   DetectorConfigs configs_;

@@ -5,6 +5,7 @@
 #include "opencv2/core/mat.hpp"
 #include "quill/Logger.h"
 #include "types.hpp"
+#include "types/ArmorType.hpp"
 #include "types/CameraInfo.hpp"
 
 #include "opencv2/core/types.hpp"
@@ -17,6 +18,7 @@ struct PnPResult {
   std::vector<cv::Mat> rvecs;
   std::vector<cv::Mat> tvecs;
   std::vector<double> project_errors;
+  types::ArmorType armor_type; // 为了重投影查找关键点
 };
 
 class PnPSolver {
