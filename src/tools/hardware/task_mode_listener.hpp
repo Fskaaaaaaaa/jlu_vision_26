@@ -10,12 +10,15 @@
 #include "quill/Logger.h"
 
 #include <atomic>
+#include <functional>
 namespace hardware {
 class TaskModeListener {
 public:
-  TaskModeListener(quill::Logger *logger, types::TaskMode target_mode,
-                   const confs::IceoryxServiceDescription &task_topic = {
-                       "task_mode", "serial", "data"});
+  TaskModeListener(
+      quill::Logger *logger, types::TaskMode target_mode,
+      const std::function<void()> &on_change_to_target_mode_callback = []() {},
+      const confs::IceoryxServiceDescription &task_topic = {"task_mode",
+                                                            "serial", "data"});
   bool isOnTask();
   bool isTask(types::TaskMode task);
 
@@ -28,5 +31,6 @@ private:
   iox::popo::Listener task_listener_;
   const types::TaskMode target_mode_;
   std::atomic<types::TaskMode> current_mode_;
+  std::function<void()> user_callback_;
 };
 } // namespace hardware

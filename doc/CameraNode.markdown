@@ -14,5 +14,5 @@
 
 ## 订阅话题：
 
-- 更改增益/曝光{camera_params, camera_name, data}
+- 更改增益/曝光{change_camera_params, camera_name, request}
 - 本打算用server/client搞的，但感觉相机节点没什么好返回的，莫不如简单一点

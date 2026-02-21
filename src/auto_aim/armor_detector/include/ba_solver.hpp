@@ -16,9 +16,9 @@
 
 namespace auto_aim {
 
-class BaSolver {
+class BASolver {
 public:
-  BaSolver(quill::Logger *logger, const BaConfig &config,
+  BASolver(quill::Logger *logger, const BaConfig &config,
            const types::CameraInfo &cam_info);
 
   bool optimizeArmorPose(Armor &armor) const;

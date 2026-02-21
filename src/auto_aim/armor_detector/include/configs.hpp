@@ -6,7 +6,6 @@
 
 #include "quill/core/LogLevel.h"
 
-#include <array>
 #include <string>
 
 namespace auto_aim {
@@ -80,17 +79,18 @@ struct BaConfig {
 };
 
 struct DetectorConfigs {
-  quill::LogLevel detector_log_level;
-  quill::LogLevel solver_log_level;
+  quill::LogLevel log_level;
   confs::CameraParams camera_params;
   // NOTE: 注意模式切换回自瞄时，要给相机发送更改参数的请求
   bool use_muti_thread;
   int queue_size;
-  bool awalys_on_task;
-  bool show_detect_result_image;
-  bool show_pca_result_image;
-  bool show_pnp_result_image;
-  bool show_ba_result_image;
+  bool detect_when_idle;
+  bool use_DL;
+  bool use_pca;
+  bool use_ba;
+  bool show_detect_result;   // detector直出的结果,红色
+  bool show_optimize_result; // PCA、BA后的结果，绿色
+  bool show_pnp_result;      // 绘制PNP两个解的坐标轴
   // confs::IceoryxServiceDescription image_topic;
   // confs::IceoryxServiceDescription camera_param_topic;
   std::string camera_name; // NOTE: 这些话题都是固定的，只要相机名称就够了

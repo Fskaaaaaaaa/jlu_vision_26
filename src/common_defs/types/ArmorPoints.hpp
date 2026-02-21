@@ -53,7 +53,7 @@ inline const std::vector<cv::Point3f> &getArmorPointsCV(::types::ArmorType t) {
     return CV_TINY_ARMOR_POINTS;
   case ::types::ArmorType::Base:
     return CV_TINY_ARMOR_POINTS;
-  case ::types::ArmorType::Negative:
+  default:
     return CV_SMALL_ARMOR_POINTS; // NOTE:非装甲板情况也不能空着，默认返回小装甲板的点
   }
 }
@@ -93,7 +93,7 @@ getArmorPointsEG(::types::ArmorType t) {
     return EG_TINY_ARMOR_POINTS;
   case ::types::ArmorType::Base:
     return EG_TINY_ARMOR_POINTS;
-  case ::types::ArmorType::Negative:
+  default:
     return EG_SMALL_ARMOR_POINTS;
   }
 }

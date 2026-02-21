@@ -9,13 +9,13 @@
 
 #include <chrono>
 #include <memory>
-#include <utility>
 #include <vector>
 
 namespace auto_aim {
 
-using ArmorsStamp =
-    std::pair<std::vector<Armor>, std::chrono::system_clock::time_point>;
+using ImageArmorsFrameIdStamp =
+    std::tuple<cv::Mat, std::vector<Armor>, std::string,
+               std::chrono::system_clock::time_point>;
 
 class STDetector {
 public:
@@ -24,9 +24,9 @@ public:
 
 class MTDetector {
 public:
-  virtual bool push(const cv::Mat &bgr_img,
+  virtual bool push(const cv::Mat &bgr_img, const std::string &frame_id,
                     std::chrono::system_clock::time_point stamp) = 0;
-  virtual ArmorsStamp pop() = 0;
+  virtual ImageArmorsFrameIdStamp pop() = 0;
 };
 
 ////////////////////////////////////////////////////////
@@ -34,16 +34,18 @@ public:
 // TODO
 class STDetectorTrad : public STDetector {
 public:
-  std::vector<Armor> detect(const cv::Mat &bgr_img) override;
+  std::vector<Armor> detect(const cv::Mat &bgr_img) override { return {}; };
 
 private:
 };
 
-class MTDetectorTrad : MTDetector {
+class MTDetectorTrad : public MTDetector {
 public:
-  bool push(const cv::Mat &bgr_img,
-            std::chrono::system_clock::time_point stamp) override;
-  ArmorsStamp pop() override;
+  bool push(const cv::Mat &bgr_img, const std::string &frame_id,
+            std::chrono::system_clock::time_point stamp) override {
+    return {};
+  };
+  ImageArmorsFrameIdStamp pop() override { return {}; };
 
 private:
 };
@@ -66,15 +68,16 @@ class MTDetectorDL : public MTDetector {
 public:
   MTDetectorDL(quill::Logger *logger, YOLOVersion yolo_version,
                const YOLOConfig &yolo_config, int queue_size);
-  bool push(const cv::Mat &bgr_img,
+  bool push(const cv::Mat &bgr_img, const std::string &frame_id,
             std::chrono::system_clock::time_point stamp) override;
-  ArmorsStamp pop() override;
+  ImageArmorsFrameIdStamp pop() override;
 
 private:
   quill::Logger *logger_;
   std::unique_ptr<YOLOBase> yolo_;
-  tools::ThreadSafeQueue<std::tuple<
-      cv::Mat, std::chrono::system_clock::time_point, ov::InferRequest>>
+  tools::ThreadSafeQueue<
+      std::tuple<cv::Mat, std::string, std::chrono::system_clock::time_point,
+                 ov::InferRequest>>
       queue_;
 };
 

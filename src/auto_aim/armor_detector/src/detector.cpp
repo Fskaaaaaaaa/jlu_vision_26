@@ -62,17 +62,18 @@ auto_aim::MTDetectorDL::MTDetectorDL(quill::Logger *logger,
 }
 
 bool auto_aim::MTDetectorDL::push(const cv::Mat &bgr_img,
+                                  const std::string &frame_id,
                                   std::chrono::system_clock::time_point stamp) {
   auto tensor = this->yolo_->preProcess(bgr_img);
   auto request = this->yolo_->requestInfer(tensor);
   request.start_async();
-  return queue_.push({bgr_img.clone(), stamp, std::move(request)});
+  return queue_.push({bgr_img.clone(), frame_id, stamp, std::move(request)});
 }
 
-auto_aim::ArmorsStamp auto_aim::MTDetectorDL::pop() {
-  auto [img, stamp, infer_request] = queue_.pop();
+auto_aim::ImageArmorsFrameIdStamp auto_aim::MTDetectorDL::pop() {
+  auto [img, frame_id, stamp, infer_request] = queue_.pop();
   infer_request.wait();
   auto output = infer_request.get_output_tensor();
   auto armors = this->yolo_->postProcess(output, {img.cols, img.rows});
-  return {std::move(armors), stamp};
+  return {img, std::move(armors), frame_id, stamp};
 }

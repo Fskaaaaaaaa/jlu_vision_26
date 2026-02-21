@@ -10,12 +10,17 @@
 #include "rfl/enums.hpp"
 
 #include <cstdlib>
+#include <functional>
 
 hardware::TaskModeListener::TaskModeListener(
     quill::Logger *logger, types::TaskMode target_mode,
+    const std::function<void()> &user_callback,
     const confs::IceoryxServiceDescription &task_topic)
-    : logger_(logger), target_mode_(target_mode),
-      task_sub_(types::IceoryxServiceDescription{task_topic}.description) {
+    : logger_(logger),
+      task_sub_(types::IceoryxServiceDescription{task_topic}.description),
+      target_mode_(target_mode), current_mode_(types::TaskMode::Idle),
+      user_callback_(user_callback) {
+  // NOTE: 默认处在空闲模式
   this->task_listener_
       .attachEvent(task_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
                    iox::popo::createNotificationCallback(
@@ -41,8 +46,14 @@ void hardware::TaskModeListener::onTaskModeReceiveCallback(
         auto mode = static_cast<types::TaskMode>(sample->mode);
         if (mode != self->current_mode_.load()) {
           self->current_mode_.store(mode);
-          LOG_TRACE_L1(self->logger_, "task mode change, current mode: {}",
-                       rfl::enum_to_string(self->current_mode_.load()));
+          LOG_TRACE_L1(self->logger_,
+                       "task mode change, current mode: {}, target mode: {}",
+                       rfl::enum_to_string(self->current_mode_.load()),
+                       rfl::enum_to_string(self->target_mode_));
+          if (self->current_mode_.load() == self->target_mode_) {
+            // NOTE: 一般用来执行更改相机参数之类的事情
+            self->user_callback_();
+          }
         }
       })) {
   } // end of while

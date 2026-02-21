@@ -49,15 +49,15 @@ auto_aim::ProjectionFactor::evaluateError(const gtsam::Pose3 &pose,
   // HACK: 这里最好用GTSAM的投影方法实现。
   auto reproj_point = reproj_points.at(0);
   auto error = reproj_point - img_point_;
-  return {error.x, error.y};
+  return Eigen::Vector2d{error.x, error.y};
 }
 
-auto_aim::BaSolver::BaSolver(quill::Logger *logger, const BaConfig &config,
+auto_aim::BASolver::BASolver(quill::Logger *logger, const BaConfig &config,
                              const types::CameraInfo &cam_info)
     : logger_(logger), config_(config), camera_matrix_(cam_info.camera_matrix),
       distortion_coefficients_(cam_info.distortion_coefficients) {}
 
-bool auto_aim::BaSolver::optimizeArmorPose(Armor &armor) const {
+bool auto_aim::BASolver::optimizeArmorPose(Armor &armor) const {
   using namespace gtsam::symbol_shorthand;
   try {
     // 获得ros系内装甲板的初始状态
@@ -87,8 +87,8 @@ bool auto_aim::BaSolver::optimizeArmorPose(Armor &armor) const {
     };
     const auto &obj_points = types::points::getArmorPointsCV(armor.type);
     gtsam::SharedDiagonal measurement_noise =
-        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(
-            config_.measurement_noise_px_xy, config_.measurement_noise_px_xy));
+        gtsam::noiseModel::Diagonal::Sigmas(
+            gtsam::Vector2::Constant(config_.measurement_noise_px_xy));
     for (int i = 0; i < img_points.size(); i++) {
       graph.emplace_shared<ProjectionFactor>(
           measurement_noise, X(0), obj_points.at(i), img_points.at(i),

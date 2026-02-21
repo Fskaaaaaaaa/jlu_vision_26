@@ -30,9 +30,9 @@ hardware::Camera::Camera(quill::Logger *logger, const CameraConfigs &configs)
                      {iox::TruncateToCapacity, configs_.camera_name.c_str()},
                      "data"}),
       cam_params_change_sub_(
-          {"camera_params",
+          {"change_camera_params",
            {iox::TruncateToCapacity, configs_.camera_name.c_str()},
-           "data"}) {
+           "request"}) {
   // init camera
   switch (configs_.camera_type) {
   case CameraType::galaxy:

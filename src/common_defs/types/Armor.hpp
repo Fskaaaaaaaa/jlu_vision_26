@@ -7,7 +7,6 @@
 
 #include "iceoryx_posh/popo/sample.hpp"
 #include <Eigen/Dense>
-#include <opencv2/core.hpp>
 
 #include <chrono>
 

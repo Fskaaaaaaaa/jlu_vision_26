@@ -21,14 +21,6 @@ inline void drawPoints(cv::Mat &img, const std::vector<cv::Point2f> &points,
   drawPoints(img, int_points, color, thickness);
 }
 
-inline void drawText(cv::Mat &img, const std::string &text,
-                     const cv::Point &point,
-                     const cv::Scalar &color = Color::bgr::RED,
-                     double font_scale = 1.0, int thickness = 2) {
-  cv::putText(img, text, point, cv::FONT_HERSHEY_SIMPLEX, font_scale, color,
-              thickness);
-}
-
 } // namespace tools
 
 // class ArmorDrawer {

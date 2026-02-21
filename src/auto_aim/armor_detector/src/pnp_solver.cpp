@@ -13,9 +13,8 @@
 #include <optional>
 #include <vector>
 
-auto_aim::PnPSolver::PnPSolver(quill::Logger *logger,
-                               const types::CameraInfo &cam_info,
-                               const PnPConfig &config)
+auto_aim::PnPSolver::PnPSolver(quill::Logger *logger, const PnPConfig &config,
+                               const types::CameraInfo &cam_info)
     : logger_(logger), config_(config),
       camera_matrix_(cam_info.camera_matrix.clone()),
       distortion_coefficients_(cam_info.distortion_coefficients.clone()) {}

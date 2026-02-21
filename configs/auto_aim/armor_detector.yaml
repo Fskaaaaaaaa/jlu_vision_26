@@ -1,0 +1,64 @@
+log_level: Debug
+camera_params:
+  exposure_time: 2500
+  gain: 15.0
+  frame_rate: -1.0
+use_muti_thread: true
+queue_size: 16
+detect_when_idle: true
+use_DL: true
+use_pca: true
+use_ba: true
+show_detect_result: true
+show_optimize_result: true
+show_pnp_result: true
+camera_name: camera0
+armors_topic:
+  service: armors
+  instance: detector
+  event: data
+yolo_version: YOLOv5
+yolo_conf:
+  device: CPU
+  model_path: assets/yolov5.xml
+  use_latency_performancemode: false
+  score_thresh: 0.7
+  nms_iou_thresh: 0.3
+  accept_thresh: 0.8
+trad_conf:
+  binary_thres: 90
+  detect_color: Red
+  light_params:
+    min_ratio: 0.0001
+    max_ratio: 1.0
+    max_angle: 40.0
+    color_diff_thresh: 20
+  armor_params:
+    min_light_ratio: 0.1
+    min_small_center_distance: 0.8
+    max_small_center_distance: 3.5
+    min_large_center_distance: 3.5
+    max_large_center_distance: 8.0
+    max_angle: 35.0
+pca_conf:
+  pass_optimize_lightbar_width: 3
+  normalize_max_brightness: 25.0
+  lightbar_min_mean_brightness: 0.0
+  padding_scale: 0.07
+  search_start_ratio: 0.4
+  search_end_ratio: 0.6
+pnp_conf:
+  use_generic_mode: true
+  project_error_ratio_thres: 3.0
+  roll_thres_degree: 15.0
+  frame_axes_length: 1.0
+  frame_axes_circle_radius: 3
+  frame_axes_circle_thickness: 1
+ba_conf:
+  measurement_noise_px_xy: 0.5
+  prior_noise:
+    roll: 0.000001
+    pitch: 0.000001
+    yaw: 0.1
+    xyz: 0.000001
+  print_result: false

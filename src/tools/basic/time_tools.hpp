@@ -15,4 +15,12 @@ inline std::chrono::system_clock::time_point nanoSecToChronoPoint(long stamp) {
   std::chrono::system_clock::time_point tp(ns);
   return tp;
 }
+
+inline long
+chronoPointToNanoSec(const std::chrono::system_clock::time_point &stamp) {
+  long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                stamp.time_since_epoch())
+                .count();
+  return ns;
+};
 } // namespace tools

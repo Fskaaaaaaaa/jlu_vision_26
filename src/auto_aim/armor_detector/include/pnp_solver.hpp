@@ -21,8 +21,8 @@ struct PnPResult {
 
 class PnPSolver {
 public:
-  PnPSolver(quill::Logger *logger, const types::CameraInfo &cam_info,
-            const PnPConfig &config);
+  PnPSolver(quill::Logger *logger, const PnPConfig &config,
+            const types::CameraInfo &cam_info);
   // NOTE:有解时返回ippe的双解，第一个是被选择的解，被写入到引用的装甲板里
   std::optional<PnPResult> solvePnP(Armor &armor) const;
   float calculateDistanceToCenter(const cv::Point2f &image_point) const;
