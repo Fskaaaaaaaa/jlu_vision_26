@@ -3,12 +3,8 @@
 #include "basic/logger.hpp"
 #include "configs.hpp"
 #include "coord_geometry.hpp"
-#include "open3d/geometry/Geometry3D.h"
 #include "target_geometry.hpp"
 
-#include <algorithm>
-#include <iterator>
-#include <memory>
 #include <open3d/Open3D.h>
 
 #include <cxxopts.hpp>
@@ -19,9 +15,12 @@
 #include <rfl.hpp>
 #include <rfl/yaml/read.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <fstream>
+#include <iterator>
+#include <memory>
 #include <thread>
 
 constexpr char APP_NAME[] = "rmviz3d";

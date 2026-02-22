@@ -6,7 +6,6 @@
 #include "opencv2/core/eigen.hpp"
 #include "opencv2/core/types.hpp"
 #include <Eigen/Dense>
-#include <exception>
 #include <gtsam/geometry/Cal3DS2.h>
 #include <gtsam/geometry/PinholeCamera.h>
 #include <gtsam/geometry/Point2.h>
@@ -20,6 +19,7 @@
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
 
 #include <cstdlib>
+#include <exception>
 #include <vector>
 
 auto_aim::ProjectionFactor::ProjectionFactor(

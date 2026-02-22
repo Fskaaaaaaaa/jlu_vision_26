@@ -123,7 +123,6 @@ auto_aim::DetectorNode::~DetectorNode() { cv::destroyAllWindows(); }
 void auto_aim::DetectorNode::imageCallback(
     const cv::Mat &image, const std::string &frame_id,
     const std::chrono::system_clock::time_point &stamp) {
-  LOG_TRACE_L1(logger_, "new frame recieved.");
   if (configs_.use_muti_thread) {
     this->mt_detector_->push(image, frame_id, stamp);
     return;
@@ -178,6 +177,7 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
   });
   // NOTE: 直接发布装甲板
   this->publishArmors(armors);
+  LOG_TRACE_L1(logger_, "{} armor(s) published.", armors.size());
   if (configs_.show_optimize_result)
     for (const auto &armor : armors)
       this->drawArmor(armor, result_img, tools::Color::bgr::GREEN);

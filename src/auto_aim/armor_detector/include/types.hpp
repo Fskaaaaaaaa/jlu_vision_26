@@ -2,7 +2,6 @@
 
 #include "opencv2/core/types.hpp"
 #include "types/Armor.hpp"
-#include "types/ArmorPoints.hpp"
 #include "types/EnemyColor.hpp"
 
 #include <Eigen/Dense>
