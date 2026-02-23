@@ -41,6 +41,8 @@ private:
               const std::string &frame_id,
               const std::chrono::system_clock::time_point &stamp);
   void publishArmors(const std::vector<Armor> &armors);
+  void
+  publishHeartbeatArmor(const std::chrono::system_clock::time_point &stamp);
   void drawArmor(const Armor &armor, cv::Mat &image, const cv::Scalar &color,
                  bool draw_text = false);
 

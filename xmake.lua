@@ -52,10 +52,8 @@ add_requires("ceres", { system = true })
 -- ceres是openvins的依赖，拟合大符应该也能用到
 add_requires("serial")
 -- add_requires("g2o")
--- FIXME: g2o官方package的deps缺少fmt和spdlog导致链接不通过,
+-- NOTE: g2o官方package的deps缺少fmt和spdlog导致链接不通过,
 -- 得手动添加到～/.xmake/repositories/xmake-repo/packages/g/g2o/xmake.lua
--- NOTE:这俩反射库也不需要了，直接导reflect-cpp来进行配置加载了
--- NOTE: g2o不需要了，改成导入封装程度更高的gtsam来进行ba优化了
 
 includes("src/third_party")
 includes("src/common_defs")
@@ -65,5 +63,4 @@ includes("src/odom_coord")
 includes("src/status_feedback")
 includes("src/auto_aim")
 includes("src/auto_buff")
-includes("src/auto_engagement")
 includes("src/auto_ballistic")

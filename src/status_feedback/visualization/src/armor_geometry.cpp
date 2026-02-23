@@ -64,7 +64,9 @@ void fb::ArmorGeometry::onArmorReceivedCallback(
                 iox::TruncateToCapacity,
                 self->config_.service_instance_event.at(1).c_str()}) {
           types::Armor armor{sample};
-          receive_armors.emplace_back(types::Armor{sample});
+          // NOTE: 注意heartbeat是未初始化的脏数据，不要UB
+          if (!armor.heart_beat)
+            receive_armors.emplace_back(armor);
         }
       })) {
   } // end of cache update

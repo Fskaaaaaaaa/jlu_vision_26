@@ -2,8 +2,11 @@
 #pragma once
 
 #include "types/Armor.hpp"
+#include "types/ArmorType.hpp"
 
 #include <Eigen/Core>
+#include <chrono>
+#include <gtsam/geometry/Rot2.h>
 
 namespace auto_aim {
 
@@ -35,6 +38,24 @@ private:
   std::string message_;
 };
 
+struct TargetStatus {
+  types::ArmorType type;
+  // for robot
+  double radius_a;
+  double radius_b;
+  double dz;
+  // for outpost
+  double radius;
+  double dz_a;
+  double dz_b;
+  // center status
+  Eigen::Vector3d center_position;
+  Eigen::Vector3d center_velocity;
+  double center_yaw;
+  double center_vyaw;
+  TargetStatus predict(double dt) const;
+};
+
 // NOTE: 装甲板类: 能从center_pos+yaw+r1/r2dz+armor_index构造position和yaw
 // 用在装甲板因子和弹道解算里
 // 另外弹道解算不要参数化了。给上限约束死了不说还很别扭()
@@ -48,6 +69,8 @@ struct Armor : public types::Armor {
   Armor(const Eigen::Vector3d &center_pos, double center_yaw, double radius_b,
         double dz, ArmorIndex armor_index);
 
+  static Armor fromTargetStatus(const TargetStatus &status,
+                                ArmorIndex armor_index, double dt_sec = 0.0);
   static Armor fromRobot(const Eigen::Vector3d &center_pos, double center_yaw,
                          double radius_a, double radius_b, double dz,
                          ArmorIndex armor_index);
@@ -56,7 +79,7 @@ struct Armor : public types::Armor {
                            ArmorIndex armor_index);
 
   // Eigen::Vector3d position;
-  double yaw;
+  gtsam::Rot2 yaw;
 
   // std::chrono::system_clock::time_point stamp;
   // std::string frame_id;

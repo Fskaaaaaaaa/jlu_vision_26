@@ -14,5 +14,6 @@ struct Armor {
   Vector4d orientation;
   float confidence;
   bool key_frame;
+  bool heart_beat;
 };
 } // namespace msgs

@@ -4,9 +4,10 @@
 
 #include <Eigen/Eigen>
 
+#include <optional>
 #include <tuple>
 
-namespace rm_ultra_tools {
+namespace tools {
 
 struct BallisticState2D {
   double distance;
@@ -33,19 +34,28 @@ struct BallisticParams {
   double barrel_length = 0.107;
 };
 
+struct PitchFlytime {
+  double pitch;
+  double fly_time;
+};
+
 class BallisticTrajectorySolver {
 public:
-  BallisticTrajectorySolver(const BallisticParams &param);
-  BallisticState2D getPos2DByT(const BallisticState2D &pos0, double time);
-  BallisticState2D rk45SingleStep(const BallisticState2D &pos0);
+  BallisticTrajectorySolver(const BallisticParams &params);
+  BallisticState2D getPos2DByT(const BallisticState2D &pos0, double time) const;
+  BallisticState2D rk45SingleStep(const BallisticState2D &pos0) const;
   Eigen::Vector3d getPosXyzByT(const BallisticState2D &pos0, double yaw,
-                               double time);
-  bool isHit(const rm_ultra_tools::BallisticState2D &bullet_pos2d,
-             const Eigen::Vector3d &target_pos3d);
-  bool isHit(const Eigen::Vector3d &bullet_pos2d,
-             const Eigen::Vector3d &target_pos3d);
-  BallisticState2D transformPos2DGimbalToBarrel(const BallisticState2D &pos2d);
+                               double time) const;
+  static bool isExceedTargetRange(const tools::BallisticState2D &bullet_pos2d,
+                                  const Eigen::Vector3d &target_pos3d);
+  static bool isExceedTargetRange(const Eigen::Vector3d &bullet_pos2d,
+                                  const Eigen::Vector3d &target_pos3d);
+  BallisticState2D
+  transformPos2DGimbalToBarrel(const BallisticState2D &pos2d) const;
+  std::optional<PitchFlytime> getAnalyticalAimingSolution(double v0, double d,
+                                                          double h) const;
 
-  BallisticParams params;
+  BallisticParams params_;
 };
-} // namespace rm_ultra_tools
+
+} // namespace tools

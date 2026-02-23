@@ -1,5 +1,8 @@
 // Copyright (c) 2026 I Love CCB. All Rights Reserved.
 #include "types.hpp"
+#include "types/ArmorType.hpp"
+
+#include <gtsam/geometry/Rot2.h>
 #include <utility>
 
 auto_aim::Armor::Armor(const types::Armor &armor) {
@@ -12,7 +15,7 @@ auto_aim::Armor::Armor(const types::Armor &armor) {
   this->position = armor.position;
   this->confidence = armor.confidence;
   this->key_frame = armor.key_frame;
-  this->yaw = armor.getRpy()(2);
+  this->yaw = gtsam::Rot2::fromAngle(armor.getRpy()(2));
 }
 
 auto_aim::Armor::Armor(const Eigen::Vector3d &center_pos, double center_yaw,
@@ -25,7 +28,20 @@ auto_aim::Armor::Armor(const Eigen::Vector3d &center_pos, double center_yaw,
   auto armor_x = center_pos.x() - radius_a * std::cos(armor_yaw);
   auto armor_y = center_pos.y() - radius_a * std::sin(armor_yaw);
   this->position = Eigen::Vector3d{armor_x, armor_y, center_pos.z()};
-  this->yaw = armor_yaw;
+  this->yaw = gtsam::Rot2::fromAngle(armor_yaw);
+}
+
+auto_aim::Armor auto_aim::Armor::fromTargetStatus(const TargetStatus &status,
+                                                  ArmorIndex armor_index,
+                                                  double dt_sec) {
+  auto _status = status.predict(dt_sec);
+  return _status.type == types::ArmorType::Outpost
+             ? Armor::fromOutpost(_status.center_position, _status.center_yaw,
+                                  _status.radius, _status.dz_a, _status.dz_b,
+                                  armor_index)
+             : Armor::fromRobot(_status.center_position, _status.center_yaw,
+                                _status.radius_a, _status.radius_b, _status.dz,
+                                armor_index);
 }
 
 auto_aim::Armor::Armor(const Eigen::Vector3d &center_pos, double center_yaw,
@@ -38,7 +54,7 @@ auto_aim::Armor::Armor(const Eigen::Vector3d &center_pos, double center_yaw,
   auto armor_x = center_pos.x() - radius_b * std::cos(armor_yaw);
   auto armor_y = center_pos.y() - radius_b * std::sin(armor_yaw);
   this->position = Eigen::Vector3d{armor_x, armor_y, center_pos.z() + dz};
-  this->yaw = armor_yaw;
+  this->yaw = gtsam::Rot2::fromAngle(armor_yaw);
 }
 
 auto_aim::Armor auto_aim::Armor::fromRobot(const Eigen::Vector3d &center_pos,
@@ -55,7 +71,7 @@ auto_aim::Armor auto_aim::Armor::fromRobot(const Eigen::Vector3d &center_pos,
   auto armor_y = center_pos.y() - radius_b * std::sin(armor_yaw);
   Armor armor;
   armor.position = Eigen::Vector3d{armor_x, armor_y, center_pos.z() + dz};
-  armor.yaw = armor_yaw;
+  armor.yaw = gtsam::Rot2::fromAngle(armor_yaw);
   return armor;
 }
 
@@ -75,6 +91,13 @@ auto_aim::Armor auto_aim::Armor::fromOutpost(const Eigen::Vector3d &center_pos,
                                             : dz_b;
   Armor armor;
   armor.position = Eigen::Vector3d{armor_x, armor_y, center_pos.z() + dz};
-  armor.yaw = armor_yaw;
+  armor.yaw = gtsam::Rot2::fromAngle(armor_yaw);
   return armor;
+}
+
+auto_aim::TargetStatus auto_aim::TargetStatus::predict(double dt) const {
+  TargetStatus status = *this;
+  status.center_position = this->center_position + this->center_velocity * dt;
+  status.center_yaw = this->center_yaw + this->center_vyaw * dt;
+  return status;
 }

@@ -3,6 +3,8 @@
 #include "types.hpp"
 
 #include <gtsam/base/Vector.h>
+#include <gtsam/geometry/Point3.h>
+#include <gtsam/geometry/Rot2.h>
 
 auto_aim::TranslationFactor::TranslationFactor(
     const gtsam::SharedNoiseModel &model, gtsam::Key x_pre, gtsam::Key v_pre,
@@ -23,12 +25,12 @@ gtsam::Vector auto_aim::TranslationFactor::evaluateError(
   return error;
 }
 
-auto_aim::RotationFactor::RotationFactor(const gtsam::SharedNoiseModel &model,
-                                         gtsam::Key r_pre, gtsam::Key w_pre,
-                                         gtsam::Key r_cur, double dt)
+auto_aim::YawFactor::YawFactor(const gtsam::SharedNoiseModel &model,
+                               gtsam::Key r_pre, gtsam::Key w_pre,
+                               gtsam::Key r_cur, double dt)
     : Base(model, r_pre, w_pre, r_cur), dt_(dt) {}
 
-gtsam::Vector auto_aim::RotationFactor::evaluateError(
+gtsam::Vector auto_aim::YawFactor::evaluateError(
     const gtsam::Rot2 &r_pre, const double &w_pre, const gtsam::Rot2 &r_cur,
     gtsam::OptionalMatrixType H1, gtsam::OptionalMatrixType H2,
     gtsam::OptionalMatrixType H3) const {
@@ -58,14 +60,14 @@ gtsam::Vector auto_aim::VelocityFactor::evaluateError(
   return error;
 }
 
-auto_aim::OmegaFactor::OmegaFactor(const gtsam::SharedNoiseModel &model,
-                                   gtsam::Key w_pre, gtsam::Key w_cur)
+auto_aim::VyawFactor::VyawFactor(const gtsam::SharedNoiseModel &model,
+                                 gtsam::Key w_pre, gtsam::Key w_cur)
     : Base(model, w_pre, w_cur) {}
 
 gtsam::Vector
-auto_aim::OmegaFactor::evaluateError(const double &w_pre, const double &w_cur,
-                                     gtsam::OptionalMatrixType H1,
-                                     gtsam::OptionalMatrixType H2) const {
+auto_aim::VyawFactor::evaluateError(const double &w_pre, const double &w_cur,
+                                    gtsam::OptionalMatrixType H1,
+                                    gtsam::OptionalMatrixType H2) const {
   gtsam::Vector1 error{w_cur - w_pre};
   if (H1)
     *H1 = -gtsam::Matrix1::Identity();
@@ -79,23 +81,33 @@ auto_aim::ArmorRadiusAFactor::ArmorRadiusAFactor(
     gtsam::Key x_cur, const Eigen::Vector3d &obs_armor_position,
     double obs_armor_yaw, ArmorIndex armor_index)
     : Base(model, rad_a, rot_cur, x_cur),
-      obs_armor_position_(obs_armor_position), obs_armor_yaw_(obs_armor_yaw),
+      obs_armor_position_(obs_armor_position),
+      obs_armor_yaw_(gtsam::Rot2::fromAngle(obs_armor_yaw)),
       armor_index_(armor_index) {}
 
 gtsam::Vector auto_aim::ArmorRadiusAFactor::evaluateError(
-    const double &ra, const gtsam::Rot2 &rotation, const gtsam::Vector3 &center,
+    const double &ra, const gtsam::Rot2 &rotation, const gtsam::Point3 &center,
     gtsam::OptionalMatrixType H1, gtsam::OptionalMatrixType H2,
     gtsam::OptionalMatrixType H3) const {
   Armor armor{center, rotation.theta(), ra, armor_index_};
-  gtsam::Vector3 pos_err = obs_armor_position_ - armor.position;
-  double yaw_err = obs_armor_yaw_ - armor.yaw;
+  gtsam::Vector3 pos_err = armor.position - obs_armor_position_;
+  auto yaw_err = obs_armor_yaw_.localCoordinates(armor.yaw).x();
   gtsam::Vector4 error{pos_err.x(), pos_err.y(), pos_err.z(), yaw_err};
+  // HACK: 注意armor.yaw是直接由rotation计算来的，所以算雅可比直接用了
+  // NOTE: 注意error减去的obs相当于常数，故相当于求armor(xyzyaw)对输入的雅可比
   if (H1) {
-    // TODO
+    (*H1) = (gtsam::Matrix(4, 1) << -std::cos(armor.yaw.theta()),
+             -std::sin(armor.yaw.theta()), 0.0, 0.0)
+                .finished();
   }
   if (H2) {
+    (*H2) = (gtsam::Matrix(4, 1) << ra * std::sin(armor.yaw.theta()),
+             -ra * std::cos(armor.yaw.theta()), 0.0, 1.0)
+                .finished();
   }
   if (H3) {
+    (*H3) =
+        (gtsam::Matrix(4, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0).finished();
   }
   return error;
 }
@@ -106,26 +118,38 @@ auto_aim::ArmorRadiusBDZFactor::ArmorRadiusBDZFactor(
     const Eigen::Vector3d &obs_armor_position, double obs_armor_yaw,
     ArmorIndex armor_index)
     : Base(model, rad_b, dz, rot_cur, x_cur),
-      obs_armor_position_(obs_armor_yaw), obs_armor_yaw_(obs_armor_yaw),
+      obs_armor_position_(obs_armor_yaw),
+      obs_armor_yaw_(gtsam::Rot2::fromAngle(obs_armor_yaw)),
       armor_index_(armor_index) {}
 
 gtsam::Vector auto_aim::ArmorRadiusBDZFactor::evaluateError(
     const double &rb, const double &dz, const gtsam::Rot2 &rotation,
-    const gtsam::Vector3 &center, gtsam::OptionalMatrixType H1,
+    const gtsam::Point3 &center, gtsam::OptionalMatrixType H1,
     gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
     gtsam::OptionalMatrixType H4) const {
   Armor armor{center, rotation.theta(), rb, dz, armor_index_};
-  gtsam::Vector3 pos_err = obs_armor_position_ - armor.position;
-  double yaw_err = obs_armor_yaw_ - armor.yaw;
+  gtsam::Vector3 pos_err = armor.position - obs_armor_position_;
+  auto yaw_err = obs_armor_yaw_.localCoordinates(armor.yaw).x();
   gtsam::Vector4 error{pos_err.x(), pos_err.y(), pos_err.z(), yaw_err};
+  // auto armor_x = center_pos.x() - radius_b * std::cos(armor_yaw);
+  // auto armor_y = center_pos.y() - radius_b * std::sin(armor_yaw);
+  // this->position = Eigen::Vector3d{armor_x, armor_y, center_pos.z() + dz};
   if (H1) {
-    // TODO
+    (*H1) = (gtsam::Matrix(4, 1) << -std::cos(armor.yaw.theta()),
+             -std::sin(armor.yaw.theta()), 0.0, 0.0)
+                .finished();
   }
   if (H2) {
+    (*H2) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 1.0, 0.0).finished();
   }
   if (H3) {
+    (*H3) = (gtsam::Matrix(4, 1) << rb * std::sin(armor.yaw.theta()),
+             -rb * std::cos(armor.yaw.theta()), 0.0, 1.0)
+                .finished();
   }
   if (H4) {
+    (*H3) =
+        (gtsam::Matrix(4, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0).finished();
   }
   return error;
 }

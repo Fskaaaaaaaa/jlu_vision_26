@@ -24,7 +24,8 @@ struct Armor {
   Eigen::Quaterniond orientation;
   Eigen::Vector3d position;
   float confidence;
-  bool key_frame; // 是否为关键帧（由pca和ba共同判断）
+  bool key_frame;  // NOTE:是否为关键帧（由pca和ba共同判断）
+  bool heart_beat; // NOTE:是否为用来驱动tracker的心跳空数据
 };
 
 } // namespace types

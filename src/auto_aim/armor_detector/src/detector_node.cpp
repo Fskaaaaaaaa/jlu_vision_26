@@ -175,9 +175,12 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
     armor.key_frame = pca_success && ba_success;
     return false;
   });
-  // NOTE: 直接发布装甲板
-  this->publishArmors(armors);
-  LOG_TRACE_L1(logger_, "{} armor(s) published.", armors.size());
+  // NOTE: 发布装甲板或心跳信号
+  if (!armors.empty()) {
+    this->publishArmors(armors);
+  } else {
+    this->publishHeartbeatArmor(stamp);
+  }
   if (configs_.show_optimize_result)
     for (const auto &armor : armors)
       this->drawArmor(armor, result_img, tools::Color::bgr::GREEN);
@@ -204,10 +207,24 @@ void auto_aim::DetectorNode::publishArmors(const std::vector<Armor> &armors) {
           sample->orientation.z = armor.orientation.z();
           sample->confidence = armor.confidence;
           sample->key_frame = armor.key_frame;
+          sample->heart_beat = false;
           sample.publish();
+          LOG_TRACE_L1(logger_, "{} armor(s) published.", armors.size());
         })
         .or_else([&](auto) { LOG_ERROR(logger_, "armor publish failed!"); });
   }
+}
+
+void auto_aim::DetectorNode::publishHeartbeatArmor(
+    const std::chrono::system_clock::time_point &stamp) {
+  this->armor_pub_.loan()
+      .and_then([&](iox::popo::Sample<msgs::Armor, msgs::Header> &sample) {
+        sample.getUserHeader().stamp_ns = tools::chronoPointToNanoSec(stamp);
+        sample->heart_beat = true;
+        sample.publish();
+        LOG_TRACE_L1(logger_, "heart_beat published.");
+      })
+      .or_else([&](auto) { LOG_ERROR(logger_, "heart_beat publish failed!"); });
 }
 
 void auto_aim::DetectorNode::drawArmor(const Armor &armor, cv::Mat &image,

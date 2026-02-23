@@ -6,6 +6,7 @@
 #include <tuple>
 #include <vector>
 
+[[deprecated]]
 types::Target::Target(
     const iox::popo::Sample<const msgs::Target, const msgs::Header> &sample)
 

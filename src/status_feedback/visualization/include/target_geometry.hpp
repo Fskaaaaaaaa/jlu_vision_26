@@ -17,7 +17,8 @@
 #include <set>
 
 namespace fb {
-class TargetGeometry {
+
+class [[deprecated]] TargetGeometry {
 public:
   TargetGeometry(quill::Logger *logger, const TargetGeometryConfig &config);
   void

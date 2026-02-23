@@ -5,7 +5,8 @@
 
 #include "iox/variant.hpp"
 namespace msgs {
-struct Target {
+
+struct [[deprecated]] Target {
   int type;
   iox::variant<BaseKinematicFunc, RobotKinematicFunc, OutpostKinematicFunc,
                SmallBuffKinematicFunc, BigBuffKinematicFunc>

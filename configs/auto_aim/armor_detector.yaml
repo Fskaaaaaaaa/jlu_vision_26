@@ -1,4 +1,4 @@
-log_level: Error
+log_level: Info
 camera_params:
   exposure_time: 2500
   gain: 15.0

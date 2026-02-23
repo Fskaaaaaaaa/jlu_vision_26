@@ -11,7 +11,7 @@
 #include <functional>
 #include <vector>
 namespace types {
-enum class TargetType {
+enum class [[deprecated]] TargetType {
   BigArmorRobot,
   SmallArmorRobot,
   Outpost,
@@ -19,7 +19,7 @@ enum class TargetType {
   SmallBuff,
   BigBuff,
 };
-struct Target {
+struct [[deprecated]] Target {
   Target(
       const iox::popo::Sample<const msgs::Target, const msgs::Header> &sample);
   std::string frame_id;

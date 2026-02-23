@@ -4,11 +4,11 @@
 
 namespace msgs {
 
-struct BaseKinematicFunc {
+struct [[deprecated]] BaseKinematicFunc {
   Vector3d center_xyz;
   RpyRadian center_rpy;
 };
-struct RobotKinematicFunc {
+struct [[deprecated]] RobotKinematicFunc {
   Vector3d center_xyz;
   Vector3d linear_velocity;
   RpyRadian center_rpy;
@@ -17,7 +17,7 @@ struct RobotKinematicFunc {
   double radius2;
   double dz;
 };
-struct OutpostKinematicFunc {
+struct [[deprecated]] OutpostKinematicFunc {
   Vector3d center_xyz;
   Vector3d linear_velocity;
   RpyRadian center_rpy;
@@ -26,14 +26,14 @@ struct OutpostKinematicFunc {
   double dz1;
   double dz2;
 };
-struct SmallBuffKinematicFunc {
+struct [[deprecated]] SmallBuffKinematicFunc {
   Vector3d center_xyz;
   Vector3d linear_velocity;
   RpyRadian center_rpy;
   RpyRadian angular_velocity;
   double radius;
 };
-struct BigBuffKinematicFunc {
+struct [[deprecated]] BigBuffKinematicFunc {
   Vector3d center_xyz;
   double initial_phase;
   // TODO

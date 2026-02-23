@@ -17,12 +17,12 @@ bool auto_aim::LightCornerCorrector::correctCorners(Armor &armor,
   auto process_lightbar = [this](LightBar &lightbar,
                                  const cv::Mat &gray_img) -> bool {
     if (lightbar.width <= this->config_.pass_optimize_lightbar_width) {
-      LOG_WARNING(logger_, "[pca]: lightbar width too short!");
+      LOG_DEBUG(logger_, "[pca]: lightbar width too short!");
       return false;
     }
     auto axis = this->findSymmetryAxis(gray_img, lightbar);
     if (!axis.has_value()) {
-      LOG_WARNING(logger_, "[pca]: axis finding failed!");
+      LOG_DEBUG(logger_, "[pca]: axis finding failed!");
       return false;
     }
     lightbar.center = axis->centroid;
@@ -71,7 +71,7 @@ auto_aim::LightCornerCorrector::findSymmetryAxis(const cv::Mat &gray_img,
   float mean_val = cv::mean(roi)[0];
   // NOTE: early return 非灯条的情况（过暗）
   if (mean_val <= config_.lightbar_min_mean_brightness) {
-    LOG_WARNING(logger_, "[pca]: lightbar too dark!");
+    LOG_DEBUG(logger_, "[pca]: lightbar too dark!");
     return std::nullopt;
   }
   roi.convertTo(roi, CV_32F);
@@ -167,7 +167,7 @@ std::optional<cv::Point2f> auto_aim::LightCornerCorrector::findCorner(
     }
   }
   if (candidates.empty()) {
-    LOG_WARNING(logger_, "[pca]: find corner failed!");
+    LOG_DEBUG(logger_, "[pca]: find corner failed!");
     return std::nullopt;
   }
   cv::Point2f result =

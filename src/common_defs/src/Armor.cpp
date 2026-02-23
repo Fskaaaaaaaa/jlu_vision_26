@@ -19,6 +19,7 @@ types::Armor::Armor(
   this->position.z() = sample->position.z;
   this->confidence = sample->confidence;
   this->key_frame = sample->key_frame;
+  this->heart_beat = sample->heart_beat;
 }
 
 Eigen::Vector3d types::Armor::getRpy() const {

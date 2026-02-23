@@ -2,7 +2,6 @@
 #include "transform_aggregator.hpp"
 #include "basic/time_tools.hpp"
 #include "configs.hpp"
-#include "iceoryx_posh/internal/popo/base_subscriber.hpp"
 #include "imu_integrator.hpp"
 #include "math/angle_tools.hpp"
 #include "msgs/Basic.hpp"
@@ -11,6 +10,7 @@
 #include "msgs/Transform.hpp"
 #include "types/ImuData.hpp"
 
+#include "iceoryx_posh/internal/popo/base_subscriber.hpp"
 #include "iceoryx_posh/popo/sample.hpp"
 #include "iox/string.hpp"
 #include "quill/LogMacros.h"

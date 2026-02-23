@@ -3,7 +3,7 @@
 #include <cmath>
 #include <tuple>
 #include <utility>
-namespace rm_ultra_tools {
+namespace tools {
 namespace ballistic_models {
 
 auto rk45SingleStep(auto &&pos2d, auto &&time_step, auto &&k, auto &&g) {
@@ -120,4 +120,4 @@ auto transformPos2DGimbelToBarrel(auto &&distance, auto &&height,
 }
 
 } // namespace ballistic_models
-} // namespace rm_ultra_tools
+} // namespace tools

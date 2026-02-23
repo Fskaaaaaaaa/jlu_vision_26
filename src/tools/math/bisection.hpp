@@ -1,7 +1,8 @@
+// 从蛟龙开源里抄的
 #pragma once
 
 #include <utility>
-namespace rm_ultra_tools {
+namespace tools {
 
 class Bisection {
 public:
@@ -38,4 +39,4 @@ public:
     return std::make_pair((left + right) / ValueT(2), right - left);
   }
 };
-} // namespace rm_ultra_tools
+} // namespace tools
