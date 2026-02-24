@@ -1,4 +1,4 @@
-log_level: Info
+log_level: Error
 # camera_type: galaxy
 camera_type: video
 camera_name: camera0

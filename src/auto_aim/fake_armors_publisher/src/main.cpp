@@ -75,7 +75,12 @@ int main(int argc, char *argv[]) {
   int knob_x = cx;
   int knob_y = cy;
   bool dragging = false;
-  auto_aim::RobotContrl contrl;
+  auto_aim::RobotContrl contrl{
+      .traction_direction = {{0, 0}},
+      .spin_status = {std::nullopt},
+      .const_speed_spin = {false},
+      .hide_armors = {false},
+  };
   auto_aim::Robot robot{logger, configs.robot_conf, contrl};
   auto screen = ScreenInteractive::TerminalOutput();
 
@@ -119,11 +124,15 @@ int main(int argc, char *argv[]) {
         text("vyaw : " + std::to_string(robot.getState().vel_yaw)));
     values.push_back(
         text("ayaw : " + std::to_string(robot.getState().acc_yaw)));
+    values.push_back(
+        text("disappear : " + std::to_string(contrl.hide_armors.load())));
     values.push_back(text(" "));
     values.push_back(text("Drag the joystick to move robot"));
     values.push_back(text("Prase r to reset robot"));
     values.push_back(text("Prase s to start/stop spin"));
     values.push_back(text("Prase space to change spin direction"));
+    values.push_back(text("Prase c to keep spin speed"));
+    values.push_back(text("Prase d to make armors disappear"));
     joystick_with_values.push_back(vbox(std::move(values)));
     return hbox(std::move(joystick_with_values));
   });
@@ -131,6 +140,26 @@ int main(int argc, char *argv[]) {
     if (e == Event::Character('r')) {
       robot.resetStatus();
       LOG_DEBUG(logger, "robot reset!");
+      return true;
+    }
+    if (e == Event::Character('c')) {
+      if (contrl.const_speed_spin.load()) {
+        contrl.const_speed_spin.store(false);
+        LOG_DEBUG(logger, "robot stop const_speed_spin!");
+      } else {
+        contrl.const_speed_spin.store(true);
+        LOG_DEBUG(logger, "robot start const_speed_spin!");
+      }
+      return true;
+    }
+    if (e == Event::Character('d')) {
+      if (contrl.hide_armors.load()) {
+        contrl.hide_armors.store(false);
+        LOG_DEBUG(logger, "hide_armors = false");
+      } else {
+        contrl.hide_armors.store(true);
+        LOG_DEBUG(logger, "hide_armors = true");
+      }
       return true;
     }
     if (e == Event::Character('s')) {

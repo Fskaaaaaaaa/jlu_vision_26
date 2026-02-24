@@ -4,13 +4,13 @@
 #include "basic/colors.hpp"
 #include "basic/plotter.hpp"
 #include "configs.hpp"
+#include "hardware/gimbal_info_listener.hpp"
 #include "hardware/image_listener.hpp"
 #include "hardware/task_mode_listener.hpp"
 #include "msgs/AimCommand.hpp"
 #include "msgs/Armor.hpp"
 #include "msgs/Header.hpp"
 #include "msgs/Image.hpp"
-#include "opencv2/core/types.hpp"
 #include "planner.hpp"
 #include "target.hpp"
 #include "transform/tf_listener.hpp"
@@ -19,8 +19,8 @@
 
 #include "iceoryx_posh/popo/publisher.hpp"
 #include "iceoryx_posh/popo/subscriber.hpp"
+#include "opencv2/core/types.hpp"
 #include "quill/Logger.h"
-#include "types/CameraInfo.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -55,6 +55,7 @@ private:
   hardware::TaskModeListener task_mode_listener_;
   tf::TransformListener tf_listener_;
   fast_tf::detail::transform_buffer tf_buffer_;
+  hardware::GimbalInfoListener gimbal_listener_;
   iox::popo::Publisher<msgs::AimCommand, msgs::Header> aimcommand_pub_;
 
   std::unordered_map<types::ArmorType, std::unique_ptr<Target>> targets_;

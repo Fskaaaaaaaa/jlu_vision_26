@@ -53,13 +53,13 @@ void tf::TransformListener::onTransFormReceivedCallback(
           if (instance_string == iox::capro::IdString_t("static")) {
             self->buffer_.set(tf.parent_frame_id, tf.child_frame_id, tf.stamp,
                               tf.getIsometry3d(), true);
-            LOG_DEBUG(self->logger_, "recieve static tf msg from {} to {}",
-                      tf.parent_frame_id, tf.child_frame_id);
+            LOG_TRACE_L2(self->logger_, "recieve static tf msg from {} to {}",
+                         tf.parent_frame_id, tf.child_frame_id);
           } else if (instance_string == iox::capro::IdString_t("dynamic")) {
             self->buffer_.set(tf.parent_frame_id, tf.child_frame_id, tf.stamp,
                               tf.getIsometry3d(), false);
-            LOG_DEBUG(self->logger_, "recieve dynamic tf msg from {} to {}",
-                      tf.parent_frame_id, tf.child_frame_id);
+            LOG_TRACE_L2(self->logger_, "recieve dynamic tf msg from {} to {}",
+                         tf.parent_frame_id, tf.child_frame_id);
           }
         } catch (const std::runtime_error &e) {
           LOG_CRITICAL(self->logger_, "runtime_error: {}", e.what());

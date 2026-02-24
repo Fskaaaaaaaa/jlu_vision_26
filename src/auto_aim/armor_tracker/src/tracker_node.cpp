@@ -1,10 +1,10 @@
 // Copyright (c) 2026 I dont have 30k. All Rights Reserved.
 #include "tracker_node.hpp"
-#include "Eigen/src/Geometry/Quaternion.h"
 #include "basic/colors.hpp"
 #include "basic/image_tools.hpp"
 #include "configs.hpp"
 #include "hardware/cam_info_listener.hpp"
+#include "hardware/gimbal_info_listener.hpp"
 #include "hardware/image_listener.hpp"
 #include "hardware/task_mode_listener.hpp"
 #include "math/angle_tools.hpp"
@@ -19,6 +19,9 @@
 #include "types/Armor.hpp"
 #include "types/ArmorPoints.hpp"
 #include "types/ArmorType.hpp"
+#include "types/EnemyColor.hpp"
+#include "types/IceoryxServiceDescription.hpp"
+#include "types/TaskMode.hpp"
 
 #include "iceoryx_posh/internal/popo/base_subscriber.hpp"
 #include "iceoryx_posh/popo/publisher.hpp"
@@ -29,16 +32,13 @@
 #include "opencv2/highgui.hpp"
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
-#include "types/EnemyColor.hpp"
-#include "types/IceoryxServiceDescription.hpp"
-#include "types/TaskMode.hpp"
 #include <Eigen/Dense>
-#include <algorithm>
-#include <cstdlib>
 #include <opencv2/core/eigen.hpp>
 
+#include <algorithm>
 #include <array>
 #include <chrono>
+#include <cstdlib>
 #include <exception>
 #include <memory>
 #include <mutex>
@@ -51,11 +51,12 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       armors_sub_(types::IceoryxServiceDescription{configs_.armors_sub_topic}
                       .description),
       task_mode_listener_(logger_, types::TaskMode::Armor),
-      tf_listener_(logger_, tf_buffer_),
+      tf_listener_(logger_, tf_buffer_), gimbal_listener_(logger_),
       aimcommand_pub_(
           types::IceoryxServiceDescription{configs_.serial_topic}.description),
       planner_(logger_, configs_.planner_conf) {
   LOG_INFO(logger_, "start tracker node!");
+  tf_listener_.init();
   for (auto type : std::array{
            types::ArmorType::One,
            types::ArmorType::Two,
@@ -88,8 +89,8 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       }
       auto [status, stamp] =
           targets_.at(selected_target_.load())->getStatusStamp();
-      // TODO 弹速
-      auto cmd = planner_.plan(status, stamp, 0);
+      auto bullet_speed = gimbal_listener_.getLatestInfo().bullet_speed;
+      auto cmd = planner_.plan(status, stamp, bullet_speed);
       // NOTE: selected_target的更新由装甲板订阅回调驱动（选择光心最近）
       // 当不控制云台时（可能是track超时或弹道解算异常），放弃锁定这个目标
       if (!cmd.control)
@@ -203,12 +204,14 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                       tools::Color::bgr::GREEN);
           }
         }
-        cv::imshow("tracker", image);
+        if (configs_.show_image)
+          cv::imshow("tracker", image);
         cv::waitKey(10); // 100fps
       } // end of while
       LOG_INFO(logger_, "image_show_thread stop!");
     }};
   }
+  LOG_INFO(logger_, "Tracker node initialization complete!");
 }
 
 void auto_aim::TrackerNode::onArmorsReceivedCallback(
@@ -255,7 +258,8 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
           Eigen::Quaterniond{armor_pose_odom.rotation().matrix()};
       return false;
     } catch (const std::exception &e) {
-      LOG_ERROR(self->logger_, "{}", e.what());
+      LOG_ERROR(self->logger_, "tf from {} to {} failed: {}", armor.frame_id,
+                self->configs_.odom_frame_id, e.what());
       return true;
     }
   });
@@ -333,8 +337,8 @@ void auto_aim::TrackerNode::drawTarget(
                 image_stamp - stamp)
                 .count();
   if (dt < 0)
-    LOG_WARNING(logger_, "stamp image is before stamp target {} last track.",
-                rfl::enum_to_string(target.type_));
+    LOG_TRACE_L1(logger_, "stamp image is before stamp target {} last track.",
+                 rfl::enum_to_string(target.type_));
   auto status_predict = status_opt.value().predict(dt);
   // 绘制所有装甲板
   for (const auto &armor : status_predict.armors())

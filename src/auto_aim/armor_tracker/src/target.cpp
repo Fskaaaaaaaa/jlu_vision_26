@@ -127,9 +127,10 @@ auto_aim::Target::track(const std::vector<types::Armor> &armors,
                     1e6;
     if (type_ == types::ArmorType::Base)
       return updateBase(selected_armors);
-    return type_ == types::ArmorType::Outpost
-               ? updateOutpost(selected_armors, dt_sec)
-               : updateRobot(selected_armors, dt_sec);
+    auto status = (type_ == types::ArmorType::Outpost)
+                      ? updateOutpost(selected_armors, dt_sec)
+                      : updateRobot(selected_armors, dt_sec);
+    return status;
   } catch (const std::exception &e) {
     LOG_ERROR(logger_, "[Target {}]: {}. reset.", rfl::enum_to_string(type_),
               e.what());
@@ -186,6 +187,7 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
   // NOTE: 车和前哨要初始化的变量不一样，就不往成员里写了
   auto do_init = [&](const Armor &armor) {
     // 初始化ra、rb、dz
+    // BUG: 会重复添加常量
     values.insert(A(0), config_.robot.default_radius_a);
     values.insert(B(0), config_.robot.default_radius_b);
     values.insert(Z(0), config_.robot.default_dz);
@@ -256,7 +258,7 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
       status_.center_position + status_.center_velocity * dt;
   double predict_yaw = status_.center_yaw + status_.center_vyaw * dt;
   values.insert(X(k_), predict_position);
-  values.insert(R(k_), predict_yaw);
+  values.insert(R(k_), gtsam::Rot2::fromAngle(predict_yaw));
   values.insert(V(k_), status_.center_velocity);
   values.insert(W(k_), status_.center_vyaw);
 
@@ -268,6 +270,7 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
     status_.center_velocity = isam2_.calculateEstimate<gtsam::Vector3>(V(k_));
     status_.center_yaw = isam2_.calculateEstimate<gtsam::Rot2>(R(k_)).theta();
     status_.center_vyaw = isam2_.calculateEstimate<double>(W(k_));
+    k_++;
     status_.radius_a = isam2_.calculateEstimate<double>(A(0));
     status_.radius_b = isam2_.calculateEstimate<double>(B(0));
     status_.dz = isam2_.calculateEstimate<double>(Z(0));

@@ -45,7 +45,6 @@ struct ArmorParams {
 };
 struct TraditionalConfig {
   int binary_thres;
-  types::EnemyColor detect_color;
   LightParams light_params;
   ArmorParams armor_params;
 };
@@ -90,8 +89,7 @@ struct DetectorConfigs {
   bool show_optimize_result; // PCA、BA后的结果，绿色
   bool show_pnp_result;      // 绘制PNP两个解的坐标轴
   bool step_by_step_debug;
-  // confs::IceoryxServiceDescription image_topic;
-  // confs::IceoryxServiceDescription camera_param_topic;
+  types::EnemyColor default_enemy_color;
   std::string camera_name; // NOTE: 这些话题都是固定的，只要相机名称就够了
   confs::IceoryxServiceDescription armors_topic;
   YOLOVersion yolo_version;

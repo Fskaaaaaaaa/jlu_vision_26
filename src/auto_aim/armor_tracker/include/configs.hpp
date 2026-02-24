@@ -98,6 +98,7 @@ struct PlannerConfig {
 struct TrackerConfigs {
   quill::LogLevel log_level;
   bool debug_mode;
+  bool show_image;
   bool publish_target_armors;
   double tf_query_tolerance_ms;
   std::string camera_name;

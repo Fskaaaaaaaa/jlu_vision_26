@@ -6,6 +6,7 @@
 #include "detector.hpp"
 #include "hardware/cam_info_listener.hpp"
 #include "hardware/camera_params_changer.hpp"
+#include "hardware/enemy_color_listener.hpp"
 #include "hardware/image_listener.hpp"
 #include "hardware/task_mode_listener.hpp"
 #include "lightbar_corrector.hpp"
@@ -68,6 +69,10 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
         std::make_unique<LightCornerCorrector>(logger_, configs_.pca_conf);
     LOG_INFO(logger_, "use PCA corrector.");
   }
+  // 初始化敌方颜色
+  self_color_ =
+      hardware::EnemyColorListener{logger_, configs_.default_enemy_color}
+          .getSelfColor();
   // 获取相机内外参并初始化pnp和ba
   auto camera_info =
       hardware::CameraInfoListener{logger_, configs_.camera_name}.get();
@@ -155,6 +160,8 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
   cv::cvtColor(bgr_image, gray_img, cv::COLOR_BGR2GRAY);
   // HACK: 用eraseif遍历处理装甲板
   std::erase_if(armors, [&](Armor &armor) -> bool {
+    if (armor.color == self_color_)
+      return true; // 删除友军
     armor.frame_id = frame_id;
     armor.stamp = stamp;
     bool pca_success{true}, ba_success{true};
@@ -166,7 +173,7 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
     auto pnp_opt = this->pnp_solver_->solvePnP(armor);
     if (!pnp_opt.has_value()) {
       LOG_WARNING(logger_, "PNP failed!");
-      return true;
+      return true; // 删除无解装甲板
     }
     if (configs_.show_pnp_result)
       this->pnp_solver_->drawFrameAxes(pnp_opt.value(), result_img);
@@ -179,7 +186,7 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
   if (!armors.empty()) {
     this->publishArmors(armors);
   } else {
-    this->publishHeartbeatArmor(stamp);
+    this->publishHeartbeat(stamp);
   }
   if (configs_.show_optimize_result)
     for (const auto &armor : armors)
@@ -215,7 +222,7 @@ void auto_aim::DetectorNode::publishArmors(const std::vector<Armor> &armors) {
   }
 }
 
-void auto_aim::DetectorNode::publishHeartbeatArmor(
+void auto_aim::DetectorNode::publishHeartbeat(
     const std::chrono::system_clock::time_point &stamp) {
   this->armor_pub_.loan()
       .and_then([&](iox::popo::Sample<msgs::Armor, msgs::Header> &sample) {

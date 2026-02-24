@@ -29,6 +29,8 @@ struct RobotContrl {
   std::atomic<types::Vector2d> traction_direction;
   std::atomic<std::optional<bool>> spin_status;
   // 不旋转、顺时针、逆时针
+  std::atomic<bool> const_speed_spin;
+  std::atomic<bool> hide_armors;
 };
 
 class Robot {

@@ -15,4 +15,4 @@ robot_conf:
   camera_pos: [0.,0.]
   pub_conf:
     service_instance_event: [armors, fake_ap, data]
-    frame_id: nan
+    frame_id: odom

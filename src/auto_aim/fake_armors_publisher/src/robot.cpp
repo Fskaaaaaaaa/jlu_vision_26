@@ -18,6 +18,7 @@
 #include <mutex>
 #include <numbers>
 #include <thread>
+#include <tuple>
 #include <vector>
 
 auto_aim::Robot::Robot(quill::Logger *logger, const RobotConfig &config,
@@ -97,6 +98,8 @@ std::vector<msgs::Armor> auto_aim::Robot::getArmorMsgsFromStatus() {
 }
 
 void auto_aim::Robot::publishArmors() {
+  if (atom_contrl_.hide_armors.load())
+    return;
   auto armors = this->getArmorMsgsFromStatus();
   for (auto &&armor : armors) {
     armor_pub_.loan()
@@ -135,8 +138,9 @@ void auto_aim::Robot::updateContrlPhysic() {
                 std::chrono::system_clock::now() - last_update_stamp_)
                 .count();
   this->last_update_stamp_ = std::chrono::system_clock::now();
-  auto [direction, spin] = std::pair{atom_contrl_.traction_direction.load(),
-                                     atom_contrl_.spin_status.load()};
+  auto [direction, spin, const_speed_spin] = std::tuple{
+      atom_contrl_.traction_direction.load(), atom_contrl_.spin_status.load(),
+      atom_contrl_.const_speed_spin.load()};
   auto [ap, bp] = std::pair{
       std::fabs(direction.x + direction.y) >= 1e-8
           ? (Eigen::Vector2d{direction.x, direction.y}.normalized() *
@@ -161,7 +165,7 @@ void auto_aim::Robot::updateContrlPhysic() {
                      0.5 * status_.linear_acceleration * std::pow(dt, 2);
   status_.linear_velocity =
       status_.linear_velocity + status_.linear_acceleration * dt;
-  status_.acc_yaw = bp + bf;
+  status_.acc_yaw = const_speed_spin ? 0 : bp + bf;
   status_.yaw = status_.yaw + status_.vel_yaw * dt +
                 0.5 * status_.acc_yaw * std::pow(dt, 2);
   status_.vel_yaw = status_.vel_yaw + status_.acc_yaw * dt;

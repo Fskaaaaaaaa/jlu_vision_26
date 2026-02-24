@@ -24,7 +24,7 @@ auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
     Eigen::Matrix<double, 2, 1> Q(config_.Q_yaw.data());
     Eigen::Matrix<double, 1, 1> R(config_.R_yaw);
     tiny_setup(&yaw_solver_, A, B, f, Q.asDiagonal(), R.asDiagonal(), 1.0, 2, 1,
-               trajectory_horizon_ * 2, 0);
+               trajectory_horizon_, 0);
 
     Eigen::MatrixXd x_min =
         Eigen::MatrixXd::Constant(2, trajectory_horizon_, -1e17);

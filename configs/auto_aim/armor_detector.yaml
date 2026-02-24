@@ -13,6 +13,7 @@ show_detect_result: true
 show_optimize_result: true
 show_pnp_result: true
 step_by_step_debug: false
+default_enemy_color: Red
 camera_name: camera0
 armors_topic:
   service: armors
@@ -28,7 +29,6 @@ yolo_conf:
   accept_thresh: 0.8
 trad_conf:
   binary_thres: 90
-  detect_color: Red
   light_params:
     min_ratio: 0.0001
     max_ratio: 1.0

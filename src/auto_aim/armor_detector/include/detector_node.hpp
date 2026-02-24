@@ -5,6 +5,7 @@
 #include "configs.hpp"
 #include "detector.hpp"
 #include "hardware/camera_params_changer.hpp"
+#include "hardware/enemy_color_listener.hpp"
 #include "hardware/image_listener.hpp"
 #include "hardware/task_mode_listener.hpp"
 #include "iceoryx_hoofs/cxx/string.hpp"
@@ -18,6 +19,7 @@
 
 #include "iceoryx_posh/popo/publisher.hpp"
 #include "quill/Logger.h"
+#include "types/EnemyColor.hpp"
 
 #include <chrono>
 #include <memory>
@@ -41,13 +43,13 @@ private:
               const std::string &frame_id,
               const std::chrono::system_clock::time_point &stamp);
   void publishArmors(const std::vector<Armor> &armors);
-  void
-  publishHeartbeatArmor(const std::chrono::system_clock::time_point &stamp);
+  void publishHeartbeat(const std::chrono::system_clock::time_point &stamp);
   void drawArmor(const Armor &armor, cv::Mat &image, const cv::Scalar &color,
                  bool draw_text = false);
 
   quill::Logger *logger_;
   DetectorConfigs configs_;
+  types::EnemyColor self_color_;
 
   hardware::CameraParamsChanger cam_params_changer_;
   std::unique_ptr<hardware::TaskModeListener> task_mode_listener_;
