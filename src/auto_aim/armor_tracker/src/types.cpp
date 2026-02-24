@@ -4,6 +4,7 @@
 
 #include <gtsam/geometry/Rot2.h>
 #include <utility>
+#include <vector>
 
 auto_aim::Armor::Armor(const types::Armor &armor) {
   this->stamp = armor.stamp;
@@ -35,6 +36,9 @@ auto_aim::Armor auto_aim::Armor::fromTargetStatus(const TargetStatus &status,
                                                   ArmorIndex armor_index,
                                                   double dt_sec) {
   auto _status = status.predict(dt_sec);
+  if (_status.type == types::ArmorType::Base)
+    return Armor::frmoBase(status.center_position, status.center_yaw,
+                           armor_index);
   return _status.type == types::ArmorType::Outpost
              ? Armor::fromOutpost(_status.center_position, _status.center_yaw,
                                   _status.radius, _status.dz_a, _status.dz_b,
@@ -42,6 +46,19 @@ auto_aim::Armor auto_aim::Armor::fromTargetStatus(const TargetStatus &status,
              : Armor::fromRobot(_status.center_position, _status.center_yaw,
                                 _status.radius_a, _status.radius_b, _status.dz,
                                 armor_index);
+}
+
+auto_aim::Armor auto_aim::Armor::frmoBase(const Eigen::Vector3d &center_pos,
+                                          double center_yaw,
+                                          ArmorIndex armor_index) {
+  if (armor_index != ArmorIndex::_0)
+    throw ArmorException(
+        "Invalid armor index: must be _0 in frmoBase constructor");
+  Armor armor;
+  armor.type = types::ArmorType::Base;
+  armor.position = center_pos;
+  armor.yaw = gtsam::Rot2::fromAngle(center_yaw);
+  return armor;
 }
 
 auto_aim::Armor::Armor(const Eigen::Vector3d &center_pos, double center_yaw,
@@ -90,6 +107,7 @@ auto_aim::Armor auto_aim::Armor::fromOutpost(const Eigen::Vector3d &center_pos,
             : armor_index == ArmorIndex::_1 ? dz_a
                                             : dz_b;
   Armor armor;
+  armor.type = types::ArmorType::Outpost;
   armor.position = Eigen::Vector3d{armor_x, armor_y, center_pos.z() + dz};
   armor.yaw = gtsam::Rot2::fromAngle(armor_yaw);
   return armor;
@@ -100,4 +118,21 @@ auto_aim::TargetStatus auto_aim::TargetStatus::predict(double dt) const {
   status.center_position = this->center_position + this->center_velocity * dt;
   status.center_yaw = this->center_yaw + this->center_vyaw * dt;
   return status;
+}
+
+std::vector<auto_aim::Armor> auto_aim::TargetStatus::armors() const {
+  const auto armor_idx_vec =
+      (type == types::ArmorType::Outpost)
+          ? std::vector{ArmorIndex::_0, ArmorIndex::_1, ArmorIndex::_2}
+      : (type == types::ArmorType::Base) ? std::vector{ArmorIndex::_0}
+                                         : std::vector{
+                                               ArmorIndex::_0,
+                                               ArmorIndex::_1,
+                                               ArmorIndex::_2,
+                                               ArmorIndex::_3,
+                                           };
+  std::vector<Armor> armors;
+  for (auto index : armor_idx_vec)
+    armors.emplace_back(Armor::fromTargetStatus(*this, index));
+  return armors;
 }

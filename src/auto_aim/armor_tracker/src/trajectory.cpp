@@ -3,7 +3,6 @@
 #include "math/angle_tools.hpp"
 #include "math/ballistic_trajectory.hpp"
 #include "types.hpp"
-#include "types/ArmorType.hpp"
 
 #include "quill/LogMacros.h"
 
@@ -64,8 +63,8 @@ auto_aim::Trajectory::resolvePitch(double bullet_speed, double target_distance,
   try {
     if (std::signbit(cost_function(search_range.min)) ==
         std::signbit(cost_function(search_range.max))) {
-      LOG_TRACE_L2(logger_,
-                   "aiming angle exceeding the maximum range of the gimbal");
+      LOG_WARNING(logger_,
+                  "aiming angle exceeding the maximum range of the gimbal");
       return std::nullopt;
     } else {
       result.pitch =
@@ -75,7 +74,7 @@ auto_aim::Trajectory::resolvePitch(double bullet_speed, double target_distance,
               .first;
     }
   } catch (const std::exception &e) {
-    LOG_TRACE_L2(logger_, "{}", e.what());
+    LOG_WARNING(logger_, "{}", e.what());
     return std::nullopt;
   }
   return result;
@@ -99,28 +98,26 @@ std::optional<auto_aim::YawPitchFlytime> auto_aim::Trajectory::resolveYawPitch(
   };
 }
 
-Eigen::Vector3d
-auto_aim::Trajectory::getSeletedArmorPosition(const TargetStatus &status,
-                                              double odom_x, double odom_y) {
-  auto armor_index_vec =
-      (status.type == types::ArmorType::Outpost)
-          ? std::vector{ArmorIndex::_0, ArmorIndex::_1, ArmorIndex::_2}
-          : std::vector{ArmorIndex::_0, ArmorIndex::_1, ArmorIndex::_2,
-                        ArmorIndex::_3};
-  std::vector<Armor> armors;
-  for (const auto index : armor_index_vec) {
-    armors.emplace_back(Armor::fromTargetStatus(status, index));
-  }
+auto_aim::Armor
+auto_aim::Trajectory::getClosestArmor(const TargetStatus &status, double odom_x,
+                                      double odom_y) {
+  auto armors = status.armors();
   std::sort(armors.begin(), armors.end(),
             [&](const Armor &a, const Armor &b) -> bool {
               auto distance_a =
                   std::hypot(a.position.x() - odom_x, a.position.y() - odom_y);
-
               auto distance_b =
                   std::hypot(b.position.x() - odom_x, b.position.y() - odom_y);
               return distance_a < distance_b;
             });
-  return armors.at(0).position;
+  // 因为armors由armor_index_vec生成，不用担心越界
+  return armors.at(0);
+}
+
+Eigen::Vector3d
+auto_aim::Trajectory::getSeletedArmorPosition(const TargetStatus &status,
+                                              double odom_x, double odom_y) {
+  return auto_aim::Trajectory::getClosestArmor(status, odom_x, odom_y).position;
 }
 
 std::optional<auto_aim::YawPitchFlytime> auto_aim::Trajectory::resolveTarget(
@@ -158,5 +155,7 @@ std::optional<auto_aim::YawPitchFlytime> auto_aim::Trajectory::resolveTarget(
              position)
                 .norm();
   }
+  LOG_TRACE_L1(logger_, "success solve YawPitchFlytime in {} iterations",
+               iteration_count);
   return result;
 }

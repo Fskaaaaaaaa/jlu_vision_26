@@ -54,9 +54,9 @@ gtsam::Vector auto_aim::VelocityFactor::evaluateError(
     gtsam::OptionalMatrixType H1, gtsam::OptionalMatrixType H2) const {
   gtsam::Vector3 error = r_cur - r_pre;
   if (H1)
-    *H1 = -gtsam::Matrix2::Identity();
+    *H1 = -gtsam::Matrix3::Identity();
   if (H2)
-    *H2 = gtsam::Matrix2::Identity();
+    *H2 = gtsam::Matrix3::Identity();
   return error;
 }
 
@@ -118,7 +118,7 @@ auto_aim::ArmorRadiusBDZFactor::ArmorRadiusBDZFactor(
     const Eigen::Vector3d &obs_armor_position, double obs_armor_yaw,
     ArmorIndex armor_index)
     : Base(model, rad_b, dz, rot_cur, x_cur),
-      obs_armor_position_(obs_armor_yaw),
+      obs_armor_position_(obs_armor_position),
       obs_armor_yaw_(gtsam::Rot2::fromAngle(obs_armor_yaw)),
       armor_index_(armor_index) {}
 
@@ -131,9 +131,6 @@ gtsam::Vector auto_aim::ArmorRadiusBDZFactor::evaluateError(
   gtsam::Vector3 pos_err = armor.position - obs_armor_position_;
   auto yaw_err = obs_armor_yaw_.localCoordinates(armor.yaw).x();
   gtsam::Vector4 error{pos_err.x(), pos_err.y(), pos_err.z(), yaw_err};
-  // auto armor_x = center_pos.x() - radius_b * std::cos(armor_yaw);
-  // auto armor_y = center_pos.y() - radius_b * std::sin(armor_yaw);
-  // this->position = Eigen::Vector3d{armor_x, armor_y, center_pos.z() + dz};
   if (H1) {
     (*H1) = (gtsam::Matrix(4, 1) << -std::cos(armor.yaw.theta()),
              -std::sin(armor.yaw.theta()), 0.0, 0.0)
@@ -148,7 +145,7 @@ gtsam::Vector auto_aim::ArmorRadiusBDZFactor::evaluateError(
                 .finished();
   }
   if (H4) {
-    (*H3) =
+    (*H4) =
         (gtsam::Matrix(4, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0).finished();
   }
   return error;

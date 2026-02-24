@@ -59,15 +59,16 @@ void fb::ArmorGeometry::onArmorReceivedCallback(
   while (subscriber->take().and_then( // 缓存全部队列
       [&](const iox::popo::Sample<const msgs::Armor, const msgs::Header>
               &sample) {
-        if (subscriber->getServiceDescription().getInstanceIDString() ==
-            iox::capro::IdString_t{
-                iox::TruncateToCapacity,
-                self->config_.service_instance_event.at(1).c_str()}) {
-          types::Armor armor{sample};
-          // NOTE: 注意heartbeat是未初始化的脏数据，不要UB
-          if (!armor.heart_beat)
-            receive_armors.emplace_back(armor);
-        }
+        // if (subscriber->getServiceDescription().getInstanceIDString() ==
+        //     iox::capro::IdString_t{
+        //         iox::TruncateToCapacity,
+        //         self->config_.service_instance_event.at(1).c_str()}) {
+        // HACK: 不做筛选，一起订阅可视化detector和tracker的装甲板
+        types::Armor armor{sample};
+        // NOTE: 注意heartbeat是未初始化的脏数据，不要UB
+        if (!armor.heart_beat)
+          receive_armors.emplace_back(armor);
+        // }
       })) {
   } // end of cache update
   if (!receive_armors.empty()) {

@@ -4,7 +4,7 @@ frame_id: "serial"
 iceoryx_conf:
   aim_command_topic:
     service: aim_command
-    instance: ballistic
+    instance: tracker
     event: data
   gimbal_info_topic:
     service: gimbal_info

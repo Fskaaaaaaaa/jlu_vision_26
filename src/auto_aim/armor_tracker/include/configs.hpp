@@ -2,6 +2,9 @@
 
 #include "confs/IceoryxServiceDescription.hpp"
 #include "quill/core/LogLevel.h"
+
+#include <array>
+
 namespace auto_aim {
 struct TargetConfig {
   double yaw_error_weight; // 匹配装甲板时，yaw误差的权重
@@ -66,29 +69,44 @@ struct TrajectoryConfig {
   double gimbal_pitch_max_degree = 30.0;
   double half_search_range_degree = 5.0;
   double max_fly_time = 1.0;
-  double default_fly_time = 0.1; // 默认假设弹丸飞行10ms,应该用不到
   int max_aim_iterate_count = 20;
   double aim_ok_error_m = 0.005;
 };
 
-struct AimerConfig {
+struct PlannerConfig {
+  double dt_sec;                    // MPC更新的间隔时间
+  double fail_polling_interval_sec; // 非ontask时轮询task的时间间隔
+  int trajectory_half_horizon;      // 生成的瞄准轨迹一半在过去，一半在未来
+  bool use_analytical_solution;     // 是否使用解析解
+  bool iterative_fly_time;          // 是否考虑子弹飞行时敌人的运动
+  int shoot_offset; // 预判几个MPC帧，在iterative_fly_time时应当为0
+  double yaw_offset;
+  double pitch_offset;
+  double fire_thresh;
+  double max_yaw_acc;
+  std::array<double, 2> Q_yaw;
+  double R_yaw;
+  double max_pitch_acc;
+  std::array<double, 2> Q_pitch;
+  double R_pitch;
+  double max_bullet_speed;
+  double default_bullet_speed;
+  double min_bullet_speed;
   TrajectoryConfig trajectory_conf;
 };
 
-struct PlannerConfig {};
-
 struct TrackerConfigs {
   quill::LogLevel log_level;
+  bool debug_mode;
   bool publish_target_armors;
-  bool show_target_armors_reproj_result;
+  double tf_query_tolerance_ms;
   std::string camera_name;
   std::string camera_frame_id; // 这两个用在tf上
   std::string odom_frame_id;
-  confs::IceoryxServiceDescription armors_topic;
+  confs::IceoryxServiceDescription armors_sub_topic;
+  confs::IceoryxServiceDescription armors_pub_topic;
   confs::IceoryxServiceDescription serial_topic;
-  confs::IceoryxServiceDescription target_armors_publish_topic;
   TargetConfig target_conf;
-  AimerConfig aimer_conf;
   PlannerConfig planner_conf;
 };
 } // namespace auto_aim

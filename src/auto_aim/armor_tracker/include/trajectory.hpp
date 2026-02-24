@@ -24,9 +24,11 @@ public:
   std::optional<YawPitchFlytime>
   resolveTarget(const TargetStatus &status, double bullet_speed,
                 double delay_time_image_to_now_sec = 0,
-                bool use_analytical_solution = false,
+                bool use_analytical_solution = true,
                 bool iterative_fly_time = true, double odom_x = 0.0,
                 double odom_y = 0.0);
+  static Armor getClosestArmor(const TargetStatus &status, double odom_x,
+                               double odom_y);
 
 private:
   std::optional<tools::PitchFlytime> resolvePitch(double bullet_speed,

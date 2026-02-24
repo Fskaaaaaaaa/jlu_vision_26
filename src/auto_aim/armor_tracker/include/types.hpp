@@ -5,7 +5,6 @@
 #include "types/ArmorType.hpp"
 
 #include <Eigen/Core>
-#include <chrono>
 #include <gtsam/geometry/Rot2.h>
 
 namespace auto_aim {
@@ -38,6 +37,8 @@ private:
   std::string message_;
 };
 
+struct Armor;
+
 struct TargetStatus {
   types::ArmorType type;
   // for robot
@@ -54,6 +55,7 @@ struct TargetStatus {
   double center_yaw;
   double center_vyaw;
   TargetStatus predict(double dt) const;
+  std::vector<Armor> armors() const;
 };
 
 // NOTE: 装甲板类: 能从center_pos+yaw+r1/r2dz+armor_index构造position和yaw
@@ -69,6 +71,7 @@ struct Armor : public types::Armor {
   Armor(const Eigen::Vector3d &center_pos, double center_yaw, double radius_b,
         double dz, ArmorIndex armor_index);
 
+  // NOTE: 只初始化position和yaw字段，小心UB
   static Armor fromTargetStatus(const TargetStatus &status,
                                 ArmorIndex armor_index, double dt_sec = 0.0);
   static Armor fromRobot(const Eigen::Vector3d &center_pos, double center_yaw,
@@ -77,6 +80,8 @@ struct Armor : public types::Armor {
   static Armor fromOutpost(const Eigen::Vector3d &center_pos, double center_yaw,
                            double radius, double dz_a, double dz_b,
                            ArmorIndex armor_index);
+  static Armor frmoBase(const Eigen::Vector3d &center_pos, double center_yaw,
+                        ArmorIndex armor_index);
 
   // Eigen::Vector3d position;
   gtsam::Rot2 yaw;

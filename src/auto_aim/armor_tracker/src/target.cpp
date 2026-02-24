@@ -20,6 +20,7 @@
 #include <chrono>
 #include <cmath>
 #include <iterator>
+#include <mutex>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -38,42 +39,46 @@ void auto_aim::Target::initStatus(const Eigen::Vector3d &armor_pos,
   auto ya = armor_pos.y();
   auto xc = xa + r * std::cos(armor_yaw);
   auto yc = ya + r * std::sin(armor_yaw);
-  if (outpost) {
-    this->status_ = {
-        .type = type_,
-        .radius = config_.outpost.default_radius,
-        .dz_a = config_.outpost.default_dz_a,
-        .dz_b = config_.outpost.default_dz_b,
-        .center_position = {xc, yc, armor_pos.z()},
-        .center_velocity = Eigen::Vector3d::Zero(),
-        .center_yaw = armor_yaw,
-        .center_vyaw = 0.0,
-    };
-  } else {
-    this->status_ = {
-        .type = type_,
-        .radius_a = config_.robot.default_radius_a,
-        .radius_b = config_.robot.default_radius_b,
-        .dz = config_.robot.default_dz,
-        .center_position = {xc, yc, armor_pos.z()},
-        .center_velocity = Eigen::Vector3d::Zero(),
-        .center_yaw = armor_yaw,
-        .center_vyaw = 0.0,
-    };
+  {
+    std::scoped_lock lk{status_mtx_};
+    if (outpost) {
+      this->status_ = {
+          .type = type_,
+          .radius = config_.outpost.default_radius,
+          .dz_a = config_.outpost.default_dz_a,
+          .dz_b = config_.outpost.default_dz_b,
+          .center_position = {xc, yc, armor_pos.z()},
+          .center_velocity = Eigen::Vector3d::Zero(),
+          .center_yaw = armor_yaw,
+          .center_vyaw = 0.0,
+      };
+    } else {
+      this->status_ = {
+          .type = type_,
+          .radius_a = config_.robot.default_radius_a,
+          .radius_b = config_.robot.default_radius_b,
+          .dz = config_.robot.default_dz,
+          .center_position = {xc, yc, armor_pos.z()},
+          .center_velocity = Eigen::Vector3d::Zero(),
+          .center_yaw = armor_yaw,
+          .center_vyaw = 0.0,
+      };
+    }
   }
 }
 
 auto_aim::ArmorIndex auto_aim::Target::matchArmor(const Armor &armor,
                                                   double dt_sec) {
   const auto armor_idx_vec =
-      type_ == types::ArmorType::Outpost
+      (type_ == types::ArmorType::Outpost)
           ? std::vector{ArmorIndex::_0, ArmorIndex::_1, ArmorIndex::_2}
-          : std::vector{
-                ArmorIndex::_0,
-                ArmorIndex::_1,
-                ArmorIndex::_2,
-                ArmorIndex::_3,
-            };
+      : (type_ == types::ArmorType::Base) ? std::vector{ArmorIndex::_0}
+                                          : std::vector{
+                                                ArmorIndex::_0,
+                                                ArmorIndex::_1,
+                                                ArmorIndex::_2,
+                                                ArmorIndex::_3,
+                                            };
   std::vector<std::pair<ArmorIndex, double>> idx_errors;
   for (auto armor_index : armor_idx_vec) {
     auto armor_predict = Armor::fromTargetStatus(status_, armor_index, dt_sec);
@@ -93,9 +98,21 @@ auto_aim::ArmorIndex auto_aim::Target::matchArmor(const Armor &armor,
   return idx_errors.at(0).first;
 }
 
+std::pair<std::optional<auto_aim::TargetStatus>,
+          std::chrono::system_clock::time_point>
+auto_aim::Target::getStatusStamp() const {
+  if (!inited_.load()) {
+    return {std::nullopt, {}};
+  }
+  {
+    std::scoped_lock lk{status_mtx_};
+    return {status_, stamp_last_update_};
+  }
+}
+
 std::optional<auto_aim::TargetStatus>
-auto_aim::Target::update(const std::vector<types::Armor> &armors,
-                         const std::chrono::system_clock::time_point &stamp) {
+auto_aim::Target::track(const std::vector<types::Armor> &armors,
+                        const std::chrono::system_clock::time_point &stamp) {
   try {
     std::vector<auto_aim::Armor> selected_armors;
     // 调用auto_aim::Armor对types::Armor的构造函数
@@ -108,13 +125,23 @@ auto_aim::Target::update(const std::vector<types::Armor> &armors,
                         stamp - stamp_last_update_)
                         .count() /
                     1e6;
+    if (type_ == types::ArmorType::Base)
+      return updateBase(selected_armors);
     return type_ == types::ArmorType::Outpost
                ? updateOutpost(selected_armors, dt_sec)
                : updateRobot(selected_armors, dt_sec);
   } catch (const std::exception &e) {
-    LOG_ERROR(logger_, "[Target {}]: {}", rfl::enum_to_string(type_), e.what());
+    LOG_ERROR(logger_, "[Target {}]: {}. reset.", rfl::enum_to_string(type_),
+              e.what());
+    reset();
     return std::nullopt;
   }
+}
+
+void auto_aim::Target::reset() {
+  this->k_ = 0;
+  this->inited_.store(false);
+  this->isam2_.clear();
 }
 
 using namespace gtsam::symbol_shorthand;
@@ -123,9 +150,7 @@ std::optional<auto_aim::TargetStatus>
 auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
   // 超时无新观测就返回并重置，否则进行优化并更新时间戳
   if (armors.empty() && dt >= config_.robot.lost_threshold_sec) {
-    this->k_ = 0;
-    this->inited_ = false;
-    this->isam2_.clear();
+    reset();
     return std::nullopt;
   }
   this->stamp_last_update_ =
@@ -136,7 +161,7 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
   gtsam::NonlinearFactorGraph graph;
   gtsam::Values values;
   // 添加运动因子
-  if (inited_) {
+  if (inited_.load()) {
     graph.add(
         TranslationFactor{gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
                               config_.translation_factor_noise.x,
@@ -187,9 +212,9 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
   };
   // 添加装甲板观测因子
   for (const auto &armor : armors) {
-    if (!inited_) {
+    if (!inited_.load()) {
       do_init(armor);
-      inited_ = true;
+      inited_.store(true);
     }
     auto index = matchArmor(armor, dt);
     if (index == ArmorIndex::_0 || index == ArmorIndex::_2) {
@@ -237,13 +262,35 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
 
   // 进行增量优化并保存结果
   this->isam2_.update(graph, values);
-  auto optimized_values = this->isam2_.calculateEstimate();
-  status_.center_position = optimized_values.at<gtsam::Point3>(X(k_));
-  status_.center_velocity = optimized_values.at<gtsam::Vector3>(V(k_));
-  status_.center_yaw = optimized_values.at<gtsam::Rot2>(R(k_)).theta();
-  status_.center_vyaw = optimized_values.at<double>(W(k_));
-  status_.radius_a = optimized_values.at<double>(A(0));
-  status_.radius_b = optimized_values.at<double>(B(0));
-  status_.dz = optimized_values.at<double>(Z(0));
-  return status_;
+  {
+    std::scoped_lock lk{status_mtx_};
+    status_.center_position = isam2_.calculateEstimate<gtsam::Point3>(X(k_));
+    status_.center_velocity = isam2_.calculateEstimate<gtsam::Vector3>(V(k_));
+    status_.center_yaw = isam2_.calculateEstimate<gtsam::Rot2>(R(k_)).theta();
+    status_.center_vyaw = isam2_.calculateEstimate<double>(W(k_));
+    status_.radius_a = isam2_.calculateEstimate<double>(A(0));
+    status_.radius_b = isam2_.calculateEstimate<double>(B(0));
+    status_.dz = isam2_.calculateEstimate<double>(Z(0));
+    // 使用模版重载的constcalculateEstimate接口来减小开销
+    return status_;
+  }
+}
+
+std::optional<auto_aim::TargetStatus>
+auto_aim::Target::updateBase(const std::vector<Armor> &armors) {
+  if (armors.empty())
+    return std::nullopt;
+  Eigen::Vector3d position = armors.at(0).position;
+  double yaw = armors.at(0).yaw.theta();
+  std::scoped_lock lk{status_mtx_};
+  return status_ = {
+             .type = type_,
+             .radius_a = 0,
+             .radius_b = 0,
+             .dz = 0,
+             .center_position = position,
+             .center_velocity = Eigen::Vector3d::Zero(),
+             .center_yaw = yaw,
+             .center_vyaw = 0,
+         };
 }

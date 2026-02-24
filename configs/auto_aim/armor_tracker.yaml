@@ -1,0 +1,92 @@
+log_level: Debug
+debug_mode: true
+publish_target_armors: true
+tf_query_tolerance_ms: 200.0
+camera_name: camera0
+camera_frame_id: camera
+odom_frame_id: odom
+armors_sub_topic:
+  service: armors
+  instance: detector
+  event: data
+armors_pub_topic:
+  service: armors
+  instance: tracker
+  event: debug
+serial_topic:
+  service: aim_command
+  instance: tracker
+  event: data
+target_conf:
+  yaw_error_weight:
+  yaw_factor_noise:
+  yaw_prior_noise:
+  translation_factor_noise:
+    x:
+    y:
+    z:
+  translation_prior_noise:
+    x:
+    y:
+    z:
+  velocity_factor_noise:
+    vx:
+    vy:
+    vz:
+  robot:
+    lost_threshold_sec:
+    default_radius_a:
+    default_radius_b:
+    default_dz:
+    ra_factor_noise:
+      x:
+      y:
+      z:
+      yaw:
+    rbdz_factor_noise:
+      x:
+      y:
+      z:
+      yaw:
+    ra_prior_noise:
+    rb_prior_noise:
+    dz_prior_noise:
+    vyaw_factor_noise:
+  outpost:
+    lost_threshold_sec:
+    default_radius:
+    default_dz_a:
+    default_dz_b:
+    vyaw_factor_noise:
+planner_conf:
+  dt_sec:
+  fail_polling_interval_sec:
+  trajectory_half_horizon:
+  use_analytical_solution:
+  iterative_fly_time:
+  shoot_offset:
+  yaw_offset:
+  pitch_offset:
+  fire_thresh:
+  max_yaw_acc:
+  Q_yaw:
+  R_yaw:
+  max_pitch_acc:
+  Q_pitch:
+  R_pitch:
+  max_bullet_speed:
+  default_bullet_speed:
+  min_bullet_speed:
+  trajectory_conf:
+    g:
+    k:
+    length_gimbal_to_barrel:
+    time_step:
+    max_pitch_iterate_count:
+    min_pitch_error:
+    gimbal_pitch_min_degree:
+    gimbal_pitch_max_degree:
+    half_search_range_degree:
+    max_fly_time:
+    max_aim_iterate_count:
+    aim_ok_error_m:
