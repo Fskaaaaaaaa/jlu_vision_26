@@ -19,46 +19,50 @@ serial_topic:
   instance: tracker
   event: data
 target_conf:
-  yaw_error_weight: 4.0
-  yaw_factor_noise: 0.00001
+  yaw_error_weight: 1.0
   yaw_prior_noise: 0.00002
-  translation_factor_noise:
-    x: 0.0000005
-    y: 0.0000005
-    z: 0.0000005
+  vyaw_prior_noise: 0.01
   translation_prior_noise:
-    x: 0.000001
-    y: 0.000001
-    z: 0.000001
+    x: 0.001
+    y: 0.001
+    z: 0.001
+  velocity_prior_noise:
+    x: 0.001
+    y: 0.001
+    z: 0.001
+  yaw_factor_noise: 0.00001
+  vyaw_factor_noise: 0.1
+  translation_factor_noise:
+    x: 0.0005
+    y: 0.0005
+    z: 0.0005
   velocity_factor_noise:
-    vx: 0.000003
-    vy: 0.000003
-    vz: 0.000003
+    x: 0.003
+    y: 0.003
+    z: 0.003
   robot:
     lost_threshold_sec: 0.5
+    ra_prior_noise: 0.002
+    rb_prior_noise: 0.002
+    dz_prior_noise: 0.001
     default_radius_a: 0.3
     default_radius_b: 0.2
     default_dz: 0.0
     ra_factor_noise:
-      x: 0.00001
-      y: 0.00001
-      z: 0.00001
-      yaw: 0.00002
+      x: 0.001
+      y: 0.001
+      z: 0.001
+      yaw: 0.002
     rbdz_factor_noise:
-      x: 0.00001
-      y: 0.00001
-      z: 0.00001
-      yaw: 0.00002
-    ra_prior_noise: 0.0002
-    rb_prior_noise: 0.0002
-    dz_prior_noise: 0.0001
-    vyaw_factor_noise: 0.00003
+      x: 0.001
+      y: 0.001
+      z: 0.001
+      yaw: 0.002
   outpost:
     lost_threshold_sec: 0.8
     default_radius: 0.26
     default_dz_a: 0.1
     default_dz_b: -0.1
-    vyaw_factor_noise: 0.00005
 planner_conf:
   dt_sec: 0.01
   fail_polling_interval_sec: 0.2

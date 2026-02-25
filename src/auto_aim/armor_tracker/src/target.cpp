@@ -14,6 +14,7 @@
 #include <gtsam/geometry/Rot2.h>
 #include <gtsam/inference/Symbol.h>
 #include <gtsam/linear/NoiseModel.h>
+#include <gtsam/nonlinear/ISAM2.h>
 #include <gtsam/nonlinear/Values.h>
 
 #include <algorithm>
@@ -27,7 +28,7 @@
 
 auto_aim::Target::Target(quill::Logger *logger, const TargetConfig &config,
                          types::ArmorType type)
-    : logger_(logger), config_(config), type_(type), inited_(false),
+    : logger_(logger), config_(config), type_(type),
       stamp_last_update_(std::chrono::system_clock::from_time_t(0)), k_(0) {}
 
 void auto_aim::Target::initStatus(const Eigen::Vector3d &armor_pos,
@@ -68,7 +69,7 @@ void auto_aim::Target::initStatus(const Eigen::Vector3d &armor_pos,
 }
 
 auto_aim::ArmorIndex auto_aim::Target::matchArmor(const Armor &armor,
-                                                  double dt_sec) {
+                                                  double dt_sec) const {
   const auto armor_idx_vec =
       (type_ == types::ArmorType::Outpost)
           ? std::vector{ArmorIndex::_0, ArmorIndex::_1, ArmorIndex::_2}
@@ -101,11 +102,11 @@ auto_aim::ArmorIndex auto_aim::Target::matchArmor(const Armor &armor,
 std::pair<std::optional<auto_aim::TargetStatus>,
           std::chrono::system_clock::time_point>
 auto_aim::Target::getStatusStamp() const {
-  if (!inited_.load()) {
-    return {std::nullopt, {}};
-  }
   {
     std::scoped_lock lk{status_mtx_};
+    if (k_ == 0) {
+      return {std::nullopt, {}};
+    }
     return {status_, stamp_last_update_};
   }
 }
@@ -121,48 +122,85 @@ auto_aim::Target::track(const std::vector<types::Armor> &armors,
                  [this](const types::Armor &armor) -> bool {
                    return armor.type == type_;
                  });
-    double dt_sec = std::chrono::duration_cast<std::chrono::microseconds>(
-                        stamp - stamp_last_update_)
-                        .count() /
-                    1e6;
-    if (type_ == types::ArmorType::Base)
-      return updateBase(selected_armors);
-    auto status = (type_ == types::ArmorType::Outpost)
-                      ? updateOutpost(selected_armors, dt_sec)
-                      : updateRobot(selected_armors, dt_sec);
-    return status;
+    double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
+                    stamp - stamp_last_update_)
+                    .count();
+    // 首帧观测时初始化status_
+    if (!selected_armors.empty() && k_ == 0) {
+      this->initStatus(selected_armors.front().position,
+                       selected_armors.front().yaw.theta());
+      LOG_INFO(logger_, "[Target {}]: status init.",
+               rfl::enum_to_string(type_));
+    }
+    if (auto status_opt = (type_ == types::ArmorType::Base)
+                              ? updateBase(selected_armors)
+                          : (type_ == types::ArmorType::Outpost)
+                              ? updateOutpost(selected_armors, dt)
+                              : updateRobot(selected_armors, dt);
+        status_opt.has_value()) {
+      // 追踪成功就更新时间戳和索引
+      std::scoped_lock lk{status_mtx_};
+      this->k_ = k_ + 1;
+      this->status_ = status_opt.value();
+      this->stamp_last_update_ = stamp;
+      return {status_};
+    } else if (k_ > 0) {
+      // NOTE:追踪失败就且非首帧就重置isam和k
+      // 传入armors为空时，update方法只在超时后才会失败
+      // 超时后传入空armors，k_一定被转入超时状态时的失败重置为0，
+      // 这里判断k_是为了避免重复重置
+      std::scoped_lock lk{status_mtx_};
+      // NOTE: 注意clear方法不会清空values，所以需要重新构造整个isam对象
+      this->isam2_ = gtsam::ISAM2{};
+      this->k_ = 0;
+      LOG_INFO(logger_, "[Target {}]: reset!", rfl::enum_to_string(type_));
+      return std::nullopt;
+    } else { // 首帧失败的情况，应该不会遇到
+      return std::nullopt;
+    }
   } catch (const std::exception &e) {
-    LOG_ERROR(logger_, "[Target {}]: {}. reset.", rfl::enum_to_string(type_),
-              e.what());
-    reset();
+    // 异常时也重置状态
+    std::scoped_lock lk{status_mtx_};
+    this->isam2_ = gtsam::ISAM2{};
+    this->k_ = 0;
+    LOG_ERROR(logger_, "[Target {}]: {}. reset Target!",
+              rfl::enum_to_string(type_), e.what());
     return std::nullopt;
   }
-}
-
-void auto_aim::Target::reset() {
-  this->k_ = 0;
-  this->inited_.store(false);
-  this->isam2_.clear();
 }
 
 using namespace gtsam::symbol_shorthand;
 
-std::optional<auto_aim::TargetStatus>
-auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
-  // 超时无新观测就返回并重置，否则进行优化并更新时间戳
-  if (armors.empty() && dt >= config_.robot.lost_threshold_sec) {
-    reset();
-    return std::nullopt;
-  }
-  this->stamp_last_update_ =
-      stamp_last_update_ +
-      std::chrono::duration_cast<std::chrono::system_clock::duration>(
-          std::chrono::duration<double>{dt});
-
-  gtsam::NonlinearFactorGraph graph;
-  gtsam::Values values;
-  // 添加运动因子
-  if (inited_.load()) {
+void auto_aim::Target::addMotionValuesFactors(
+    gtsam::Values &values, gtsam::NonlinearFactorGraph &graph, double dt,
+    std::uint64_t k) const {
+  auto status_predict = status_.predict(dt);
+  Eigen::Vector3d predict_position = status_predict.center_position;
+  gtsam::Rot2 predict_yaw = status_predict.center_yaw;
+  values.insert(X(k_), predict_position);
+  values.insert(R(k_), predict_yaw);
+  values.insert(V(k_), status_predict.center_velocity);
+  values.insert(W(k_), status_predict.center_vyaw);
+  if (k == 0) {
+    graph.addPrior(X(0), status_predict.center_position,
+                   gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
+                       config_.translation_prior_noise.x,
+                       config_.translation_prior_noise.y,
+                       config_.translation_prior_noise.z,
+                   }));
+    graph.addPrior(
+        R(0), gtsam::Rot2::fromAngle(status_.center_yaw),
+        gtsam::noiseModel::Isotropic::Sigma(1, config_.yaw_prior_noise));
+    graph.addPrior(V(0), status_predict.center_velocity,
+                   gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
+                       config_.velocity_prior_noise.x,
+                       config_.velocity_prior_noise.y,
+                       config_.velocity_prior_noise.z,
+                   }));
+    graph.addPrior(
+        W(0), status_predict.center_vyaw,
+        gtsam::noiseModel::Isotropic::Sigma(1, config_.vyaw_prior_noise));
+  } else {
     graph.add(
         TranslationFactor{gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
                               config_.translation_factor_noise.x,
@@ -170,24 +208,37 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
                               config_.translation_factor_noise.z,
                           }),
                           X(k_ - 1), V(k_ - 1), X(k_), dt});
-    graph.add(VelocityFactor{gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
-                                 config_.velocity_factor_noise.vx,
-                                 config_.velocity_factor_noise.vy,
-                                 config_.velocity_factor_noise.vz,
-                             }),
-                             V(k_ - 1), V(k_)});
     graph.add(YawFactor{
         gtsam::noiseModel::Isotropic::Sigma(1, config_.yaw_factor_noise),
         R(k_ - 1), W(k_ - 1), R(k_), dt});
+    graph.add(VelocityFactor{gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
+                                 config_.velocity_factor_noise.x,
+                                 config_.velocity_factor_noise.y,
+                                 config_.velocity_factor_noise.z,
+                             }),
+                             V(k_ - 1), V(k_)});
     graph.add(VyawFactor{
-        gtsam::noiseModel::Isotropic::Sigma(1, config_.robot.vyaw_factor_noise),
+        gtsam::noiseModel::Isotropic::Sigma(1, config_.vyaw_factor_noise),
         W(k_ - 1), W(k_)});
   }
-  // 初始化常量和先验
-  // NOTE: 车和前哨要初始化的变量不一样，就不往成员里写了
-  auto do_init = [&](const Armor &armor) {
-    // 初始化ra、rb、dz
-    // BUG: 会重复添加常量
+}
+
+std::optional<auto_aim::TargetStatus>
+auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
+                              double dt) const {
+  // 超时，返回失败
+  if (k_ > 0 && dt > config_.robot.lost_threshold_sec) {
+    LOG_INFO(logger_, "[Target {}]: Time out!", rfl::enum_to_string(type_));
+    return std::nullopt;
+  }
+  // 首帧观测缺失，为欠约束系统，返回失败
+  if (k_ == 0 && armors.empty())
+    return std::nullopt;
+
+  gtsam::Values values;
+  gtsam::NonlinearFactorGraph graph;
+  // 首帧观测初始化常量并添加先验
+  if (k_ == 0) {
     values.insert(A(0), config_.robot.default_radius_a);
     values.insert(B(0), config_.robot.default_radius_b);
     values.insert(Z(0), config_.robot.default_dz);
@@ -200,24 +251,22 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
     graph.addPrior(
         Z(0), config_.robot.default_dz,
         gtsam::noiseModel::Isotropic::Sigma(1, config_.robot.dz_prior_noise));
-    // 初始化position、yaw
-    initStatus(armor.position, armor.yaw.theta());
-    graph.addPrior(X(0), gtsam::Point3{status_.center_position},
-                   gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
-                       config_.translation_prior_noise.x,
-                       config_.translation_prior_noise.y,
-                       config_.translation_prior_noise.z,
-                   }));
-    graph.addPrior(
-        R(0), gtsam::Rot2::fromAngle(status_.center_yaw),
-        gtsam::noiseModel::Isotropic::Sigma(1, config_.yaw_prior_noise));
-  };
-  // 添加装甲板观测因子
+  }
+  // 添加运动因子或先验
+  addMotionValuesFactors(values, graph, dt, k_);
+
+  // TODO
+  // FIXME:
+  // x1 = x0 + v0
+  // v1 = v0
+  // 如果没有观测
+  // 整个系统可以整体平移，缺少约束
+  // 只有一个装甲板观测时也一样（会连着R一起飘走）
+  // 而ekf不会飘R纯粹是因为有clamp
+  // 另外因为缺少约束，isam时不时会将半径优化成负数，需要一个映射（比如sigmod）
+
+  // 添加装甲板观测因子，非首帧时aromrs可以为空（直到超时）
   for (const auto &armor : armors) {
-    if (!inited_.load()) {
-      do_init(armor);
-      inited_.store(true);
-    }
     auto index = matchArmor(armor, dt);
     if (index == ArmorIndex::_0 || index == ArmorIndex::_2) {
       graph.add(ArmorRadiusAFactor{
@@ -253,47 +302,36 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors, double dt) {
     }
   } // end of armors loop
 
-  // 构建优化变量
-  Eigen::Vector3d predict_position =
-      status_.center_position + status_.center_velocity * dt;
-  double predict_yaw = status_.center_yaw + status_.center_vyaw * dt;
-  values.insert(X(k_), predict_position);
-  values.insert(R(k_), gtsam::Rot2::fromAngle(predict_yaw));
-  values.insert(V(k_), status_.center_velocity);
-  values.insert(W(k_), status_.center_vyaw);
-
-  // 进行增量优化并保存结果
+  // 进行增量优化并返回结果
   this->isam2_.update(graph, values);
-  {
-    std::scoped_lock lk{status_mtx_};
-    status_.center_position = isam2_.calculateEstimate<gtsam::Point3>(X(k_));
-    status_.center_velocity = isam2_.calculateEstimate<gtsam::Vector3>(V(k_));
-    status_.center_yaw = isam2_.calculateEstimate<gtsam::Rot2>(R(k_)).theta();
-    status_.center_vyaw = isam2_.calculateEstimate<double>(W(k_));
-    k_++;
-    status_.radius_a = isam2_.calculateEstimate<double>(A(0));
-    status_.radius_b = isam2_.calculateEstimate<double>(B(0));
-    status_.dz = isam2_.calculateEstimate<double>(Z(0));
-    // 使用模版重载的constcalculateEstimate接口来减小开销
-    return status_;
-  }
+
+  // 使用模版重载的constcalculateEstimate接口来减小开销
+  return TargetStatus{
+      .type = type_,
+      .radius_a = isam2_.calculateEstimate<double>(A(0)),
+      .radius_b = isam2_.calculateEstimate<double>(B(0)),
+      .dz = isam2_.calculateEstimate<double>(Z(0)),
+      .center_position = isam2_.calculateEstimate<gtsam::Point3>(X(k_)),
+      .center_velocity = isam2_.calculateEstimate<gtsam::Vector3>(V(k_)),
+      .center_yaw = isam2_.calculateEstimate<gtsam::Rot2>(R(k_)).theta(),
+      .center_vyaw = isam2_.calculateEstimate<double>(W(k_)),
+  };
 }
 
 std::optional<auto_aim::TargetStatus>
-auto_aim::Target::updateBase(const std::vector<Armor> &armors) {
+auto_aim::Target::updateBase(const std::vector<Armor> &armors) const {
   if (armors.empty())
     return std::nullopt;
-  Eigen::Vector3d position = armors.at(0).position;
-  double yaw = armors.at(0).yaw.theta();
-  std::scoped_lock lk{status_mtx_};
-  return status_ = {
-             .type = type_,
-             .radius_a = 0,
-             .radius_b = 0,
-             .dz = 0,
-             .center_position = position,
-             .center_velocity = Eigen::Vector3d::Zero(),
-             .center_yaw = yaw,
-             .center_vyaw = 0,
-         };
+  Eigen::Vector3d position = armors.front().position;
+  double yaw = armors.front().yaw.theta();
+  return TargetStatus{
+      .type = type_,
+      .radius_a = 0,
+      .radius_b = 0,
+      .dz = 0,
+      .center_position = position,
+      .center_velocity = Eigen::Vector3d::Zero(),
+      .center_yaw = yaw,
+      .center_vyaw = 0,
+  };
 }

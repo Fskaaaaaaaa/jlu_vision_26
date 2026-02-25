@@ -1,61 +1,58 @@
 #pragma once
 
+#include "confs/Basic.hpp"
 #include "confs/IceoryxServiceDescription.hpp"
+
 #include "quill/core/LogLevel.h"
 
 #include <array>
 
 namespace auto_aim {
+
+struct RobotConfig {
+  double lost_threshold_sec; // 超时重置因子图的阈值
+  double ra_prior_noise;
+  double rb_prior_noise;
+  double dz_prior_noise;
+  double default_radius_a;
+  double default_radius_b;
+  double default_dz;
+  struct {
+    double x;
+    double y;
+    double z;
+    double yaw;
+  } ra_factor_noise;
+  struct {
+    double x;
+    double y;
+    double z;
+    double yaw;
+  } rbdz_factor_noise;
+};
+
+struct OutpostConfig {
+  double lost_threshold_sec; // 超时重置因子图的阈值
+  double default_radius;
+  double default_dz_a;
+  double default_dz_b;
+};
+
 struct TargetConfig {
   double yaw_error_weight; // 匹配装甲板时，yaw误差的权重
-  double yaw_factor_noise;
+  // 先验噪声
   double yaw_prior_noise;
-  struct {
-    double x;
-    double y;
-    double z;
-  } translation_factor_noise;
-  struct {
-    double x;
-    double y;
-    double z;
-  } translation_prior_noise;
-  struct {
-    double vx;
-    double vy;
-    double vz;
-  } velocity_factor_noise;
+  double vyaw_prior_noise;
+  confs::Vector3d translation_prior_noise;
+  confs::Vector3d velocity_prior_noise;
+  // 因子噪声
+  double yaw_factor_noise;
+  double vyaw_factor_noise;
+  confs::Vector3d translation_factor_noise;
+  confs::Vector3d velocity_factor_noise;
 
-  struct {
-    double lost_threshold_sec; // 超时重置因子图的阈值
-    double default_radius_a;
-    double default_radius_b;
-    double default_dz;
-    struct {
-      double x;
-      double y;
-      double z;
-      double yaw;
-    } ra_factor_noise;
-    struct {
-      double x;
-      double y;
-      double z;
-      double yaw;
-    } rbdz_factor_noise;
-    double ra_prior_noise;
-    double rb_prior_noise;
-    double dz_prior_noise;
-    double vyaw_factor_noise;
-  } robot;
-
-  struct {
-    double lost_threshold_sec; // 超时重置因子图的阈值
-    double default_radius;
-    double default_dz_a;
-    double default_dz_b;
-    double vyaw_factor_noise;
-  } outpost;
+  RobotConfig robot;
+  OutpostConfig outpost;
 };
 
 struct TrajectoryConfig {
