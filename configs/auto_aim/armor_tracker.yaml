@@ -1,7 +1,7 @@
-log_level: Debug
+log_level: Info
 debug_mode: true
 show_image: false
-publish_target_armors: true
+publish_target_armors: false
 tf_query_tolerance_ms: 200.0
 camera_name: camera0
 camera_frame_id: camera
@@ -19,32 +19,36 @@ serial_topic:
   instance: tracker
   event: data
 target_conf:
-  yaw_error_weight: 1.0
-  yaw_prior_noise: 0.00002
-  vyaw_prior_noise: 0.01
+  yaw_error_weight: 0.5
+  match_error_scale: 0.5
+  max_match_error: 0.8
+  yaw_prior_noise: 0.05
+  vyaw_prior_noise: 0.2 
+  yaw_factor_noise: 0.02 
+  vyaw_factor_noise: 0.01  #最好和dt一致
   translation_prior_noise:
-    x: 0.001
-    y: 0.001
-    z: 0.001
-  velocity_prior_noise:
-    x: 0.001
-    y: 0.001
-    z: 0.001
-  yaw_factor_noise: 0.00001
-  vyaw_factor_noise: 0.1
+    x: 0.05
+    y: 0.05
+    z: 0.05
   translation_factor_noise:
-    x: 0.0005
-    y: 0.0005
-    z: 0.0005
+    x: 0.005
+    y: 0.005
+    z: 0.005
+  velocity_prior_noise:
+    x: 0.1
+    y: 0.1
+    z: 0.1
   velocity_factor_noise:
-    x: 0.003
-    y: 0.003
-    z: 0.003
+    x: 0.00001
+    y: 0.00001
+    z: 0.00001
   robot:
     lost_threshold_sec: 0.5
-    ra_prior_noise: 0.002
-    rb_prior_noise: 0.002
-    dz_prior_noise: 0.001
+    ra_prior_noise: 0.005
+    rb_prior_noise: 0.005
+    dz_prior_noise: 0.002
+    radius_min: 0.15
+    radius_max: 0.5
     default_radius_a: 0.3
     default_radius_b: 0.2
     default_dz: 0.0
@@ -52,12 +56,12 @@ target_conf:
       x: 0.001
       y: 0.001
       z: 0.001
-      yaw: 0.002
+      yaw: 0.001
     rbdz_factor_noise:
       x: 0.001
       y: 0.001
       z: 0.001
-      yaw: 0.002
+      yaw: 0.001
   outpost:
     lost_threshold_sec: 0.8
     default_radius: 0.26

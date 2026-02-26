@@ -9,7 +9,6 @@
 #include "msgs/Header.hpp"
 #include "quill/LogMacros.h"
 #include "quill/core/ThreadContextManager.h"
-#include "types/Basic.hpp"
 
 #include <algorithm>
 #include <array>
@@ -98,8 +97,19 @@ std::vector<msgs::Armor> auto_aim::Robot::getArmorMsgsFromStatus() {
 }
 
 void auto_aim::Robot::publishArmors() {
-  if (atom_contrl_.hide_armors.load())
+  if (atom_contrl_.hide_armors.load()) {
+    armor_pub_.loan()
+        .and_then([&](iox::popo::Sample<msgs::Armor, msgs::Header> &sample) {
+          sample.getUserHeader().frame_id = {iox::TruncateToCapacity,
+                                             config_.pub_conf.frame_id.c_str()};
+          sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
+          sample->heart_beat = true;
+          sample.publish();
+          LOG_DEBUG(logger_, "heart_beat published");
+        })
+        .or_else([&](auto) { LOG_ERROR(logger_, "loan shm failure!"); });
     return;
+  }
   auto armors = this->getArmorMsgsFromStatus();
   for (auto &&armor : armors) {
     armor_pub_.loan()
@@ -112,11 +122,12 @@ void auto_aim::Robot::publishArmors() {
           sample->distance_to_image_center = armor.distance_to_image_center;
           sample->position = armor.position;
           sample->orientation = armor.orientation;
+          sample->heart_beat = false;
           sample.publish();
-          LOG_DEBUG(logger_, "armor published");
         })
         .or_else([&](auto) { LOG_ERROR(logger_, "loan shm failure!"); });
   }
+  LOG_DEBUG(logger_, "{} armor(s) published", armors.size());
   return;
 }
 

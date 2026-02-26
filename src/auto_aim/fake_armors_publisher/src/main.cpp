@@ -126,6 +126,13 @@ int main(int argc, char *argv[]) {
         text("ayaw : " + std::to_string(robot.getState().acc_yaw)));
     values.push_back(
         text("disappear : " + std::to_string(contrl.hide_armors.load())));
+    values.push_back(
+        text("spin : " +
+             std::to_string(contrl.spin_status.load().has_value()
+                                ? contrl.spin_status.load().value() ? 1 : -1
+                                : 0)));
+    values.push_back(text("const_speed_spin : " +
+                          std::to_string(contrl.const_speed_spin.load())));
     values.push_back(text(" "));
     values.push_back(text("Drag the joystick to move robot"));
     values.push_back(text("Prase r to reset robot"));
@@ -212,4 +219,5 @@ int main(int argc, char *argv[]) {
     return false;
   });
   screen.Loop(joystick);
+  iox::waitForTerminationRequest();
 }

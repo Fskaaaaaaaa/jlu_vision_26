@@ -226,22 +226,23 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
         // 过滤掉自己发布的装甲板
         if (subscriber->getServiceDescription().getInstanceIDString() ==
             self->armors_sub_.getServiceDescription().getInstanceIDString()) {
-          armors.emplace_back(sample);
+          types::Armor armor{sample};
+          armors.emplace_back(armor);
         }
       })) {
   } // end of while
+  // 排除连心跳都没有的假唤醒
   if (armors.empty())
     return;
-  auto image_stamp = armors.at(0).stamp; // 假设一次接收的armors来自同一帧
   // 过滤掉心跳信号并按照光心距离排序
-  std::erase_if(armors,
-                [](const Armor &armor) -> bool { return armor.heart_beat; });
-  LOG_TRACE_L2(self->logger_, "recieve {} valid armor(s).", armors.size());
+  auto image_stamp = armors.front().stamp; // 假设一次接收的armors来自同一帧
+  std::erase_if(armors, [](const types::Armor &a) { return a.heart_beat; });
+  LOG_TRACE_L1(self->logger_, "receive {} valid armors.", armors.size());
   std::sort(armors.begin(), armors.end(),
             [](const Armor &a, const Armor &b) -> bool {
               return a.distance_to_image_center < b.distance_to_image_center;
             });
-  // 将坐标变换到odom系内并抹除变换失败的装甲板
+  // 将坐标变换到odom系并抹除变换失败的装甲板
   std::erase_if(armors, [&](types::Armor &armor) {
     try {
       Eigen::Isometry3d armor_pose_camera;
@@ -263,8 +264,6 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
       return true;
     }
   });
-  if (!armors.empty()) // 更新瞄准目标
-    self->selected_target_ = armors.at(0).type;
   // NOTE:
   // 更新所有目标。track由图像时间戳驱动，图像到现在的时间补偿由planner完成
   for (auto &[type, target] : self->targets_)
@@ -337,7 +336,7 @@ void auto_aim::TrackerNode::drawTarget(
                 image_stamp - stamp)
                 .count();
   if (dt < 0)
-    LOG_TRACE_L1(logger_, "stamp image is before stamp target {} last track.",
+    LOG_TRACE_L3(logger_, "stamp image is before stamp target {} last track.",
                  rfl::enum_to_string(target.type_));
   auto status_predict = status_opt.value().predict(dt);
   // 绘制所有装甲板

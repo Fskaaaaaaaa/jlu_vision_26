@@ -7,15 +7,16 @@
 
 #include "iceoryx_posh/popo/sample.hpp"
 #include <Eigen/Dense>
+// #include <Eigen/StdVector>
 
 #include <chrono>
 
 namespace types {
 struct Armor {
+  // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Armor() = default;
   Armor(const iox::popo::Sample<const msgs::Armor, const msgs::Header> &sample);
   Eigen::Vector3d getRpy() const;
-  // msgs::Armor toMsg();
   std::chrono::system_clock::time_point stamp;
   std::string frame_id;
   ArmorType type;
@@ -29,3 +30,5 @@ struct Armor {
 };
 
 } // namespace types
+
+// EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(types::Armor)

@@ -1,15 +1,15 @@
-log_level: Error
+log_level: Info
 robot_conf:
-  r1: 2.0
-  r2: 1.0
-  dz: 0.5
+  r1: 0.35
+  r2: 0.21
+  dz: 0.1
   armor_type: Four
   armor_color: Blue
   drag_linear_acceleration: 8.0
   drag_angular_acceleration: 8.0
   power_linear_acceleration: 10.0
   power_angular_acceleration: 10.0
-  time_step_ms: 10
+  time_step_ms: 20
   facing_armor_cos_incidence: 0.25
   hidden_invisible_armors: true
   camera_pos: [0.,0.]

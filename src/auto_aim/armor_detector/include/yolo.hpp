@@ -4,7 +4,6 @@
 #include "types.hpp"
 
 #include "quill/Logger.h"
-#include "types/Armor.hpp"
 #include <openvino/openvino.hpp>
 #include <unordered_map>
 #include <vector>
@@ -29,8 +28,6 @@ public:
                                  cv::Size input_image_size) override;
 
 private:
-  double sigmoid(double x);
-
   quill::Logger *logger_;
   YOLOConfig config_;
   static constexpr int yolo_input_size = 640;

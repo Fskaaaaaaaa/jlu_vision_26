@@ -14,7 +14,7 @@ armor_conf:
   path_to_armor_stl: assets/armor_small.stl
   service_instance_event: [armors, fake_ap, data]
   # service_instance_event: [armors, detector, data]
-  armor_scale: 0.005
+  armor_scale: 0.002
 target_conf:
   msg_source:
     service: target

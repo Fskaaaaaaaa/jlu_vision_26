@@ -15,7 +15,6 @@
 
 #include <fstream>
 #include <string>
-#include <thread>
 
 constexpr char APP_NAME[] = "armor_tracker";
 
@@ -53,7 +52,5 @@ int main(int argc, char *argv[]) {
   iox::runtime::PoshRuntime::initRuntime(APP_NAME);
   auto_aim::TrackerNode node{logger, configs};
   iox::waitForTerminationRequest();
-  // 等待所有子进程结束
-  std::this_thread::sleep_for(std::chrono::milliseconds{100});
   return 0;
 }

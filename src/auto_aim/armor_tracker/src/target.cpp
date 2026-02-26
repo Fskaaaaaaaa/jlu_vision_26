@@ -2,6 +2,7 @@
 #include "target.hpp"
 #include "configs.hpp"
 #include "factors.hpp"
+#include "math/sigmoid_functions.hpp"
 #include "types.hpp"
 #include "types/ArmorType.hpp"
 
@@ -68,8 +69,8 @@ void auto_aim::Target::initStatus(const Eigen::Vector3d &armor_pos,
   }
 }
 
-auto_aim::ArmorIndex auto_aim::Target::matchArmor(const Armor &armor,
-                                                  double dt_sec) const {
+std::pair<auto_aim::ArmorIndex, double>
+auto_aim::Target::matchArmor(const Armor &armor, double dt_sec) const {
   const auto armor_idx_vec =
       (type_ == types::ArmorType::Outpost)
           ? std::vector{ArmorIndex::_0, ArmorIndex::_1, ArmorIndex::_2}
@@ -83,32 +84,32 @@ auto_aim::ArmorIndex auto_aim::Target::matchArmor(const Armor &armor,
   std::vector<std::pair<ArmorIndex, double>> idx_errors;
   for (auto armor_index : armor_idx_vec) {
     auto armor_predict = Armor::fromTargetStatus(status_, armor_index, dt_sec);
-    Eigen::Vector3d pos_error = armor_predict.position - armor.position;
+    double pos_error = (armor_predict.position - armor.position).norm();
     // NOTE: 因为单位不一样，yaw的error必须乘个权重
-    double yaw_error = config_.yaw_error_weight *
-                       armor.yaw.localCoordinates(armor_predict.yaw).x();
-    Eigen::Vector4d error{pos_error.x(), pos_error.y(), pos_error.z(),
-                          yaw_error};
-    idx_errors.emplace_back(armor_index, error.norm());
+    double yaw_error =
+        config_.yaw_error_weight *
+        std::abs(armor.yaw.localCoordinates(armor_predict.yaw).x());
+    idx_errors.emplace_back(
+        armor_index,
+        // 将误差映射到0~1区间
+        tools::logisticFunction(
+            (pos_error + yaw_error) * config_.match_error_scale, -1, 1));
   }
   std::sort(idx_errors.begin(), idx_errors.end(),
             [](const std::pair<ArmorIndex, double> &a,
                const std::pair<ArmorIndex, double> &b) -> bool {
               return a.second < b.second;
             });
-  return idx_errors.at(0).first;
+  return idx_errors.front();
 }
 
 std::pair<std::optional<auto_aim::TargetStatus>,
           std::chrono::system_clock::time_point>
 auto_aim::Target::getStatusStamp() const {
-  {
-    std::scoped_lock lk{status_mtx_};
-    if (k_ == 0) {
-      return {std::nullopt, {}};
-    }
-    return {status_, stamp_last_update_};
-  }
+  std::scoped_lock lk{status_mtx_};
+  if (k_ == 0)
+    return {std::nullopt, {}};
+  return {status_, stamp_last_update_};
 }
 
 std::optional<auto_aim::TargetStatus>
@@ -161,10 +162,10 @@ auto_aim::Target::track(const std::vector<types::Armor> &armors,
   } catch (const std::exception &e) {
     // 异常时也重置状态
     std::scoped_lock lk{status_mtx_};
+    LOG_ERROR(logger_, "[Target {}]: {}\ncurrent k: {}. reset Target!",
+              rfl::enum_to_string(type_), e.what(), k_);
     this->isam2_ = gtsam::ISAM2{};
     this->k_ = 0;
-    LOG_ERROR(logger_, "[Target {}]: {}. reset Target!",
-              rfl::enum_to_string(type_), e.what());
     return std::nullopt;
   }
 }
@@ -235,6 +236,11 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
   if (k_ == 0 && armors.empty())
     return std::nullopt;
 
+  if (!armors.empty()) {
+    LOG_DEBUG(logger_, "[Target {}]: receive {} armor(s).",
+              rfl::enum_to_string(type_), armors.size());
+  }
+
   gtsam::Values values;
   gtsam::NonlinearFactorGraph graph;
   // 首帧观测初始化常量并添加先验
@@ -243,10 +249,16 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
     values.insert(B(0), config_.robot.default_radius_b);
     values.insert(Z(0), config_.robot.default_dz);
     graph.addPrior(
-        A(0), config_.robot.default_radius_a,
+        A(0),
+        tools::logisticInverse(config_.robot.default_radius_a,
+                               config_.robot.radius_min,
+                               config_.robot.radius_max),
         gtsam::noiseModel::Isotropic::Sigma(1, config_.robot.ra_prior_noise));
     graph.addPrior(
-        B(0), config_.robot.default_radius_b,
+        B(0),
+        tools::logisticInverse(config_.robot.default_radius_b,
+                               config_.robot.radius_min,
+                               config_.robot.radius_max),
         gtsam::noiseModel::Isotropic::Sigma(1, config_.robot.rb_prior_noise));
     graph.addPrior(
         Z(0), config_.robot.default_dz,
@@ -264,10 +276,19 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
   // 只有一个装甲板观测时也一样（会连着R一起飘走）
   // 而ekf不会飘R纯粹是因为有clamp
   // 另外因为缺少约束，isam时不时会将半径优化成负数，需要一个映射（比如sigmod）
+  // 26.2.26: 添加了sigmoid归一半径。依然会飘或反复横跳。
+  // 虽然反复reset且状态抖动不可用，但符号和趋势是没问题的
 
   // 添加装甲板观测因子，非首帧时aromrs可以为空（直到超时）
   for (const auto &armor : armors) {
-    auto index = matchArmor(armor, dt);
+    auto [index, error] = matchArmor(armor, dt);
+    if (error > config_.max_match_error) {
+      LOG_WARNING(
+          logger_,
+          "[Target {}]: Huge armor matching error! index: {}, error: {}!",
+          rfl::enum_to_string(type_), static_cast<int>(index), error);
+      return std::nullopt;
+    }
     if (index == ArmorIndex::_0 || index == ArmorIndex::_2) {
       graph.add(ArmorRadiusAFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
@@ -282,6 +303,8 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
           armor.position,
           armor.yaw.theta(),
           index,
+          config_.robot.radius_min,
+          config_.robot.radius_max,
       });
     } else {
       graph.add(ArmorRadiusBDZFactor{
@@ -298,6 +321,8 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
           armor.position,
           armor.yaw.theta(),
           index,
+          config_.robot.radius_min,
+          config_.robot.radius_max,
       });
     }
   } // end of armors loop
@@ -308,8 +333,12 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
   // 使用模版重载的constcalculateEstimate接口来减小开销
   return TargetStatus{
       .type = type_,
-      .radius_a = isam2_.calculateEstimate<double>(A(0)),
-      .radius_b = isam2_.calculateEstimate<double>(B(0)),
+      .radius_a = tools::logisticFunction(
+          isam2_.calculateEstimate<double>(A(0)), config_.robot.radius_min,
+          config_.robot.radius_max),
+      .radius_b = tools::logisticFunction(
+          isam2_.calculateEstimate<double>(B(0)), config_.robot.radius_min,
+          config_.robot.radius_max),
       .dz = isam2_.calculateEstimate<double>(Z(0)),
       .center_position = isam2_.calculateEstimate<gtsam::Point3>(X(k_)),
       .center_velocity = isam2_.calculateEstimate<gtsam::Vector3>(V(k_)),

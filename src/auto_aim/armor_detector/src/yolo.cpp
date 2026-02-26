@@ -1,8 +1,8 @@
 #include "yolo.hpp"
 
+#include "math/sigmoid_functions.hpp"
 #include "opencv2/core/types.hpp"
 #include "quill/LogMacros.h"
-#include "types/Armor.hpp"
 
 #include <unordered_map>
 #include <vector>
@@ -53,13 +53,6 @@ auto_aim::YOLOv5::requestInfer(const ov::Tensor &input_tensor) {
   return infer_request;
 }
 
-double auto_aim::YOLOv5::sigmoid(double x) {
-  if (x > 0)
-    return 1.0 / (1.0 + std::exp(-x));
-  else
-    return std::exp(x) / (1.0 + std::exp(x));
-}
-
 std::vector<auto_aim::Armor>
 auto_aim::YOLOv5::postProcess(const ov::Tensor &output_tensor,
                               cv::Size image_size) {
@@ -73,7 +66,7 @@ auto_aim::YOLOv5::postProcess(const ov::Tensor &output_tensor,
   std::vector<std::array<cv::Point2f, 4>> armors_key_points;
   for (int r = 0; r < output.rows; r++) {
     double score = output.at<float>(r, 8);
-    score = sigmoid(score);
+    score = tools::logisticFunction(score);
     if (score < config_.score_thresh)
       continue;
     // 颜色和类别独热向量

@@ -104,7 +104,8 @@ public:
   ArmorRadiusAFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_a,
                      gtsam::Key rot_cur, gtsam::Key x_cur,
                      const Eigen::Vector3d &obs_armor_position,
-                     double obs_armor_yaw, ArmorIndex armor_index);
+                     double obs_armor_yaw, ArmorIndex armor_index,
+                     double radius_min, double radius_max);
 
   gtsam::Vector evaluateError(const double &ra, const gtsam::Rot2 &rotation,
                               const gtsam::Point3 &center,
@@ -116,6 +117,7 @@ private:
   gtsam::Vector3 obs_armor_position_;
   gtsam::Rot2 obs_armor_yaw_;
   ArmorIndex armor_index_;
+  double min_, max_;
 };
 class ArmorRadiusBDZFactor
     : public gtsam::NoiseModelFactorN<double, double, gtsam::Rot2,
@@ -127,7 +129,8 @@ public:
   ArmorRadiusBDZFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_b,
                        gtsam::Key dz, gtsam::Key rot_cur, gtsam::Key x_cur,
                        const Eigen::Vector3d &obs_armor_position,
-                       double obs_armor_yaw, ArmorIndex armor_index);
+                       double obs_armor_yaw, ArmorIndex armor_index,
+                       double radius_min, double radius_max);
 
   gtsam::Vector
   evaluateError(const double &rb, const double &dz, const gtsam::Rot2 &rotation,
@@ -139,6 +142,7 @@ private:
   gtsam::Vector3 obs_armor_position_;
   gtsam::Rot2 obs_armor_yaw_;
   ArmorIndex armor_index_;
+  double min_, max_;
 };
 
 class OutpostFactor {};
