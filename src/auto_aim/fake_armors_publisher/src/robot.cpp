@@ -171,6 +171,11 @@ void auto_aim::Robot::updateContrlPhysic() {
                     ? -status_.vel_yaw / std::fabs(status_.vel_yaw) *
                           config_.drag_angular_acceleration
                     : 0.};
+  if (status_.linear_velocity.norm() <= 1e-1)
+    status_.linear_velocity = Eigen::Vector2d::Zero();
+  if (std::abs(status_.vel_yaw) <= 0.06)
+    status_.vel_yaw = 0;
+
   status_.linear_acceleration = ap + af;
   status_.position = status_.position + status_.linear_velocity * dt +
                      0.5 * status_.linear_acceleration * std::pow(dt, 2);

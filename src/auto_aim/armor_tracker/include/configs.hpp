@@ -41,9 +41,14 @@ struct OutpostConfig {
 };
 
 struct TargetConfig {
-  double yaw_error_weight;  // 匹配装甲板时，yaw误差的权重
-  double match_error_scale; // 整体误差传递给sigmoid归一化时的乘数
-  double max_match_error;
+  // 这四个参数用来算误差标准差（用来归一化误差到0-1）
+  double translation_cdf_error0;
+  double translation_cdf_p0;
+  double yaw_cdf_error0_degree;
+  double yaw_cdf_p0;
+  double yaw_error_weight; // 匹配装甲板时，yaw误差的权重
+  double max_match_distance_m;
+  double max_match_yaw_diff_degree;
   // 先验噪声
   double yaw_prior_noise;
   double vyaw_prior_noise;

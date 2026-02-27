@@ -19,49 +19,56 @@ serial_topic:
   instance: tracker
   event: data
 target_conf:
-  yaw_error_weight: 0.5
-  match_error_scale: 0.5
-  max_match_error: 0.8
-  yaw_prior_noise: 0.05
-  vyaw_prior_noise: 0.2 
-  yaw_factor_noise: 0.02 
-  vyaw_factor_noise: 0.01  #最好和dt一致
+  translation_cdf_error0: 1.0
+  translation_cdf_p0: 0.9
+  yaw_cdf_error0_degree: 45
+  yaw_cdf_p0: 0.9
+  yaw_error_weight: 0.7
+  max_match_distance_m: 1.0
+  max_match_yaw_diff_degree: 45.0
+
+  yaw_prior_noise: 0.2
+  vyaw_prior_noise: 0.5 
+  yaw_factor_noise: 0.05 
+  vyaw_factor_noise: 0.05  #最好和dt一致
+
   translation_prior_noise:
-    x: 0.05
-    y: 0.05
-    z: 0.05
-  translation_factor_noise:
-    x: 0.005
-    y: 0.005
-    z: 0.005
-  velocity_prior_noise:
     x: 0.1
     y: 0.1
     z: 0.1
+  translation_factor_noise:
+    x: 0.03
+    y: 0.03
+    z: 0.03
+  velocity_prior_noise:
+    x: 0.5
+    y: 0.5
+    z: 0.5
   velocity_factor_noise:
-    x: 0.00001
-    y: 0.00001
-    z: 0.00001
+    x: 0.01
+    y: 0.01
+    z: 0.01
+
   robot:
     lost_threshold_sec: 0.5
-    ra_prior_noise: 0.005
-    rb_prior_noise: 0.005
-    dz_prior_noise: 0.002
+    ra_prior_noise: 0.3
+    rb_prior_noise: 0.3
+    dz_prior_noise: 0.05
     radius_min: 0.15
     radius_max: 0.5
-    default_radius_a: 0.3
-    default_radius_b: 0.2
+    default_radius_a: 0.35
+    default_radius_b: 0.21
     default_dz: 0.0
     ra_factor_noise:
-      x: 0.001
-      y: 0.001
-      z: 0.001
-      yaw: 0.001
+      x: 0.03
+      y: 0.03
+      z: 0.03
+      yaw: 0.05
     rbdz_factor_noise:
-      x: 0.001
-      y: 0.001
-      z: 0.001
-      yaw: 0.001
+      x: 0.03
+      y: 0.03
+      z: 0.03
+      yaw: 0.05
   outpost:
     lost_threshold_sec: 0.8
     default_radius: 0.26

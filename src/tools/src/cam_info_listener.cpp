@@ -19,7 +19,6 @@ hardware::CameraInfoListener::CameraInfoListener(quill::Logger *logger,
       camera_instance_id_({iox::TruncateToCapacity, camera_name.c_str()}),
       cam_info_sub_({"camera_info", camera_instance_id_, "data"}),
       cam_info_ok_(false) {
-  LOG_DEBUG(logger_, "Constructor: this = {}", static_cast<void *>(this));
   this->cam_info_listener_
       .attachEvent(cam_info_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
                    iox::popo::createNotificationCallback(
@@ -32,7 +31,6 @@ hardware::CameraInfoListener::CameraInfoListener(quill::Logger *logger,
 }
 
 hardware::CameraInfoListener::~CameraInfoListener() {
-  LOG_DEBUG(logger_, "Destructor: this = {}", static_cast<void *>(this));
   cam_info_listener_.detachEvent(cam_info_sub_,
                                  iox::popo::SubscriberEvent::DATA_RECEIVED);
 }
@@ -40,8 +38,6 @@ hardware::CameraInfoListener::~CameraInfoListener() {
 void hardware::CameraInfoListener::onCamInfoReceivedCallback(
     iox::popo::Subscriber<msgs::CameraInfo, msgs::Header> *subscriber,
     CameraInfoListener *self) {
-  LOG_DEBUG(self->logger_, "[cam_info_listener]: Callback: self = {}",
-            static_cast<void *>(self));
   subscriber->take().and_then(
       [subscriber, self](const iox::popo::Sample<const msgs::CameraInfo,
                                                  const msgs::Header> &sample) {
@@ -60,8 +56,6 @@ void hardware::CameraInfoListener::onCamInfoReceivedCallback(
 
 types::CameraInfo hardware::CameraInfoListener::get() {
   LOG_INFO(this->logger_, "start waiting for camera info.");
-  LOG_DEBUG(logger_, "get() called, this = {}", static_cast<void *>(this));
   this->cam_info_ok_.wait(false, std::memory_order_acquire);
-  LOG_DEBUG(logger_, "get() returning, this = {}", static_cast<void *>(this));
   return this->cam_info_;
 }

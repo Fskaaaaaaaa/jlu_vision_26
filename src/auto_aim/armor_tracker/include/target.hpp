@@ -7,7 +7,6 @@
 #include "quill/Logger.h"
 #include "types/ArmorType.hpp"
 #include <Eigen/Core>
-#include <atomic>
 #include <cstdint>
 #include <gtsam/nonlinear/ISAM2.h>
 
@@ -18,6 +17,11 @@
 #include <optional>
 
 namespace auto_aim {
+
+struct ArmorMatchError {
+  double distance;
+  double yaw_diff;
+};
 
 class Target {
 public:
@@ -44,8 +48,8 @@ private:
   // NOTE: 注意这个方法本身就是threadsafe的，再设锁会死锁
   void initStatus(const Eigen::Vector3d &armor_pos, double armor_yaw);
   // NOTE: 比较观测和预测，选择误差最小的
-  std::pair<ArmorIndex, double> matchArmor(const Armor &armor,
-                                           double dt_sec) const;
+  std::pair<ArmorIndex, ArmorMatchError> matchArmor(const Armor &armor,
+                                                    double dt_sec) const;
   // NOTE: 不更新除了isam以外的成员，返回的opt表示是否更新成功
   // statue、k和stamp的更新放到track方法里完成（即是当k非0返回null时reset）
   std::optional<TargetStatus> updateRobot(const std::vector<Armor> &armors,

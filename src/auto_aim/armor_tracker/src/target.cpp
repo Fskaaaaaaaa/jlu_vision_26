@@ -2,7 +2,9 @@
 #include "target.hpp"
 #include "configs.hpp"
 #include "factors.hpp"
+#include "math/angle_tools.hpp"
 #include "math/sigmoid_functions.hpp"
+#include "math/threshold_tools.hpp"
 #include "types.hpp"
 #include "types/ArmorType.hpp"
 
@@ -34,7 +36,7 @@ auto_aim::Target::Target(quill::Logger *logger, const TargetConfig &config,
 
 void auto_aim::Target::initStatus(const Eigen::Vector3d &armor_pos,
                                   double armor_yaw) {
-  bool outpost = type_ == types::ArmorType::Outpost;
+  bool outpost = (type_ == types::ArmorType::Outpost);
   auto r =
       outpost ? config_.outpost.default_radius : config_.robot.default_radius_a;
   auto xa = armor_pos.x();
@@ -69,7 +71,7 @@ void auto_aim::Target::initStatus(const Eigen::Vector3d &armor_pos,
   }
 }
 
-std::pair<auto_aim::ArmorIndex, double>
+std::pair<auto_aim::ArmorIndex, auto_aim::ArmorMatchError>
 auto_aim::Target::matchArmor(const Armor &armor, double dt_sec) const {
   const auto armor_idx_vec =
       (type_ == types::ArmorType::Outpost)
@@ -81,24 +83,32 @@ auto_aim::Target::matchArmor(const Armor &armor, double dt_sec) const {
                                                 ArmorIndex::_2,
                                                 ArmorIndex::_3,
                                             };
-  std::vector<std::pair<ArmorIndex, double>> idx_errors;
+  std::vector<std::pair<ArmorIndex, ArmorMatchError>> idx_errors;
+  auto status_predict = status_.predict(dt_sec);
   for (auto armor_index : armor_idx_vec) {
-    auto armor_predict = Armor::fromTargetStatus(status_, armor_index, dt_sec);
-    double pos_error = (armor_predict.position - armor.position).norm();
-    // NOTE: 因为单位不一样，yaw的error必须乘个权重
-    double yaw_error =
-        config_.yaw_error_weight *
+    auto armor_predict = Armor::fromTargetStatus(status_predict, armor_index);
+    // NOTE: 用于归一化误差的静态变量，只会初始化一次
+    double distance = (armor_predict.position - armor.position).norm();
+    double yaw_diff =
         std::abs(armor.yaw.localCoordinates(armor_predict.yaw).x());
-    idx_errors.emplace_back(
-        armor_index,
-        // 将误差映射到0~1区间
-        tools::logisticFunction(
-            (pos_error + yaw_error) * config_.match_error_scale, -1, 1));
+    idx_errors.emplace_back(armor_index, ArmorMatchError{distance, yaw_diff});
   }
+  static tools::ErrorNormalizer norm_pos(config_.translation_cdf_error0,
+                                         config_.translation_cdf_p0);
+  static tools::ErrorNormalizer norm_yaw(
+      tools::angle2Radian(config_.yaw_cdf_error0_degree), config_.yaw_cdf_p0);
   std::sort(idx_errors.begin(), idx_errors.end(),
-            [](const std::pair<ArmorIndex, double> &a,
-               const std::pair<ArmorIndex, double> &b) -> bool {
-              return a.second < b.second;
+            [this](const std::pair<ArmorIndex, ArmorMatchError> &a,
+                   const std::pair<ArmorIndex, ArmorMatchError> &b) -> bool {
+              const auto &[distance_a, yaw_diff_a] = a.second;
+              double error_a =
+                  norm_pos(distance_a) * (1 - config_.yaw_error_weight) +
+                  norm_yaw(yaw_diff_a) * config_.yaw_error_weight;
+              const auto &[distance_b, yaw_diff_b] = b.second;
+              double error_b =
+                  norm_pos(distance_a) * (1 - config_.yaw_error_weight) +
+                  norm_yaw(yaw_diff_b) * config_.yaw_error_weight;
+              return error_a < error_b;
             });
   return idx_errors.front();
 }
@@ -130,8 +140,9 @@ auto_aim::Target::track(const std::vector<types::Armor> &armors,
     if (!selected_armors.empty() && k_ == 0) {
       this->initStatus(selected_armors.front().position,
                        selected_armors.front().yaw.theta());
-      LOG_INFO(logger_, "[Target {}]: status init.",
-               rfl::enum_to_string(type_));
+      LOG_INFO(logger_, "[Target {}]: status init. xc{}, yc{}.",
+               rfl::enum_to_string(type_), status_.center_position.x(),
+               status_.center_position.y());
     }
     if (auto status_opt = (type_ == types::ArmorType::Base)
                               ? updateBase(selected_armors)
@@ -178,10 +189,10 @@ void auto_aim::Target::addMotionValuesFactors(
   auto status_predict = status_.predict(dt);
   Eigen::Vector3d predict_position = status_predict.center_position;
   gtsam::Rot2 predict_yaw = status_predict.center_yaw;
-  values.insert(X(k_), predict_position);
-  values.insert(R(k_), predict_yaw);
-  values.insert(V(k_), status_predict.center_velocity);
-  values.insert(W(k_), status_predict.center_vyaw);
+  values.insert(X(k), predict_position);
+  values.insert(R(k), predict_yaw);
+  values.insert(V(k), status_predict.center_velocity);
+  values.insert(W(k), status_predict.center_vyaw);
   if (k == 0) {
     graph.addPrior(X(0), status_predict.center_position,
                    gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
@@ -208,19 +219,19 @@ void auto_aim::Target::addMotionValuesFactors(
                               config_.translation_factor_noise.y,
                               config_.translation_factor_noise.z,
                           }),
-                          X(k_ - 1), V(k_ - 1), X(k_), dt});
+                          X(k - 1), V(k - 1), X(k), dt});
     graph.add(YawFactor{
         gtsam::noiseModel::Isotropic::Sigma(1, config_.yaw_factor_noise),
-        R(k_ - 1), W(k_ - 1), R(k_), dt});
+        R(k - 1), W(k - 1), R(k), dt});
     graph.add(VelocityFactor{gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
                                  config_.velocity_factor_noise.x,
                                  config_.velocity_factor_noise.y,
                                  config_.velocity_factor_noise.z,
                              }),
-                             V(k_ - 1), V(k_)});
+                             V(k - 1), V(k)});
     graph.add(VyawFactor{
         gtsam::noiseModel::Isotropic::Sigma(1, config_.vyaw_factor_noise),
-        W(k_ - 1), W(k_)});
+        W(k - 1), W(k)});
   }
 }
 
@@ -282,11 +293,14 @@ auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
   // 添加装甲板观测因子，非首帧时aromrs可以为空（直到超时）
   for (const auto &armor : armors) {
     auto [index, error] = matchArmor(armor, dt);
-    if (error > config_.max_match_error) {
-      LOG_WARNING(
-          logger_,
-          "[Target {}]: Huge armor matching error! index: {}, error: {}!",
-          rfl::enum_to_string(type_), static_cast<int>(index), error);
+    if (auto [distance, yaw_diff] = error;
+        distance > config_.max_match_distance_m ||
+        tools::radian2Angle(yaw_diff) > config_.max_match_yaw_diff_degree) {
+      LOG_WARNING(logger_,
+                  "[Target {}]: Huge armor matching error! index: {}, "
+                  "distance: {}, yaw_diff: {}(degree)!",
+                  rfl::enum_to_string(type_), static_cast<int>(index),
+                  error.distance, tools::radian2Angle(error.yaw_diff));
       return std::nullopt;
     }
     if (index == ArmorIndex::_0 || index == ArmorIndex::_2) {

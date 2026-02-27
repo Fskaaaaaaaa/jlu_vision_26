@@ -35,17 +35,19 @@ auto_aim::Armor::Armor(const Eigen::Vector3d &center_pos, double center_yaw,
 auto_aim::Armor auto_aim::Armor::fromTargetStatus(const TargetStatus &status,
                                                   ArmorIndex armor_index,
                                                   double dt_sec) {
-  auto _status = status.predict(dt_sec);
-  if (_status.type == types::ArmorType::Base)
+  auto status_predict = status.predict(dt_sec);
+  if (status_predict.type == types::ArmorType::Base)
     return Armor::frmoBase(status.center_position, status.center_yaw,
                            armor_index);
-  return _status.type == types::ArmorType::Outpost
-             ? Armor::fromOutpost(_status.center_position, _status.center_yaw,
-                                  _status.radius, _status.dz_a, _status.dz_b,
-                                  armor_index)
-             : Armor::fromRobot(_status.center_position, _status.center_yaw,
-                                _status.radius_a, _status.radius_b, _status.dz,
-                                armor_index);
+  return status_predict.type == types::ArmorType::Outpost
+             ? Armor::fromOutpost(status_predict.center_position,
+                                  status_predict.center_yaw,
+                                  status_predict.radius, status_predict.dz_a,
+                                  status_predict.dz_b, armor_index)
+             : Armor::fromRobot(
+                   status_predict.center_position, status_predict.center_yaw,
+                   status_predict.radius_a, status_predict.radius_b,
+                   status_predict.dz, armor_index);
 }
 
 auto_aim::Armor auto_aim::Armor::frmoBase(const Eigen::Vector3d &center_pos,
@@ -76,18 +78,19 @@ auto_aim::Armor::Armor(const Eigen::Vector3d &center_pos, double center_yaw,
 
 auto_aim::Armor auto_aim::Armor::fromRobot(const Eigen::Vector3d &center_pos,
                                            double center_yaw, double radius_a,
-                                           double radius_b, double _dz,
+                                           double radius_b, double dz,
                                            ArmorIndex armor_index) {
   auto between_angle = (2 * std::numbers::pi) / 4;
   auto armor_yaw = center_yaw + static_cast<int>(armor_index) * between_angle;
-  auto [r, dz] =
+  auto [r, status_dz] =
       (armor_index == ArmorIndex::_0 || armor_index == ArmorIndex::_2)
           ? std::pair{radius_a, 0.0}
-          : std::pair{radius_b, _dz};
+          : std::pair{radius_b, dz};
   auto armor_x = center_pos.x() - radius_b * std::cos(armor_yaw);
   auto armor_y = center_pos.y() - radius_b * std::sin(armor_yaw);
   Armor armor;
-  armor.position = Eigen::Vector3d{armor_x, armor_y, center_pos.z() + dz};
+  armor.position =
+      Eigen::Vector3d{armor_x, armor_y, center_pos.z() + status_dz};
   armor.yaw = gtsam::Rot2::fromAngle(armor_yaw);
   return armor;
 }

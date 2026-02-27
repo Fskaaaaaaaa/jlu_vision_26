@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <cmath>
 #include <numbers>
 #include <utility>
@@ -30,10 +29,6 @@ inline double angle2Radian(double angle) {
 
 inline double radian2Angle(double radian) {
   return radian * 180. / std::numbers::pi;
-}
-
-inline double limitZeroThres(double in, double zero_thres, double max) {
-  return std::min(in < zero_thres ? 0. : in, max);
 }
 
 inline Eigen::Quaterniond rpyToQuaterniond(const Eigen::Vector3d &rpy_angle) {
