@@ -18,7 +18,7 @@ public:
   Planner(quill::Logger *logger, const PlannerConfig &config);
 
   msgs::AimCommand
-  plan(const std::optional<TargetStatus> &target_state,
+  plan(const TargetStatus &target_state,
        const std::chrono::system_clock::time_point &target_stamp,
        double bullet_speed);
 

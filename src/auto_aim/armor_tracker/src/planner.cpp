@@ -60,15 +60,15 @@ auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
 }
 
 msgs::AimCommand auto_aim::Planner::plan(
-    const std::optional<TargetStatus> &target_state,
+    const TargetStatus &target_state,
     const std::chrono::system_clock::time_point &target_stamp,
     double bullet_speed) {
-  if (!target_state.has_value())
+  if (target_state.track_status == TrackStatus::Lost)
     return {.control = false};
   double dt_sec = std::chrono::duration_cast<std::chrono::duration<double>>(
                       std::chrono::system_clock::now() - target_stamp)
                       .count();
-  return plan(target_state.value(), dt_sec, bullet_speed);
+  return plan(target_state, dt_sec, bullet_speed);
 }
 
 msgs::AimCommand auto_aim::Planner::plan(const TargetStatus &target_state,

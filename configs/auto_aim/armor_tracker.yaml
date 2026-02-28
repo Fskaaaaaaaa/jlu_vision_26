@@ -19,11 +19,6 @@ serial_topic:
   instance: tracker
   event: data
 target_conf:
-  translation_cdf_error0: 1.0
-  translation_cdf_p0: 0.9
-  yaw_cdf_error0_degree: 45
-  yaw_cdf_p0: 0.9
-  yaw_error_weight: 0.7
   max_match_distance_m: 1.0
   max_match_yaw_diff_degree: 45.0
 

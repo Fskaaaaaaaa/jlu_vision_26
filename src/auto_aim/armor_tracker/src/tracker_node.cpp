@@ -168,41 +168,34 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
           // 绘制所有目标装甲板（红色）
           drawTarget(*target, image, image_stamp);
           // 发布在线的目标信息
-          if (auto [status_opt, stamp] = target->getStatusStamp();
-              status_opt.has_value()) {
-            const auto &status = status_opt.value();
-            auto type_name = rfl::enum_to_string(status.type);
-            plotter_.plot(type_name + "x", status_opt->center_position.x());
-            plotter_.plot(type_name + "y", status_opt->center_position.y());
-            plotter_.plot(type_name + "z", status_opt->center_position.z());
-            plotter_.plot(type_name + "vx", status_opt->center_velocity.x());
-            plotter_.plot(type_name + "vy", status_opt->center_velocity.y());
-            plotter_.plot(type_name + "vz", status_opt->center_velocity.z());
-            plotter_.plot(type_name + "yaw", status_opt->center_yaw);
-            plotter_.plot(type_name + "vyaw", status_opt->center_vyaw);
-            if (status.type == types::ArmorType::Outpost) {
-              plotter_.plot(type_name + "dz_a", status_opt->dz_a);
-              plotter_.plot(type_name + "dz_b", status_opt->dz_b);
-              plotter_.plot(type_name + "r", status_opt->radius);
-            } else if (status.type != types::ArmorType::Base) {
-              plotter_.plot(type_name + "r_a", status_opt->radius_a);
-              plotter_.plot(type_name + "r_b", status_opt->radius_b);
-              plotter_.plot(type_name + "dz", status_opt->dz);
-            }
+          auto [status, stamp] = target->getStatusStamp();
+          auto type_name = rfl::enum_to_string(status.type);
+          plotter_.plot(type_name + "x", status.center_position.x());
+          plotter_.plot(type_name + "y", status.center_position.y());
+          plotter_.plot(type_name + "z", status.center_position.z());
+          plotter_.plot(type_name + "vx", status.center_velocity.x());
+          plotter_.plot(type_name + "vy", status.center_velocity.y());
+          plotter_.plot(type_name + "vz", status.center_velocity.z());
+          plotter_.plot(type_name + "yaw", status.center_yaw);
+          plotter_.plot(type_name + "vyaw", status.center_vyaw);
+          if (status.type == types::ArmorType::Outpost) {
+            plotter_.plot(type_name + "dz_a", status.dz_a);
+            plotter_.plot(type_name + "dz_b", status.dz_b);
+            plotter_.plot(type_name + "r", status.radius);
+          } else if (status.type != types::ArmorType::Base) {
+            plotter_.plot(type_name + "r_a", status.radius_a);
+            plotter_.plot(type_name + "r_b", status.radius_b);
+            plotter_.plot(type_name + "dz", status.dz);
           }
         }
         if (auto aim_target = this->selected_target_.load();
             aim_target != types::ArmorType::Negative) {
-          if (auto status_opt = targets_.at(aim_target)->getStatusStamp().first;
-              status_opt.has_value()) {
-            auto status_predict =
-                status_opt.value().predict(planner_.aim0_predict_time_.load());
-            auto aimed_armor =
-                Trajectory::getClosestArmor(status_predict, 0, 0);
-            // 绘制正在标准的装甲板（绿色）
-            drawArmor(aimed_armor, image, image_stamp,
-                      tools::Color::bgr::GREEN);
-          }
+          auto status = targets_.at(aim_target)->getStatusStamp().first;
+          auto status_predict =
+              status.predict(planner_.aim0_predict_time_.load());
+          auto aimed_armor = Trajectory::getClosestArmor(status_predict, 0, 0);
+          // 绘制正在标准的装甲板（绿色）
+          drawArmor(aimed_armor, image, image_stamp, tools::Color::bgr::GREEN);
         }
         if (configs_.show_image)
           cv::imshow("tracker", image);
@@ -245,18 +238,22 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   // 将坐标变换到odom系并抹除变换失败的装甲板
   std::erase_if(armors, [&](types::Armor &armor) {
     try {
-      Eigen::Isometry3d armor_pose_camera;
-      // 注意PNP得到的是绝对坐标，需要先平移
+      Eigen::Isometry3d armor_pose_camera{Eigen::Isometry3d::Identity()};
+      // 虽然PNP得到的是绝对坐标，但发布出来时已经是prerotate的了
       armor_pose_camera.pretranslate(armor.position);
-      armor_pose_camera.rotate(armor.orientation);
+      armor_pose_camera.rotate(armor.orientation.matrix());
       Eigen::Isometry3d T = self->tf_buffer_.get(
           self->configs_.odom_frame_id, armor.frame_id, armor.stamp,
           std::chrono::nanoseconds{static_cast<int64_t>(
               self->configs_.tf_query_tolerance_ms * 1e6)});
       Eigen::Isometry3d armor_pose_odom = T * armor_pose_camera;
+      LOG_TRACE_L1(self->logger_, "armor position before tf: x{},y{},z{}",
+                   armor.position.x(), armor.position.y(), armor.position.z());
       armor.position = armor_pose_odom.translation();
       armor.orientation =
           Eigen::Quaterniond{armor_pose_odom.rotation().matrix()};
+      LOG_TRACE_L1(self->logger_, "armor position after tf: x{},y{},z{}",
+                   armor.position.x(), armor.position.y(), armor.position.z());
       return false;
     } catch (const std::exception &e) {
       LOG_ERROR(self->logger_, "tf from {} to {} failed: {}", armor.frame_id,
@@ -328,9 +325,7 @@ void auto_aim::TrackerNode::drawArmor(
 void auto_aim::TrackerNode::drawTarget(
     const Target &target, cv::Mat &image,
     const std::chrono::system_clock::time_point &image_stamp) const {
-  auto [status_opt, stamp] = target.getStatusStamp();
-  if (!status_opt.has_value())
-    return;
+  auto [status, stamp] = target.getStatusStamp();
   auto dt = std::chrono::duration_cast<
                 std::chrono::duration<double, std::chrono::seconds::period>>(
                 image_stamp - stamp)
@@ -338,7 +333,7 @@ void auto_aim::TrackerNode::drawTarget(
   if (dt < 0)
     LOG_TRACE_L3(logger_, "stamp image is before stamp target {} last track.",
                  rfl::enum_to_string(target.type_));
-  auto status_predict = status_opt.value().predict(dt);
+  auto status_predict = status.predict(dt);
   // 绘制所有装甲板
   for (const auto &armor : status_predict.armors())
     drawArmor(armor, image, image_stamp);

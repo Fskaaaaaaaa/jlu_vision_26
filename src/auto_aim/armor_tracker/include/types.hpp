@@ -37,6 +37,12 @@ private:
   std::string message_;
 };
 
+enum TrackStatus {
+  Lost,
+  TempLost,
+  Tracking,
+};
+
 struct Armor;
 
 struct TargetStatus {
@@ -50,10 +56,12 @@ struct TargetStatus {
   double dz_a;
   double dz_b;
   // center status
-  Eigen::Vector3d center_position;
-  Eigen::Vector3d center_velocity;
-  double center_yaw;
-  double center_vyaw;
+  Eigen::Vector3d center_position = Eigen::Vector3d::Zero();
+  Eigen::Vector3d center_velocity = Eigen::Vector3d::Zero();
+  double center_yaw = 0;
+  double center_vyaw = 0;
+  TrackStatus track_status = TrackStatus::Lost;
+  std::uint64_t k = 0;
   TargetStatus predict(double dt) const;
   std::vector<Armor> armors() const;
 };
@@ -73,7 +81,7 @@ struct Armor : public types::Armor {
 
   // NOTE: 只初始化position和yaw字段，小心UB
   static Armor fromTargetStatus(const TargetStatus &status,
-                                ArmorIndex armor_index, double dt_sec = 0.0);
+                                ArmorIndex armor_index);
   static Armor fromRobot(const Eigen::Vector3d &center_pos, double center_yaw,
                          double radius_a, double radius_b, double dz,
                          ArmorIndex armor_index);
@@ -85,6 +93,7 @@ struct Armor : public types::Armor {
 
   // Eigen::Vector3d position;
   gtsam::Rot2 yaw;
+  ArmorIndex index;
 
   // std::chrono::system_clock::time_point stamp;
   // std::string frame_id;
