@@ -1,5 +1,6 @@
 #include "hardware/enemy_color_listener.hpp"
 #include "msgs/EnemyColor.hpp"
+#include "rfl/enums.hpp"
 #include "types/EnemyColor.hpp"
 #include "types/IceoryxServiceDescription.hpp"
 
@@ -47,8 +48,14 @@ types::EnemyColor hardware::EnemyColorListener::getEnemyColor() const {
     return dt >= time_out_sec_;
   };
   do {
+    if (timeout()) {
+      LOG_WARNING(logger_,
+                  "Waiting enemy_color time out! Use default_color {}.",
+                  rfl::enum_to_string(color_.load()));
+      break;
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds{50});
-  } while (!color_ok_.load() && !timeout());
+  } while (!color_ok_.load());
   return color_.load();
 }
 

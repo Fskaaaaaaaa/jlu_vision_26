@@ -1,5 +1,8 @@
 log_level: Debug
-frame_id: "serial"
+serial_frame_id: serial
+odom_frame_id: odom
+gimbal_fram_id: gimbal
+stamp_offset_sec: 0.0
 
 iceoryx_conf:
   aim_command_topic:

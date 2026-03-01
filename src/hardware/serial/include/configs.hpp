@@ -5,8 +5,6 @@
 
 #include "quill/core/LogLevel.h"
 #include "serial/serial.h"
-#include "types/EnemyColor.hpp"
-#include "types/TaskMode.hpp"
 
 #include <cstdint>
 
@@ -29,7 +27,10 @@ struct IecoryxConfig {
 struct SerialConfigs {
   SerialConfig serial_conf;
   IecoryxConfig iceoryx_conf;
-  std::string frame_id;
+  std::string serial_frame_id;
+  std::string gimbal_fram_id;
+  std::string odom_frame_id;
+  double stamp_offset_sec;
   // bool publish_latency_ms;
   quill::LogLevel log_level;
 };

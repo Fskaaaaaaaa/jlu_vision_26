@@ -28,6 +28,8 @@
 
 #include <array>
 #include <chrono>
+#include <iomanip>
+#include <ios>
 #include <memory>
 #include <optional>
 #include <string>
@@ -71,7 +73,7 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
   }
   // 初始化敌方颜色
   self_color_ =
-      hardware::EnemyColorListener{logger_, configs_.default_enemy_color}
+      hardware::EnemyColorListener{logger_, configs_.default_enemy_color, 2}
           .getSelfColor();
   // 获取相机内外参并初始化pnp和ba
   auto camera_info =
@@ -188,9 +190,30 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
   } else {
     this->publishHeartbeat(stamp);
   }
-  if (configs_.show_optimize_result)
+  if (configs_.show_optimize_result) {
+    static std::chrono::system_clock::time_point last_stamp{
+        std::chrono::system_clock::now()};
+    auto fps = 1 / std::chrono::duration_cast<std::chrono::duration<double>>(
+                       stamp - last_stamp)
+                       .count();
+    last_stamp = stamp;
+    auto latency = std::chrono::duration_cast<std::chrono::duration<double>>(
+                       std::chrono::system_clock::now() - stamp)
+                       .count() *
+                   1000;
+    std::stringstream latency_ss, fps_ss;
+    latency_ss << "Latency: " << std::fixed << std::setprecision(2) << latency
+               << "ms";
+    fps_ss << "Fps: " << std::fixed << std::setprecision(2) << fps;
+    auto latency_str = latency_ss.str();
+    auto fps_str = fps_ss.str();
+    cv::putText(result_img, latency_str, cv::Point(10, 30),
+                cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 255, 0), 2);
+    cv::putText(result_img, fps_str, cv::Point(10, 60),
+                cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 255, 0), 2);
     for (const auto &armor : armors)
       this->drawArmor(armor, result_img, tools::Color::bgr::GREEN);
+  }
   return debug ? std::optional{result_img} : std::nullopt;
 }
 

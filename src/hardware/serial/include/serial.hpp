@@ -1,19 +1,20 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #pragma once
 #include "configs.hpp"
-#include "iceoryx_posh/popo/listener.hpp"
-#include "iceoryx_posh/popo/subscriber.hpp"
 #include "msgs/AimCommand.hpp"
 #include "msgs/BulletId.hpp"
 #include "msgs/EnemyColor.hpp"
 #include "msgs/GimbalInfo.hpp"
 #include "msgs/Header.hpp"
 #include "msgs/TaskMode.hpp"
+#include "transform/dynamic_tf_publisher.hpp"
 
+#include "iceoryx_posh/popo/listener.hpp"
 #include "iceoryx_posh/popo/publisher.hpp"
+#include "iceoryx_posh/popo/subscriber.hpp"
 #include "quill/Logger.h"
 #include "serial/serial.h"
-#include <atomic>
+
 #include <thread>
 
 namespace hardware {
@@ -40,6 +41,7 @@ private:
   iox::popo::Publisher<msgs::BulletId, msgs::Header> bullet_id_pub_;
   iox::popo::Subscriber<msgs::AimCommand, msgs::Header> aim_cmd_sub_;
   iox::popo::Listener aim_cmd_listener_;
+  tf::DynamicTransformPublisher tf_pub_;
 };
 
 } // namespace hardware

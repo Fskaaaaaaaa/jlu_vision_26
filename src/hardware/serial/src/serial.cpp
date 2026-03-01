@@ -1,7 +1,9 @@
 #include "serial.hpp"
+#include "Eigen/src/Geometry/Transform.h"
 #include "basic/time_tools.hpp"
 #include "configs.hpp"
 #include "crc.hpp"
+#include "math/angle_tools.hpp"
 #include "msgs/AimCommand.hpp"
 #include "msgs/BulletId.hpp"
 #include "msgs/EnemyColor.hpp"
@@ -43,7 +45,8 @@ hardware::Serial::Serial(quill::Logger *logger, const SerialConfigs &configs)
                          .description),
       aim_cmd_sub_(types::IceoryxServiceDescription{
           configs_.iceoryx_conf.aim_command_topic}
-                       .description) {
+                       .description),
+      tf_pub_(logger_) {
   // setup serial
   try {
     serial_.setBaudrate(configs_.serial_conf.baudrate);
@@ -121,7 +124,7 @@ void hardware::Serial::receiveThread() {
       // publish ReceivePacket
       auto now = tools::getTimeNowNanoSec();
       iox::cxx::string<10> frame_id{iox::TruncateToCapacity,
-                                    configs_.frame_id.c_str()};
+                                    configs_.serial_frame_id.c_str()};
       this->task_mode_pub_.loan().and_then(
           [&](iox::popo::Sample<msgs::TaskMode, msgs::Header> &sample) {
             sample.getUserHeader().stamp_ns = now;
@@ -160,8 +163,16 @@ void hardware::Serial::receiveThread() {
             LOG_DEBUG(logger_, "publish bullet_id: {}",
                       static_cast<uint32_t>(packet.bullet_id));
           });
-    } catch (const std::exception &ex) {
-      LOG_ERROR(logger_, "Error while receiving data: {}", ex.what());
+      Eigen::Isometry3d T{Eigen::Isometry3d::Identity()};
+      T.rotate(tools::rpyToQuaterniond(
+          Eigen::Vector3d{packet.roll, packet.pitch, packet.yaw}));
+      this->tf_pub_.publishTransform(
+          T, configs_.odom_frame_id, configs_.gimbal_fram_id,
+          std::chrono::system_clock::now() +
+              std::chrono::duration_cast<std::chrono::system_clock::duration>(
+                  std::chrono::duration<double>(configs_.stamp_offset_sec)));
+    } catch (const std::exception &e) {
+      LOG_ERROR(logger_, "Error while receiving data: {}", e.what());
       reopenPort();
     }
   }
