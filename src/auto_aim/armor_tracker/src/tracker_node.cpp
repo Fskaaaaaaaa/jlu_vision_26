@@ -54,6 +54,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       tf_listener_(logger_, tf_buffer_), gimbal_listener_(logger_),
       aimcommand_pub_(
           types::IceoryxServiceDescription{configs_.serial_topic}.description),
+      selected_target_(types::ArmorType::Negative),
       planner_(logger_, configs_.planner_conf) {
   LOG_INFO(logger_, "start tracker node!");
   tf_listener_.init();
@@ -81,8 +82,10 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
   this->plan_thread_ = std::jthread{[this]() {
     LOG_INFO(logger_, "plan_thread start!");
     while (!iox::hasTerminationRequested()) {
-      if (!task_mode_listener_.isOnTask() ||
-          !targets_.contains(selected_target_.load())) { // 排除Nigger
+      bool on_task =
+          configs_.awalys_on_task ? true : task_mode_listener_.isOnTask();
+      if (!on_task ||
+          !targets_.contains(selected_target_.load())) { // 无锁定状态
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
         continue;
@@ -93,8 +96,10 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       auto cmd = planner_.plan(status, stamp, bullet_speed);
       // NOTE: selected_target的更新由装甲板订阅回调驱动（选择光心最近）
       // 当不控制云台时（可能是track超时或弹道解算异常），放弃锁定这个目标
-      if (!cmd.control)
+      if (!cmd.control) {
         selected_target_.store(types::ArmorType::Negative);
+        LOG_WARNING(logger_, "Aimcommand not control! Select negative target!");
+      }
       aimcommand_pub_.loan()
           .and_then(
               [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
@@ -164,11 +169,18 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
           this->image_stamp_cache_.first.copyTo(image); // 避免锁住imagelistener
           image_stamp = image_stamp_cache_.second;
         }
-        for (const auto &[type, target] : targets_) {
+        if (auto aim_target = this->selected_target_.load();
+            aim_target != types::ArmorType::Negative) {
+          auto [status, stamp] = targets_.at(aim_target)->getStatusStamp();
+          auto status_predict =
+              status.predict(planner_.aim0_predict_time_.load());
+          auto [aimed_armor, armor_index] =
+              Trajectory::getClosestArmorIndex(status_predict, 0, 0);
+          // 绘制正在标准的装甲板（绿色）
+          drawArmor(aimed_armor, image, image_stamp, tools::Color::bgr::GREEN);
+          const auto &target = targets_.at(aim_target);
           // 绘制所有目标装甲板（红色）
           drawTarget(*target, image, image_stamp);
-          // 发布在线的目标信息
-          auto [status, stamp] = target->getStatusStamp();
           auto type_name = rfl::enum_to_string(status.type);
           plotter_.plot(type_name + "x", status.center_position.x());
           plotter_.plot(type_name + "y", status.center_position.y());
@@ -187,15 +199,6 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
             plotter_.plot(type_name + "r_b", status.radius_b);
             plotter_.plot(type_name + "dz", status.dz);
           }
-        }
-        if (auto aim_target = this->selected_target_.load();
-            aim_target != types::ArmorType::Negative) {
-          auto status = targets_.at(aim_target)->getStatusStamp().first;
-          auto status_predict =
-              status.predict(planner_.aim0_predict_time_.load());
-          auto aimed_armor = Trajectory::getClosestArmor(status_predict, 0, 0);
-          // 绘制正在标准的装甲板（绿色）
-          drawArmor(aimed_armor, image, image_stamp, tools::Color::bgr::GREEN);
         }
         if (configs_.show_image)
           cv::imshow("tracker", image);
@@ -235,6 +238,13 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
             [](const Armor &a, const Armor &b) -> bool {
               return a.distance_to_image_center < b.distance_to_image_center;
             });
+  // 选择光心最近装甲板作为打击目标
+  // 注意目标丢失的情况是由planner处理的。
+  if (self->selected_target_.load() != armors.front().type) {
+    self->selected_target_.store(armors.front().type);
+    LOG_INFO(self->logger_, "Select target {}!",
+             rfl::enum_to_string(armors.front().type));
+  }
   // 将坐标变换到odom系并抹除变换失败的装甲板
   std::erase_if(armors, [&](types::Armor &armor) {
     try {
@@ -247,12 +257,12 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
           std::chrono::nanoseconds{static_cast<int64_t>(
               self->configs_.tf_query_tolerance_ms * 1e6)});
       Eigen::Isometry3d armor_pose_odom = T * armor_pose_camera;
-      LOG_TRACE_L1(self->logger_, "armor position before tf: x{},y{},z{}",
+      LOG_TRACE_L3(self->logger_, "armor position before tf: x{},y{},z{}",
                    armor.position.x(), armor.position.y(), armor.position.z());
       armor.position = armor_pose_odom.translation();
       armor.orientation =
           Eigen::Quaterniond{armor_pose_odom.rotation().matrix()};
-      LOG_TRACE_L1(self->logger_, "armor position after tf: x{},y{},z{}",
+      LOG_TRACE_L3(self->logger_, "armor position after tf: x{},y{},z{}",
                    armor.position.x(), armor.position.y(), armor.position.z());
       return false;
     } catch (const std::exception &e) {
@@ -276,7 +286,7 @@ void auto_aim::TrackerNode::drawArmor(
         tf_buffer_.get(configs_.camera_frame_id, configs_.odom_frame_id, stamp,
                        std::chrono::nanoseconds{static_cast<int64_t>(
                            configs_.tf_query_tolerance_ms * 1e6)});
-    Eigen::Isometry3d armor_pose_odom;
+    Eigen::Isometry3d armor_pose_odom{Eigen::Isometry3d::Identity()};
     // NOTE: PNP得到的是绝对坐标，先平移
     armor_pose_odom.pretranslate(armor.position);
     double pitch =

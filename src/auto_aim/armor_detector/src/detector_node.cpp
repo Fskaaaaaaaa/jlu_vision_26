@@ -50,19 +50,19 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
       this->mt_detector_ = std::make_unique<MTDetectorDL>(
           logger_, configs_.yolo_version, configs_.yolo_conf,
           configs.queue_size);
-      LOG_INFO(logger_, "use traditional detector muti thread.");
+      LOG_INFO(logger_, "use DL detector muti thread.");
     } else {
       this->mt_detector_ = std::make_unique<MTDetectorTrad>();
-      LOG_INFO(logger_, "use DL detector muti thread.");
+      LOG_INFO(logger_, "use traditional detector muti thread.");
     }
   } else {
     if (configs_.use_DL) {
       this->st_detector_ = std::make_unique<STDetectorDL>(
           logger_, configs_.yolo_version, configs_.yolo_conf);
-      LOG_INFO(logger_, "use traditional detector single thread.");
+      LOG_INFO(logger_, "use DL detector single thread.");
     } else {
       this->st_detector_ = std::make_unique<STDetectorTrad>();
-      LOG_INFO(logger_, "use DL detector single thread.");
+      LOG_INFO(logger_, "use traditional detector single thread.");
     }
   }
   // 初始化PCA优化器
@@ -113,7 +113,6 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
         auto debug_img_opt = this->afterDetect(image, armors, frame_id, stamp);
         if (debug_img_opt.has_value()) {
           const auto &img = debug_img_opt.value();
-          // cv::resize(img, img, {}, 0.5, 0.5);
           cv::imshow("detector", img);
           cv::waitKey(configs_.step_by_step_debug ? 0 : 1);
         }
@@ -134,11 +133,31 @@ void auto_aim::DetectorNode::imageCallback(
     this->mt_detector_->push(image, frame_id, stamp);
     return;
   }
+  auto infer_start = std::chrono::system_clock::now();
   auto armors = this->st_detector_->detect(image);
+  auto infer_end = std::chrono::system_clock::now();
+  std::stringstream infer_ss, camera_ss;
+  auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(
+                infer_end - infer_start)
+                .count() *
+            1000;
+  auto camera_latency =
+      std::chrono::duration_cast<std::chrono::duration<double>>(infer_start -
+                                                                stamp)
+          .count() *
+      1000;
+  infer_ss << "Yolo: " << std::fixed << std::setprecision(2) << dt << "ms";
+  camera_ss << "Camera: " << std::fixed << std::setprecision(2)
+            << camera_latency << "ms";
+  auto infer_str = infer_ss.str();
+  auto camera_str = camera_ss.str();
   auto debug_img_opt = this->afterDetect(image, armors, frame_id, stamp);
   if (debug_img_opt.has_value()) {
     const auto &img = debug_img_opt.value();
-    // cv::resize(img, img, {}, 0.5, 0.5);
+    cv::putText(img, infer_str, cv::Point(10, 90), cv::FONT_HERSHEY_SIMPLEX,
+                1.0, cv::Scalar(0, 255, 0), 2);
+    cv::putText(img, camera_str, cv::Point(10, 120), cv::FONT_HERSHEY_SIMPLEX,
+                1.0, cv::Scalar(0, 255, 0), 2);
     cv::imshow("detector", img);
     cv::waitKey(configs_.step_by_step_debug ? 0 : 1);
   }

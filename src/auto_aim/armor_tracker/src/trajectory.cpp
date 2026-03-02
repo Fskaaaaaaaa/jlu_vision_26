@@ -98,26 +98,23 @@ std::optional<auto_aim::YawPitchFlytime> auto_aim::Trajectory::resolveYawPitch(
   };
 }
 
-auto_aim::Armor
-auto_aim::Trajectory::getClosestArmor(const TargetStatus &status, double odom_x,
-                                      double odom_y) {
+std::pair<auto_aim::Armor, auto_aim::ArmorIndex>
+auto_aim::Trajectory::getClosestArmorIndex(const TargetStatus &status,
+                                           double odom_x, double odom_y) {
   auto armors = status.armors();
-  std::sort(armors.begin(), armors.end(),
-            [&](const Armor &a, const Armor &b) -> bool {
-              auto distance_a =
-                  std::hypot(a.position.x() - odom_x, a.position.y() - odom_y);
-              auto distance_b =
-                  std::hypot(b.position.x() - odom_x, b.position.y() - odom_y);
-              return distance_a < distance_b;
-            });
-  // 因为armors由armor_index_vec生成，不用担心越界
-  return armors.at(0);
-}
-
-Eigen::Vector3d
-auto_aim::Trajectory::getSeletedArmorPosition(const TargetStatus &status,
-                                              double odom_x, double odom_y) {
-  return auto_aim::Trajectory::getClosestArmor(status, odom_x, odom_y).position;
+  double min_distance = DBL_MAX;
+  Armor selected_armor;
+  ArmorIndex selected_index;
+  for (int i = 0; i < armors.size(); i++) {
+    const auto &armor = armors.at(i);
+    auto distance =
+        std::hypot(armor.position.x() - odom_x, armor.position.y() - odom_y);
+    if (distance < min_distance) {
+      selected_armor = armor;
+      selected_index = static_cast<ArmorIndex>(i);
+    }
+  }
+  return {selected_armor, selected_index};
 }
 
 std::optional<auto_aim::YawPitchFlytime> auto_aim::Trajectory::resolveTarget(
@@ -125,37 +122,70 @@ std::optional<auto_aim::YawPitchFlytime> auto_aim::Trajectory::resolveTarget(
     double delay_time_image_to_now_sec, bool use_analytical_solution,
     bool iterative_fly_time, double odom_x, double odom_y) {
   if (!iterative_fly_time) {
-    Eigen::Vector3d position = getSeletedArmorPosition(
+    auto [armor, index] = getClosestArmorIndex(
         status.predict(delay_time_image_to_now_sec), odom_x, odom_y);
-    return resolveYawPitch(bullet_speed, position, use_analytical_solution);
+    return resolveYawPitch(bullet_speed, armor.position,
+                           use_analytical_solution);
   }
+  // NOTE:
+  // 斜观测spin有时选板会反复在两个armor间横跳，无法收敛，此时应该避免打弹
   TargetStatus status_d = status;
   double error = DBL_MAX;
   int iteration_count = 0;
+  int switch_armor_count = 0;
   YawPitchFlytime result;
   status_d = status.predict(delay_time_image_to_now_sec);
-  Eigen::Vector3d position = getSeletedArmorPosition(status, odom_x, odom_y);
+  auto [armor, index] = getClosestArmorIndex(status_d, odom_x, odom_y);
+  ArmorIndex last_index;
   while (error >= config_.aim_ok_error_m) {
-    if (auto result_opt =
-            resolveYawPitch(bullet_speed, position, use_analytical_solution);
+    if (switch_armor_count > config_.max_aim_switch_armor_count) {
+      LOG_WARNING(logger_, "[Trajectory]: Aim switch armor {} times! abandon.",
+                  switch_armor_count);
+      return std::nullopt;
+    }
+    if (auto result_opt = resolveYawPitch(bullet_speed, armor.position,
+                                          use_analytical_solution);
         !result_opt.has_value() ||
         iteration_count++ > config_.max_aim_iterate_count) {
       // 无解情况直接返回
+      LOG_WARNING(logger_,
+                  "[Trajectory]: fail to solve YawPitchFlytime in {} "
+                  "iterations, error {}.",
+                  iteration_count, error);
       return std::nullopt;
     } else {
       result = result_opt.value();
     }
     // 使用fly_time更新目标预测位置
     status_d = status.predict(delay_time_image_to_now_sec + result.fly_time);
-    position = getSeletedArmorPosition(status, odom_x, odom_y);
-    error = (solver_.getPosXyzByT(
-                 solver_.transformPos2DGimbalToBarrel(
-                     tools::BallisticState2D{0, 0, result.pitch, bullet_speed}),
-                 result.yaw, result.fly_time) -
-             position)
-                .norm();
+    last_index = index;
+    std::tie(armor, index) = getClosestArmorIndex(status_d, odom_x, odom_y);
+    if (last_index != index) {
+      switch_armor_count++;
+    }
+    auto state = tools::BallisticState2D{
+        0,
+        0,
+        result.pitch,
+        bullet_speed,
+    };
+    auto shoot_position =
+        use_analytical_solution
+            ? solver_.getPosXyzByT(state, result.yaw, result.fly_time, true)
+            : solver_.getPosXyzByT(
+                  solver_.transformPos2DGimbalToBarrel(tools::BallisticState2D{
+                      0, 0, result.pitch, bullet_speed}),
+                  result.yaw, result.fly_time);
+    error = (shoot_position - armor.position).norm();
+    LOG_TRACE_L2(logger_,
+                 "iteration_count {}, error {}, positoin: ({}, "
+                 "{}, {}), pitch "
+                 "{}, yaw {}, fly_time {}.",
+                 iteration_count, error, armor.position.x(), armor.position.y(),
+                 armor.position.z(), result.pitch, result.yaw, result.fly_time);
   }
-  LOG_TRACE_L1(logger_, "success solve YawPitchFlytime in {} iterations",
-               iteration_count);
+  LOG_DEBUG(logger_,
+            "success solve YawPitchFlytime in {} iterations, error {}.",
+            iteration_count, error);
   return result;
 }

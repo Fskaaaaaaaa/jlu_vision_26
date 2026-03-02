@@ -87,7 +87,7 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetStatus &target_state,
     std::tie(traj, yaw0) = getTrajectoryYaw0(target_state, dt, bullet_speed);
   } catch (const std::exception &e) {
     LOG_WARNING(logger_, "{}, bullet_speed: {}.", e.what(), bullet_speed);
-    return {false};
+    return {.control = false};
   }
   // 3. Solve yaw
   Eigen::VectorXd x0(2);
@@ -130,28 +130,37 @@ std::pair<Eigen::MatrixXd, double>
 auto_aim::Planner::getTrajectoryYaw0(const TargetStatus &target_state,
                                      double dt_image_to_now,
                                      double bullet_speed) {
-  auto aim = [&](const TargetStatus &state, bool high_precision = false) {
+  auto aim = [&](const TargetStatus &state, bool analytical, bool iterative,
+                 bool no_except) {
     auto yaw_pitch_flytime_opt = traj_solver_.resolveTarget(
-        state, bullet_speed, dt_image_to_now,
-        high_precision ? false : config_.use_analytical_solution,
-        high_precision ? true : config_.iterative_fly_time);
-    if (!yaw_pitch_flytime_opt.has_value())
-      throw std::runtime_error("Unsolvable bullet trajectory!");
-
-    return yaw_pitch_flytime_opt.value();
+        state, bullet_speed, dt_image_to_now, analytical, iterative);
+    static YawPitchFlytime last_aim;
+    if (!yaw_pitch_flytime_opt.has_value()) {
+      if (!no_except)
+        throw std::runtime_error("Unsolvable bullet trajectory!");
+      // HACK:
+      // 迭代情况下，求解轨迹需要的50次弹道时难免碰到“选板横跳、不可击中”的情况，
+      //  为避免规划失败，使用上一帧的解算结果来填补空缺
+      return last_aim;
+    }
+    return last_aim = yaw_pitch_flytime_opt.value();
   };
-  auto aim0 = aim(target_state, true);
+  auto aim0 =
+      aim(target_state, config_.analytical_yaw0, config_.iterative_yaw0, false);
   double yaw0 = aim0.yaw; // mid
   aim0_predict_time_.store(aim0.fly_time + dt_image_to_now);
   Eigen::MatrixXd traj(4, trajectory_horizon_);
   TargetStatus status = target_state.predict(
       -config_.dt_sec * (config_.trajectory_half_horizon + 1));
-  auto yaw_pitch_last = aim(status);
+  auto yaw_pitch_last =
+      aim(status, config_.analytical_traj, config_.iterative_traj, false);
   status = status.predict(config_.dt_sec);
-  auto yaw_pitch = aim(status);                   // left
+  auto yaw_pitch = aim(status, config_.analytical_traj, config_.iterative_traj,
+                       false);                    // left
   for (int i = 0; i < trajectory_horizon_; i++) { // until right
     status = status.predict(config_.dt_sec);
-    auto yaw_pitch_next = aim(status);
+    auto yaw_pitch_next =
+        aim(status, config_.analytical_traj, config_.iterative_traj, true);
     auto yaw_vel = tools::limitRadian(yaw_pitch_next.yaw - yaw_pitch_last.yaw) /
                    (2 * config_.dt_sec);
     auto pitch_vel =

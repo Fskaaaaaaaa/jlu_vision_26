@@ -25,10 +25,20 @@ BallisticTrajectorySolver::rk45SingleStep(const BallisticState2D &pos0) const {
 
 Eigen::Vector3d
 BallisticTrajectorySolver::getPosXyzByT(const BallisticState2D &pos0,
-                                        double yaw, double time) const {
-  auto &&[x, y, z] = ballistic_models::getXyzByT(
-      pos0.toTuple(), std::move(yaw), std::move(time), params_.time_step,
-      params_.k, params_.g);
+                                        double yaw, double time,
+                                        bool analytic) const {
+  if (!analytic) {
+    auto &&[x, y, z] = ballistic_models::getXyzByT(
+        pos0.toTuple(), std::move(yaw), std::move(time), params_.time_step,
+        params_.k, params_.g);
+    return {x, y, z};
+  }
+  auto vx = pos0.velocity * std::cos(pos0.pitch);
+  auto vy0 = pos0.velocity * std::sin(pos0.pitch);
+  auto distance = pos0.distance + vx * time;
+  auto z = pos0.height + vy0 * time - 0.5 * params_.g * time * time;
+  auto x = distance * std::cos(yaw);
+  auto y = distance * std::sin(yaw);
   return {x, y, z};
 }
 

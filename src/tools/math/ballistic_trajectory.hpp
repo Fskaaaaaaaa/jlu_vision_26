@@ -45,7 +45,7 @@ public:
   BallisticState2D getPos2DByT(const BallisticState2D &pos0, double time) const;
   BallisticState2D rk45SingleStep(const BallisticState2D &pos0) const;
   Eigen::Vector3d getPosXyzByT(const BallisticState2D &pos0, double yaw,
-                               double time) const;
+                               double time, bool analytical = false) const;
   static bool isExceedTargetRange(const tools::BallisticState2D &bullet_pos2d,
                                   const Eigen::Vector3d &target_pos3d);
   static bool isExceedTargetRange(const Eigen::Vector3d &bullet_pos2d,

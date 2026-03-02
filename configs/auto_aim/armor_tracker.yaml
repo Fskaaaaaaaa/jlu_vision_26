@@ -1,5 +1,6 @@
 log_level: Info
 debug_mode: true
+awalys_on_task: true
 show_image: false
 publish_target_armors: false
 tf_query_tolerance_ms: 200.0
@@ -73,8 +74,10 @@ planner_conf:
   dt_sec: 0.01
   fail_polling_interval_sec: 0.2
   trajectory_half_horizon: 50
-  use_analytical_solution: true
-  iterative_fly_time: true
+  analytical_yaw0: false
+  iterative_yaw0: true
+  analytical_traj: true
+  iterative_traj: true
   shoot_offset: 0
   yaw_offset: 0.0
   pitch_offset: 0.0
@@ -92,12 +95,13 @@ planner_conf:
     g: 9.8
     k: 0.103
     length_gimbal_to_barrel: 0.107
-    time_step: 0.004
+    time_step: 0.0002
     max_pitch_iterate_count: 100
     min_pitch_error: 0.01
-    gimbal_pitch_min_degree: 30.0
-    gimbal_pitch_max_degree: -5.0
-    half_search_range_degree: 5.0
+    gimbal_pitch_min_degree: -5.0
+    gimbal_pitch_max_degree: 30.0
+    half_search_range_degree: 45
     max_fly_time: 1.0
     max_aim_iterate_count: 100
-    aim_ok_error_m: 0.01
+    max_aim_switch_armor_count: 10
+    aim_ok_error_m: 0.02

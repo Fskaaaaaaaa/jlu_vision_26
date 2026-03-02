@@ -3,7 +3,7 @@ robot_conf:
   r1: 0.35
   r2: 0.21
   dz: 0.1
-  armor_type: Four
+  armor_type: Three
   armor_color: Blue
   drag_linear_acceleration: 8.0
   drag_angular_acceleration: 8.0

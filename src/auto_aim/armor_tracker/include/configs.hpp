@@ -70,6 +70,7 @@ struct TrajectoryConfig {
   double half_search_range_degree = 5.0;
   double max_fly_time = 1.0;
   int max_aim_iterate_count = 20;
+  int max_aim_switch_armor_count;
   double aim_ok_error_m = 0.005;
 };
 
@@ -77,9 +78,11 @@ struct PlannerConfig {
   double dt_sec;                    // MPC更新的间隔时间
   double fail_polling_interval_sec; // 非ontask时轮询task的时间间隔
   int trajectory_half_horizon;      // 生成的瞄准轨迹一半在过去，一半在未来
-  bool use_analytical_solution;     // 是否使用解析解
-  bool iterative_fly_time;          // 是否考虑子弹飞行时敌人的运动
-  int shoot_offset; // 预判几个MPC帧，在iterative_fly_time时应当为0
+  bool analytical_yaw0;
+  bool iterative_yaw0;
+  bool analytical_traj; // 是否使用解析解
+  bool iterative_traj;  // 是否考虑子弹飞行时敌人的运动
+  int shoot_offset;     // 预判几个MPC帧，在iterative_fly_time时应当为0
   double yaw_offset;
   double pitch_offset;
   double fire_thresh;
@@ -98,6 +101,7 @@ struct PlannerConfig {
 struct TrackerConfigs {
   quill::LogLevel log_level;
   bool debug_mode;
+  bool awalys_on_task;
   bool show_image;
   bool publish_target_armors;
   double tf_query_tolerance_ms;

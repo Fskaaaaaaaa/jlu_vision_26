@@ -41,7 +41,6 @@ auto_aim::Robot::Robot(quill::Logger *logger, const RobotConfig &config,
           std::chrono::milliseconds(config_.time_step_ms));
     }
     LOG_DEBUG(logger_, "physic_pub_thread stop.");
-    // BUG: 资源释放有问题
   }};
 }
 
@@ -59,7 +58,7 @@ std::vector<msgs::Armor> auto_aim::Robot::getArmorMsgsFromStatus() {
     armors.emplace_back(
         msgs::Armor{.armor_type = static_cast<int>(config_.armor_type),
                     .armor_color = static_cast<int>(config_.armor_color),
-                    .distance_to_image_center = 0,
+                    .distance_to_image_center = status_.position.norm(),
                     .position =
                         {
                             .x = status_.position.x() + std::cos(armor_yaw) * r,
