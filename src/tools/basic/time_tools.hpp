@@ -1,7 +1,7 @@
 // Copyright (c) 2026 F. All Rights Reserved.
+#pragma once
 
 #include <chrono>
-#include <cstdint>
 
 namespace tools {
 inline long getTimeNowNanoSec() {

@@ -7,7 +7,7 @@
 #include "hardware/cam_info_listener.hpp"
 #include "hardware/camera_params_changer.hpp"
 #include "hardware/enemy_color_listener.hpp"
-#include "hardware/image_listener.hpp"
+#include "hardware/image_poller.hpp"
 #include "hardware/task_mode_listener.hpp"
 #include "lightbar_corrector.hpp"
 #include "msgs/Armor.hpp"
@@ -92,8 +92,8 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
         LOG_INFO(logger_, "on task! change camera params.");
       });
   // 初始化图像订阅回调
-  this->image_listener_ =
-      std::make_unique<hardware::ImageListener<msgs::Image1440x1080_8UC3>>(
+  this->image_poller_ =
+      std::make_unique<hardware::ImagePoller<msgs::Image1440x1080_8UC3>>(
           logger_, configs_.camera_name,
           [this](const cv::Mat &image, const std::string frame_id,
                  const std::chrono::system_clock::time_point &stamp) {

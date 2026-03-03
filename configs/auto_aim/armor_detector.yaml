@@ -4,7 +4,7 @@ camera_params:
   gain: 15.0
   frame_rate: -1.0
 use_muti_thread: true
-queue_size: 16
+queue_size: 4
 detect_when_idle: true
 use_DL: true
 use_pca: true

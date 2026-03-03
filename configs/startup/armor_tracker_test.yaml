@@ -1,0 +1,47 @@
+working_dir: "."
+processes:
+  iox_roudi:
+    command: iox-roudi -c configs/iox-roudi_config.toml
+    availability:
+      restart: always
+  camera:
+    command: build/linux/x86_64/release/camera
+    availability:
+      restart: always
+    depends_on:
+      iox_roudi:
+        condition: process_started
+  static_tf_bc:
+    command: build/linux/x86_64/release/static_tf_bc
+    depends_on:
+      iox_roudi:
+        condition: process_started
+  rmviz3d:
+    command: build/linux/x86_64/release/rmviz3d
+    depends_on:
+      iox_roudi:
+        condition: process_started
+      static_tf_bc:
+        condition: process_started
+  tracker:
+    command: build/linux/x86_64/release/armor_tracker
+    depends_on:
+      iox_roudi:
+        condition: process_started
+      camera:
+        condition: process_started
+      static_tf_bc:
+        condition: process_started
+  plot_juggler:
+    command: ~/Applications/PlotJuggler-x86_64_97452b746c8c6b582d2297a9866b00a4.AppImage
+    depends_on:
+      tracker:
+        condition: process_started
+  # fake_ap:
+  #   command: build/linux/x86_64/release/fake_ap
+  #   is_interactive: true
+  #   depends_on:
+  #     iox_roudi:
+  #       condition: process_started
+  #     tracker:
+  #       condition: process_started

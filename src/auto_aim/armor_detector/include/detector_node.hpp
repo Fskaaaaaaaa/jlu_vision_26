@@ -5,7 +5,8 @@
 #include "configs.hpp"
 #include "detector.hpp"
 #include "hardware/camera_params_changer.hpp"
-#include "hardware/image_listener.hpp"
+// #include "hardware/image_listener.hpp"
+#include "hardware/image_poller.hpp"
 #include "hardware/task_mode_listener.hpp"
 #include "lightbar_corrector.hpp"
 #include "msgs/Armor.hpp"
@@ -51,8 +52,11 @@ private:
 
   hardware::CameraParamsChanger cam_params_changer_;
   std::unique_ptr<hardware::TaskModeListener> task_mode_listener_;
-  std::unique_ptr<hardware::ImageListener<msgs::Image1440x1080_8UC3>>
-      image_listener_;
+  // std::unique_ptr<hardware::ImageListener<msgs::Image1440x1080_8UC3>>
+  //     image_listener_;
+  std::unique_ptr<hardware::ImagePoller<msgs::Image1440x1080_8UC3>>
+      image_poller_;
+
   iox::popo::Publisher<msgs::Armor, msgs::Header> armor_pub_;
 
   std::unique_ptr<MTDetector> mt_detector_;

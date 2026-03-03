@@ -25,7 +25,7 @@ hardware::Camera::Camera(quill::Logger *logger, const CameraConfigs &configs)
       image_pub_({"image_raw",
                   {iox::TruncateToCapacity, configs_.camera_name.c_str()},
                   "data"},
-                 {0}),
+                 {0U}),
       cam_info_pub_({"camera_info",
                      {iox::TruncateToCapacity, configs_.camera_name.c_str()},
                      "data"}),
@@ -91,6 +91,9 @@ bool hardware::Camera::publishImage() {
         // 理想情况的延迟在0.1ms左右，抖动时最高可达到20～30ms
         // 估计是接受到的sample占用shm不释放导致的
         // 暂时的解决方案是让运行频率：detector > camera
+        // update 26.3.3
+        // 当图像发布频率高于detector处理频率时，启动自瞄时会明显有一段“暖机”
+        // 及帧率会缓慢地从十几帧爬升到三十至四十帧，可能会突然抖动掉回十几帧后重新爬升
         sample.getUserHeader().frame_id = {iox::TruncateToCapacity,
                                            configs_.camera_frame_id.c_str()};
         sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();

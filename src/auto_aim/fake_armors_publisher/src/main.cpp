@@ -12,7 +12,6 @@
 #include "configs.hpp"
 #include "robot.hpp"
 
-#include <atomic>
 #include <cxxopts.hpp>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/event.hpp>
@@ -20,8 +19,6 @@
 #include <ftxui/dom/elements.hpp>
 #include <iceoryx_posh/runtime/posh_runtime.hpp>
 #include <iox/signal_watcher.hpp>
-#include <optional>
-#include <ostream>
 #include <quill/Backend.h>
 #include <quill/LogMacros.h>
 #include <quill/backend/ThreadUtilities.h>
@@ -32,6 +29,8 @@
 #include <atomic>
 #include <cmath>
 #include <fstream>
+#include <optional>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
