@@ -6,21 +6,21 @@
 void fb::GeometryTransformManager::operator()(
     std::shared_ptr<open3d::geometry::Geometry3D> geometry_ptr,
     const Eigen::Isometry3d &transform_in_world) {
-  auto name = geometry_ptr->GetName();
+  auto key = geometry_ptr.get();
   if (auto mesh = std::dynamic_pointer_cast<open3d::geometry::TriangleMesh>(
           geometry_ptr)) {
-    if (!cache_.contains(name))
-      cache_.emplace(name, mesh->vertices_);
-    mesh->vertices_ = cache_.at(name);
+    if (!cache_.contains(key))
+      cache_.emplace(key, mesh->vertices_);
+    mesh->vertices_ = cache_.at(key);
     mesh->Transform(transform_in_world.matrix());
     mesh->ComputeVertexNormals();
     return;
   }
   if (auto lines =
           std::dynamic_pointer_cast<open3d::geometry::LineSet>(geometry_ptr)) {
-    if (!cache_.contains(name))
-      cache_.emplace(name, lines->points_);
-    lines->points_ = cache_.at(name);
+    if (!cache_.contains(key))
+      cache_.emplace(key, lines->points_);
+    lines->points_ = cache_.at(key);
     lines->Transform(transform_in_world.matrix());
     return;
   }

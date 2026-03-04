@@ -16,7 +16,7 @@
 #include <functional>
 
 namespace hardware {
-template <typename ImageT> class ImageListener {
+template <typename ImageT> class [[deprecated]] ImageListener {
 public:
   ImageListener(
       quill::Logger *logger, const std::string &camera_name,

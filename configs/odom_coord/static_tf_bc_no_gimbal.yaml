@@ -13,14 +13,13 @@ static_broudcaster_conf:
         roll: 0.0
         pitch: 0.0
         yaw: 0.0
-    # TODO: odom到gimbal的变换由serial发布
-    - parent_frame_id: gimbal
+    - parent_frame_id: odom
       child_frame_id: camera
       translation:
         x: 0.0
         y: 0.0
         z: 0.0
       rpy_angle:
-        roll: 90.0
-        pitch: -90.0
-        yaw: 0.0
+        roll: -90.0
+        pitch: 0.0
+        yaw: -90.0

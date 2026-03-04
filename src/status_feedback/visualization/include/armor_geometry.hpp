@@ -2,10 +2,12 @@
 #pragma once
 
 #include "configs.hpp"
+#include "fast_tf/fast_tf.hpp"
 #include "msgs/Armor.hpp"
 #include "msgs/Header.hpp"
 #include "open3d/geometry/TriangleMesh.h"
 #include "open3d_tools.hpp"
+#include "transform/tf_listener.hpp"
 #include "types/Armor.hpp"
 
 #include "iceoryx_posh/popo/listener.hpp"
@@ -40,5 +42,7 @@ private:
   GeometryTransformManager transform_;
   std::shared_ptr<open3d::geometry::TriangleMesh> armor_mesh_;
   std::set<std::string> last_armor_ids_;
+  tf::TransformListener tf_listener_;
+  fast_tf::detail::transform_buffer tf_buffer_;
 };
 } // namespace fb

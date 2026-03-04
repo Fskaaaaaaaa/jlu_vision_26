@@ -19,7 +19,9 @@ public:
                   const Eigen::Isometry3d &transform_in_world);
 
 private:
-  std::unordered_map<std::string, std::vector<Eigen::Vector3d>> cache_;
+  std::unordered_map<open3d::geometry::Geometry3D *,
+                     std::vector<Eigen::Vector3d>>
+      cache_;
 };
 
 // WARNING: vibe coding!

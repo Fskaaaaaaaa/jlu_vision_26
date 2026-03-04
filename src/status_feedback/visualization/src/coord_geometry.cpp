@@ -59,9 +59,8 @@ void fb::CoordGeometry::update(
   // update coords
   for (const auto &frame_id : config_.frame_ids) {
     try {
-      Eigen::Isometry3d T = this->tf_buffer_.get(
-          frame_id, config_.static_frame_id, now, tolerance);
-
+      Eigen::Isometry3d T = this->tf_buffer_.get(config_.static_frame_id,
+                                                 frame_id, now, tolerance);
       for (auto &&geom_ptr : geom_ptrs)
         if (geom_ptr->GetName() == frame_id)
           transform_(geom_ptr, T);

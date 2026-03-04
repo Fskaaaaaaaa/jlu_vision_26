@@ -21,12 +21,14 @@ struct CoordGeometryConfig {
 };
 
 struct ArmorGeometryConfig {
+  std::string fixed_frame_id;
+  int tf_query_time_tolerance_ms = 100;
   std::string path_to_armor_stl;
   std::array<std::string, 3> service_instance_event;
   double armor_scale;
 };
 
-struct TargetGeometryConfig {
+struct [[deprecated]] TargetGeometryConfig {
   confs::IceoryxServiceDescription msg_source;
   bool show_vel_arrow;
   double target_scale;
@@ -36,7 +38,7 @@ struct TargetGeometryConfig {
 struct VisualizationConfigs {
   CoordGeometryConfig coord_conf;
   ArmorGeometryConfig armor_conf;
-  TargetGeometryConfig target_conf;
+  // TargetGeometryConfig target_conf;
   // BuffDrawerConfig buff_conf;
   // BulletDrawerConfig bullet_conf;
 

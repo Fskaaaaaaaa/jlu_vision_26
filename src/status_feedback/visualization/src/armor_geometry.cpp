@@ -1,5 +1,7 @@
 // Copyright (c) 2026 Author. All Rights Reserved.
 #include "armor_geometry.hpp"
+#include "Eigen/src/Geometry/Quaternion.h"
+#include "Eigen/src/Geometry/Transform.h"
 #include "msgs/Armor.hpp"
 #include "msgs/Header.hpp"
 #include "types/Armor.hpp"
@@ -17,7 +19,9 @@
 #include "types/EnemyColor.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cstdlib>
+#include <exception>
 #include <iterator>
 #include <memory>
 #include <mutex>
@@ -32,9 +36,10 @@ fb::ArmorGeometry::ArmorGeometry(quill::Logger *logger,
                   {iox::TruncateToCapacity,
                    config_.service_instance_event.at(1).c_str()},
                   {iox::TruncateToCapacity,
-                   config_.service_instance_event.at(2).c_str()}}) {
+                   config_.service_instance_event.at(2).c_str()}}),
+      tf_listener_(logger_, tf_buffer_) {
   LOG_INFO(logger_, "start armor_geometry.");
-
+  this->tf_listener_.init();
   this->armor_mesh_ = open3d::io::CreateMeshFromFile(config_.path_to_armor_stl);
   armor_mesh_->Scale(config_.armor_scale, {0, 0, 0});
   if (armor_mesh_ == nullptr) {
@@ -84,7 +89,21 @@ void fb::ArmorGeometry::update(
     std::set<std::shared_ptr<open3d::geometry::Geometry3D>> &geom_ptrs) {
   std::scoped_lock lk{armors_mtx_};
   std::set<std::string> current_armor_ids;
+  Eigen::Isometry3d T_camera_to_fixed;
   for (auto &&armor : armors_cache_) {
+    Eigen::Isometry3d armor_pose{Eigen::Isometry3d::Identity()};
+    armor_pose.pretranslate(armor.position);
+    armor_pose.rotate(armor.orientation.matrix());
+    try {
+      T_camera_to_fixed = tf_buffer_.get(
+          config_.fixed_frame_id, armor.frame_id, armor.stamp,
+          std::chrono::milliseconds{config_.tf_query_time_tolerance_ms});
+      // std::cout << "T matrix:\n" << T.matrix() << std::endl;
+    } catch (const std::exception &e) {
+      LOG_ERROR(logger_, "error looking transform form {} to {}: {}",
+                armor.frame_id, config_.fixed_frame_id, e.what());
+      continue;
+    }
     auto armor_id = rfl::enum_to_string(armor.type) + '_' +
                     rfl::enum_to_string(armor.color);
     bool has_same_id{false};
@@ -102,6 +121,7 @@ void fb::ArmorGeometry::update(
     Eigen::Isometry3d T{Eigen::Isometry3d::Identity()};
     T.pretranslate(armor.position);
     T.rotate(armor.orientation.matrix());
+    T = T_camera_to_fixed * T;
     bool is_in_rander_set{false};
     for (auto &&geo_ptr : geom_ptrs)
       if (geo_ptr->GetName() == armor_id) {
@@ -137,4 +157,5 @@ void fb::ArmorGeometry::update(
         it++;
       }
   last_armor_ids_ = current_armor_ids;
+  // LOG_INFO(logger_, "geom_ptrs size = {}", geom_ptrs.size());
 }

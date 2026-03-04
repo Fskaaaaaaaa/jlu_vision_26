@@ -2,6 +2,7 @@ working_dir: "."
 processes:
   iox_roudi:
     command: iox-roudi -c configs/iox-roudi_config.toml
+    ready_log_line: "RouDi is ready for clients"
     availability:
       restart: always
   camera:
@@ -10,6 +11,18 @@ processes:
       restart: always
     depends_on:
       iox_roudi:
+        condition: process_log_ready
+  static_tf_bc:
+    command: build/linux/x86_64/release/static_tf_bc -c configs/odom_coord/static_tf_bc_no_gimbal.yaml
+    depends_on:
+      iox_roudi:
+        condition: process_log_ready
+  rmviz3d:
+    command: build/linux/x86_64/release/rmviz3d
+    depends_on:
+      iox_roudi:
+        condition: process_log_ready
+      static_tf_bc:
         condition: process_started
   detector:
     command: build/linux/x86_64/release/armor_detector
