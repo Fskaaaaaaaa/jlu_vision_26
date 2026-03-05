@@ -74,14 +74,13 @@ struct PlannerConfig {
 struct TrackerConfigs {
   quill::LogLevel log_level;
   bool plot_info;
-  bool awalys_on_task;
+  bool always_on_task;
   bool show_image;
   double tf_query_tolerance_ms;
   std::string camera_name;
   std::string camera_frame_id; // 这两个用在tf上
   std::string odom_frame_id;
   confs::IceoryxServiceDescription armors_sub_topic;
-  confs::IceoryxServiceDescription armors_pub_topic;
   confs::IceoryxServiceDescription serial_topic;
   RobotConfig robot_conf;
   PlannerConfig planner_conf;

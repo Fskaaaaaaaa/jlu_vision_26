@@ -3,7 +3,6 @@
 #include "configs.hpp"
 #include "tracker_node.hpp"
 
-#include <chrono>
 #include <cxxopts.hpp>
 #include <iceoryx_posh/runtime/posh_runtime.hpp>
 #include <iox/signal_watcher.hpp>

@@ -66,6 +66,7 @@ private:
 };
 
 struct RobotTargetState : public TargetState {
+  RobotTargetState predict(double dt) const;
   double radius_a;
   double radius_b;
   double dz;

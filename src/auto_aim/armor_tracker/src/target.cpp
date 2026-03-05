@@ -33,13 +33,21 @@ std::vector<auto_aim::ArmorMatchResult> auto_aim::Target::matchArmor(
     double max_match_distance, double max_match_yaw_diff) {
   std::vector<ArmorMatchResult> results;
   int i = 0;
+  // std::cout << "\nstart matching armor!\nobs armor: xyz"
+  //           << obs.position.transpose() << " yaw" << obs.yaw.degrees()
+  //           << std::endl;
   for (const auto &armor : armors) {
     auto distance = (armor.position - obs.position).norm();
     auto yaw_diff = std::abs(obs.yaw.localCoordinates(armor.yaw).x());
+    // std::cout << "armor xyz" << armor.position.transpose() << " yaw"
+    //           << armor.yaw.degrees() << " distance" << distance << "
+    //           yaw_diff"
+    //           << yaw_diff << '\n'
+    //           << std::endl;
     if (distance <= max_match_distance && yaw_diff <= max_match_yaw_diff)
       results.emplace_back(static_cast<ArmorIndex>(i++), distance, yaw_diff);
   }
-  std::ranges::sort(results, std::ranges::less{}, &ArmorMatchResult::yaw_diff);
+  std::ranges::sort(results, std::ranges::less{}, &ArmorMatchResult::distance);
   return results;
 }
 
@@ -78,9 +86,9 @@ auto_aim::RobotTarget::getArmorsFromTargetState(const TargetState &state,
 
 std::vector<auto_aim::ArmorPositionYaw>
 auto_aim::RobotTarget::getArmorsFromTargetState(
-    const TargetState &state) const {
-  return RobotTarget::getArmorsFromTargetState(
-      state, target_state_.radius_a, target_state_.radius_b, target_state_.dz);
+    const RobotTargetState &state) const {
+  return RobotTarget::getArmorsFromTargetState(state, state.radius_a,
+                                               state.radius_b, state.dz);
 }
 
 auto_aim::RobotTargetState auto_aim::RobotTarget::getTargetStateFromArmor(
@@ -131,24 +139,24 @@ auto_aim::TrackState::State auto_aim::RobotTarget::track(
   auto [traget_state, track_state] = update(selected_armors, dt);
   if (track_state == TrackState::State::TRACKING) {
     if (track_state_.state != TrackState::State::TRACKING) {
-      track_state_.state = TrackState::State::TRACKING;
       LOG_INFO(logger_, "[Target {}]: {} -> TRACKING. dt{}, k{}.",
                rfl::enum_to_string(target_state_.type),
                rfl::enum_to_string(track_state_.state), dt, track_state_.k);
     }
     std::scoped_lock lk{state_mtx_};
     target_state_ = traget_state;
+    track_state_.state = track_state;
     track_state_.stamp_last_tracking = stamp;
     track_state_.stamp_last_update = stamp;
     track_state_.k += 1;
   } else if (track_state == TrackState::State::TEMPLOST) {
     if (track_state_.state != TrackState::State::TEMPLOST) {
-      track_state_.state = TrackState::State::TEMPLOST;
       LOG_INFO(logger_, "[Target {}]: TRACKING -> TEMPLOST. dt{}, k{}.",
                rfl::enum_to_string(target_state_.type), dt, track_state_.k);
     }
     std::scoped_lock lk{state_mtx_};
     target_state_ = traget_state;
+    track_state_.state = track_state;
     track_state_.stamp_last_update = stamp;
     track_state_.k += 1;
   } else if (track_state == TrackState::State::LOST) {
@@ -233,6 +241,9 @@ void auto_aim::RobotTarget::addMotionValuesFactors(
         W(k),
     });
   }
+  LOG_TRACE_L1(logger_,
+               "[Target {}]: add motion values factors. k = {}, dt = {}.",
+               rfl::enum_to_string(target_state_.type), k, dt);
 }
 
 void auto_aim::RobotTarget::addArmorValuesFactors(
@@ -240,8 +251,12 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
     const std::vector<std::pair<ArmorPositionYaw, ArmorIndex>> &armor_indexs,
     std::uint64_t k) const {
   if (k == 0) {
-    values.insert(A(0), config_.default_radius);
-    values.insert(B(0), config_.default_radius);
+    values.insert(A(0), tools::logisticInverse(config_.default_radius,
+                                               config_.radius_min,
+                                               config_.radius_max));
+    values.insert(B(0), tools::logisticInverse(config_.default_radius,
+                                               config_.radius_min,
+                                               config_.radius_max));
     values.insert(Z(0), config_.default_dz);
     graph.addPrior(
         A(0),
@@ -295,29 +310,32 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
       });
     }
   }
+  LOG_TRACE_L1(logger_, "[Target {}]: add {} armor factors. k = {}.",
+               rfl::enum_to_string(target_state_.type), armor_indexs.size(), k);
 }
 
 std::pair<auto_aim::RobotTargetState, auto_aim::TrackState::State>
 auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
                               double dt) const {
   // 超时丢失
+  auto dt_tracking_to_update =
+      std::chrono::duration_cast<std::chrono::duration<double>>(
+          track_state_.stamp_last_update - track_state_.stamp_last_tracking)
+          .count();
   if (track_state_.state != TrackState::State::LOST &&
       // 注意dt是从update算的，得手动补偿下track到update的间隔
-      dt + std::chrono::duration_cast<std::chrono::duration<double>>(
-               track_state_.stamp_last_update -
-               track_state_.stamp_last_tracking)
-                  .count() >
-          config_.lost_threshold_sec) {
+      dt + dt_tracking_to_update > config_.lost_threshold_sec) {
     LOG_INFO(logger_, "[Target {}]: Time out! dt{}.",
-             rfl::enum_to_string(target_state_.type), dt);
+             rfl::enum_to_string(target_state_.type),
+             dt + dt_tracking_to_update);
     return {{}, TrackState::State::LOST};
   }
-  // 切换到跟踪状态前需要由观测初始化target_state
-  auto target_state = target_state_;
+  auto target_state = target_state_.predict(dt);
   if (track_state_.state == TrackState::State::LOST) {
     if (armors.empty()) {
       return {{}, TrackState::State::LOST};
     } else {
+      // 切换到跟踪状态前需要由观测初始化target_state
       target_state = getTargetStateFromArmor(armors.front());
     }
   }

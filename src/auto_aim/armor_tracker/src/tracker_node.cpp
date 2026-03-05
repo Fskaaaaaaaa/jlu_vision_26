@@ -80,7 +80,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
     LOG_INFO(logger_, "plan_thread start!");
     while (!iox::hasTerminationRequested()) {
       bool on_task =
-          configs_.awalys_on_task ? true : task_mode_listener_.isOnTask();
+          configs_.always_on_task ? true : task_mode_listener_.isOnTask();
       if (!on_task || !targets_.contains(aiming_target_.load())) { // 无锁定状态
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
@@ -226,9 +226,13 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
           std::chrono::nanoseconds{static_cast<int64_t>(
               self->configs_.tf_query_tolerance_ms * 1e6)});
       Eigen::Isometry3d armor_pose_odom = T * armor_pose_camera;
+      LOG_TRACE_L3(self->logger_, "armor position before tf: x{},y{},z{}",
+                   armor.position.x(), armor.position.y(), armor.position.z());
       armor.position = armor_pose_odom.translation();
       armor.orientation =
           Eigen::Quaterniond{armor_pose_odom.rotation().matrix()};
+      LOG_TRACE_L3(self->logger_, "armor position after tf: x{},y{},z{}",
+                   armor.position.x(), armor.position.y(), armor.position.z());
       return false;
     } catch (const std::exception &e) {
       LOG_ERROR(self->logger_, "tf from {} to {} failed: {}", armor.frame_id,

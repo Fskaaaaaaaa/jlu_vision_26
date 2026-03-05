@@ -1,8 +1,7 @@
-log_level: Info
+log_level: TraceL1
 plot_info: true
-awalys_on_task: true
+always_on_task: true
 show_image: false
-publish_target_armors: false
 tf_query_tolerance_ms: 200.0
 camera_name: camera0
 camera_frame_id: camera
@@ -11,72 +10,54 @@ armors_sub_topic:
   service: armors
   instance: fake_ap
   event: data
-armors_pub_topic:
-  service: armors
-  instance: fake_ap
-  event: data
 serial_topic:
   service: aim_command
   instance: tracker
   event: data
-target_conf:
-  max_match_distance_m: 0.5
-  max_match_yaw_diff_degree: 30.0
-
+robot_conf:
+  max_match_distance_m: 1.0
+  max_match_yaw_diff_degree: 45.0
+  lost_threshold_sec: 0.5
   yaw_prior_noise: 0.2
   vyaw_prior_noise: 0.5 
-  yaw_factor_noise: 0.05 
-  vyaw_factor_noise: 0.1
-
   translation_prior_noise:
     x: 0.1
     y: 0.1
     z: 0.1
-  translation_factor_noise:
-    x: 0.03
-    y: 0.03
-    z: 0.03
   velocity_prior_noise:
     x: 0.5
     y: 0.5
     z: 0.5
+
+  yaw_factor_noise: 0.05 
+  vyaw_factor_noise: 0.05
+  translation_factor_noise:
+    x: 0.03
+    y: 0.03
+    z: 0.03
   velocity_factor_noise:
     x: 0.01
     y: 0.01
     z: 0.01
+  radius_prior_noise: 0.2
+  radius_min: 0.15
+  default_radius: 0.26
+  radius_max: 0.5
+  dz_prior_noise: 0.1
+  default_dz: 0.0
+  obs_factor_noise:
+    x: 0.03
+    y: 0.03
+    z: 0.03
+    w: 0.05
 
-  robot:
-    lost_threshold_sec: 0.5
-    ra_prior_noise: 0.5
-    rb_prior_noise: 0.5
-    dz_prior_noise: 0.1
-    radius_min: 0.15
-    radius_max: 0.5
-    default_radius_a: 0.26
-    default_radius_b: 0.26
-    default_dz: 0.0
-    ra_factor_noise:
-      x: 0.05
-      y: 0.05
-      z: 0.05
-      yaw: 1.0
-    rbdz_factor_noise:
-      x: 0.05
-      y: 0.05
-      z: 0.05
-      yaw: 1.0
-  outpost:
-    lost_threshold_sec: 0.8
-    default_radius: 0.26
-    default_dz_a: 0.1
-    default_dz_b: -0.1
 planner_conf:
   dt_sec: 0.01
   fail_polling_interval_sec: 0.2
   trajectory_half_horizon: 50
-  analytical_yaw0: true
+  rk45_yaw0: false
   iterative_yaw0: false
-  analytical_traj: true
+  rk45_traj: false
   iterative_traj: false
   shoot_offset: 0
   yaw_offset: 0.0
@@ -92,16 +73,16 @@ planner_conf:
   default_bullet_speed: 22.0
   min_bullet_speed: 10.0
   trajectory_conf:
-    g: 9.8
-    k: 0.103
-    length_gimbal_to_barrel: 0.107
-    time_step: 0.0002
-    max_pitch_iterate_count: 100
-    min_pitch_error: 0.01
-    gimbal_pitch_min_degree: -10.0
-    gimbal_pitch_max_degree: 30.0
-    half_search_range_degree: 45
-    max_fly_time: 1.0
+    ballistic_conf:
+      g: 9.8
+      k: 0.019
+      barrel_length: 0.107
+      time_step: 0.01
+      max_fly_time: 0.8
+      max_pitch_iterate_count: 100
+      min_pitch_error_m: 0.01
+      gimbal_pitch_max_degree: 30.0
+      gimbal_pitch_min_degree: -10.0
     max_aim_iterate_count: 100
     max_aim_switch_armor_count: 10
     aim_ok_error_m: 0.02

@@ -9,7 +9,7 @@ robot_conf:
   drag_angular_acceleration: 8.0
   power_linear_acceleration: 10.0
   power_angular_acceleration: 10.0
-  time_step_ms: 30
+  time_step_ms: 50
   facing_armor_cos_incidence: 0.25
   hidden_invisible_armors: true
   camera_pos: [0.,0.]

@@ -50,7 +50,7 @@ private:
   std::pair<RobotTargetState, TrackState::State>
   update(const std::vector<ArmorPositionYaw> &armors, double dt) const;
   std::vector<ArmorPositionYaw>
-  getArmorsFromTargetState(const TargetState &state) const;
+  getArmorsFromTargetState(const RobotTargetState &state) const;
   static std::vector<ArmorPositionYaw>
   getArmorsFromTargetState(const TargetState &state, double radius_a,
                            double radius_b, double dz);

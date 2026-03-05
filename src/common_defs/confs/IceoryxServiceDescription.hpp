@@ -1,7 +1,5 @@
 #pragma once
 
-#include "iceoryx_posh/capro/service_description.hpp"
-
 #include <string>
 
 namespace confs {
