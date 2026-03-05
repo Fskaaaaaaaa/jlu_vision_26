@@ -60,23 +60,21 @@ auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
 }
 
 msgs::AimCommand auto_aim::Planner::plan(
-    const TargetStatus &target_state,
+    const TargetState &target_state,
     const std::chrono::system_clock::time_point &target_stamp,
     double bullet_speed) {
-  if (target_state.track_status == TrackStatus::Lost)
-    return {.control = false};
   double dt_sec = std::chrono::duration_cast<std::chrono::duration<double>>(
                       std::chrono::system_clock::now() - target_stamp)
                       .count();
   return plan(target_state, dt_sec, bullet_speed);
 }
 
-msgs::AimCommand auto_aim::Planner::plan(const TargetStatus &target_state,
+msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
                                          double dt, double bullet_speed) {
   // 0. Check bullet speed
   if (bullet_speed < config_.min_bullet_speed ||
       bullet_speed > config_.max_bullet_speed) {
-    LOG_WARNING(logger_, "abnormal bullet speed {}, use default {}.",
+    LOG_WARNING(logger_, "[Planner]: Abnormal bullet speed {}, use default {}.",
                 bullet_speed, config_.default_bullet_speed);
     bullet_speed = config_.default_bullet_speed;
   }
@@ -127,13 +125,13 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetStatus &target_state,
 }
 
 std::pair<Eigen::MatrixXd, double>
-auto_aim::Planner::getTrajectoryYaw0(const TargetStatus &target_state,
+auto_aim::Planner::getTrajectoryYaw0(const TargetState &target_state,
                                      double dt_image_to_now,
                                      double bullet_speed) {
-  auto aim = [&](const TargetStatus &state, bool analytical, bool iterative,
+  auto aim = [&](const TargetState &state, bool use_rk45, bool iterative,
                  bool no_except) {
     auto yaw_pitch_flytime_opt = traj_solver_.resolveTarget(
-        state, bullet_speed, dt_image_to_now, analytical, iterative);
+        state, bullet_speed, dt_image_to_now, use_rk45, iterative);
     static YawPitchFlytime last_aim;
     if (!yaw_pitch_flytime_opt.has_value()) {
       if (!no_except)
@@ -146,21 +144,21 @@ auto_aim::Planner::getTrajectoryYaw0(const TargetStatus &target_state,
     return last_aim = yaw_pitch_flytime_opt.value();
   };
   auto aim0 =
-      aim(target_state, config_.analytical_yaw0, config_.iterative_yaw0, false);
+      aim(target_state, config_.rk45_yaw0, config_.iterative_yaw0, false);
   double yaw0 = aim0.yaw; // mid
   aim0_predict_time_.store(aim0.fly_time + dt_image_to_now);
   Eigen::MatrixXd traj(4, trajectory_horizon_);
-  TargetStatus status = target_state.predict(
+  TargetState status = target_state.predict(
       -config_.dt_sec * (config_.trajectory_half_horizon + 1));
   auto yaw_pitch_last =
-      aim(status, config_.analytical_traj, config_.iterative_traj, false);
+      aim(status, config_.rk45_traj, config_.iterative_traj, false);
   status = status.predict(config_.dt_sec);
-  auto yaw_pitch = aim(status, config_.analytical_traj, config_.iterative_traj,
+  auto yaw_pitch = aim(status, config_.rk45_traj, config_.iterative_traj,
                        false);                    // left
   for (int i = 0; i < trajectory_horizon_; i++) { // until right
     status = status.predict(config_.dt_sec);
     auto yaw_pitch_next =
-        aim(status, config_.analytical_traj, config_.iterative_traj, true);
+        aim(status, config_.rk45_traj, config_.iterative_traj, true);
     auto yaw_vel = tools::limitRadian(yaw_pitch_next.yaw - yaw_pitch_last.yaw) /
                    (2 * config_.dt_sec);
     auto pitch_vel =

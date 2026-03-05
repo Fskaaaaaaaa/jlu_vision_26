@@ -93,7 +93,8 @@ gtsam::Vector auto_aim::ArmorRadiusAFactor::evaluateError(
     gtsam::OptionalMatrixType H3) const {
   // NOTE: 因子图不直接优化半径
   auto radius_a = tools::logisticFunction(ra, min_, max_);
-  Armor armor{center, rotation.theta(), radius_a, armor_index_};
+  ArmorPositionYaw armor{center, rotation.theta(), radius_a, 0.0,
+                         4,      armor_index_};
   gtsam::Vector3 pos_err = armor.position - obs_armor_position_;
   auto yaw_err = obs_armor_yaw_.localCoordinates(armor.yaw).x();
   gtsam::Vector4 error{pos_err.x(), pos_err.y(), pos_err.z(), yaw_err};
@@ -134,7 +135,8 @@ gtsam::Vector auto_aim::ArmorRadiusBDZFactor::evaluateError(
     gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
     gtsam::OptionalMatrixType H4) const {
   auto radius_b = tools::logisticFunction(rb, min_, max_);
-  Armor armor{center, rotation.theta(), radius_b, dz, armor_index_};
+  ArmorPositionYaw armor{center, rotation.theta(), radius_b, dz,
+                         4,      armor_index_};
   gtsam::Vector3 pos_err = armor.position - obs_armor_position_;
   auto yaw_err = obs_armor_yaw_.localCoordinates(armor.yaw).x();
   gtsam::Vector4 error{pos_err.x(), pos_err.y(), pos_err.z(), yaw_err};

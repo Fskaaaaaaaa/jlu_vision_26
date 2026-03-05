@@ -9,6 +9,7 @@
 
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
+#include <array>
 #include <gtsam/base/Vector.h>
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Rot2.h>
@@ -21,326 +22,349 @@
 #include <chrono>
 #include <cmath>
 #include <exception>
+#include <functional>
 #include <iterator>
 #include <mutex>
 #include <utility>
 #include <vector>
 
-auto_aim::Target::Target(quill::Logger *logger, const TargetConfig &config,
-                         types::ArmorType type)
-    : logger_(logger), config_(config), type_(type),
-      stamp_last_tracking_(std::chrono::system_clock::from_time_t(0)) {}
-
-auto_aim::TargetStatus
-auto_aim::Target::getStatusFromArmor(const Armor &armor, TrackStatus status,
-                                     std::uint64_t k) const {
-  bool is_outpost = (type_ == types::ArmorType::Outpost);
-  auto r = is_outpost ? config_.outpost.default_radius
-                      : config_.robot.default_radius_a;
-  auto xa = armor.position.x();
-  auto ya = armor.position.y();
-  auto xc = xa + r * std::cos(armor.yaw.theta());
-  auto yc = ya + r * std::sin(armor.yaw.theta());
-  return (is_outpost)
-             ? TargetStatus{.type = type_,
-                            .radius = config_.outpost.default_radius,
-                            .dz_a = config_.outpost.default_dz_a,
-                            .dz_b = config_.outpost.default_dz_b,
-                            .center_position =
-                                Eigen::Vector3d{xc, yc, armor.position.z()},
-                            .center_velocity = Eigen::Vector3d::Zero(),
-                            .center_yaw = armor.yaw.theta(),
-                            .center_vyaw = 0.0,
-                            .track_status = status,
-                            .k = k,}
-             : TargetStatus{
-                   .type = type_,
-                   .radius_a = config_.robot.default_radius_a,
-                   .radius_b = config_.robot.default_radius_b,
-                   .dz = config_.robot.default_dz,
-                   .center_position =
-                       Eigen::Vector3d{xc, yc, armor.position.z()},
-                   .center_velocity = Eigen::Vector3d::Zero(),
-                   .center_yaw = armor.yaw.theta(),
-                   .center_vyaw = 0.0,
-                   .track_status = status,
-                   .k = k,
-               };
-}
-
-std::vector<std::pair<auto_aim::ArmorIndex, auto_aim::ArmorMatchError>>
-auto_aim::Target::matchArmor(const Armor &armor_obs, double dt_sec) const {
-  auto armors = status_.predict(dt_sec).armors();
-  std::vector<std::pair<ArmorIndex, ArmorMatchError>> idx_errors;
-  for (const auto &armor_pre : armors) {
-    auto distance = (armor_obs.position - armor_pre.position).norm();
-    auto yaw_diff = std::abs(armor_obs.yaw.localCoordinates(armor_pre.yaw).x());
-    if (distance < config_.max_match_distance_m &&
-        yaw_diff < tools::angle2Radian(config_.max_match_yaw_diff_degree)) {
-      idx_errors.emplace_back(armor_pre.index,
-                              ArmorMatchError{distance, yaw_diff});
-    }
+std::vector<auto_aim::ArmorMatchResult> auto_aim::Target::matchArmor(
+    const std::vector<ArmorPositionYaw> &armors, const ArmorPositionYaw &obs,
+    double max_match_distance, double max_match_yaw_diff) {
+  std::vector<ArmorMatchResult> results;
+  int i = 0;
+  for (const auto &armor : armors) {
+    auto distance = (armor.position - obs.position).norm();
+    auto yaw_diff = std::abs(obs.yaw.localCoordinates(armor.yaw).x());
+    if (distance <= max_match_distance && yaw_diff <= max_match_yaw_diff)
+      results.emplace_back(static_cast<ArmorIndex>(i++), distance, yaw_diff);
   }
-  // 因为PNPyaw不准确，所以优先距离排序
-  std::sort(idx_errors.begin(), idx_errors.end(),
-            [this](const std::pair<ArmorIndex, ArmorMatchError> &a,
-                   const std::pair<ArmorIndex, ArmorMatchError> &b) -> bool {
-              return a.second.distance < b.second.distance;
-            });
-  // 满足条件的都是匹配到的装甲板（虽然大多数情况只有一块）
-  // 怎么处理是后续方法的事情了
-  return idx_errors;
+  std::ranges::sort(results, std::ranges::less{}, &ArmorMatchResult::yaw_diff);
+  return results;
 }
 
-std::pair<auto_aim::TargetStatus, std::chrono::system_clock::time_point>
-auto_aim::Target::getStatusStamp() const {
-  std::scoped_lock lk{status_mtx_};
-  return {status_, stamp_last_tracking_};
+auto_aim::RobotTarget::RobotTarget(quill::Logger *logger,
+                                   const RobotConfig &config,
+                                   types::ArmorType type)
+    : logger_(logger), config_(config) {
+  target_state_.type = type;
+  target_state_.radius_a = config_.default_radius;
+  target_state_.radius_b = config_.default_radius;
+  target_state_.dz = config_.default_dz;
+  track_state_.state = TrackState::State::LOST;
+  track_state_.stamp_last_update = std::chrono::system_clock::from_time_t(0);
+  track_state_.stamp_last_tracking = std::chrono::system_clock::from_time_t(0);
+  track_state_.k = 0;
 }
 
-auto_aim::TargetStatus
-auto_aim::Target::track(const std::vector<types::Armor> &armors,
-                        const std::chrono::system_clock::time_point &stamp) {
-  std::vector<Armor> selected_armors;
+std::vector<auto_aim::ArmorPositionYaw>
+auto_aim::RobotTarget::getArmorsFromTargetState(const TargetState &state,
+                                                double radius_a,
+                                                double radius_b, double dz) {
+  std::vector<ArmorPositionYaw> armors;
+  for (auto i : std::array{
+           ArmorIndex::_0,
+           ArmorIndex::_1,
+           ArmorIndex::_2,
+           ArmorIndex::_3,
+       }) {
+    auto [_r, _dz] = (i == ArmorIndex::_0 || i == ArmorIndex::_2)
+                         ? std::make_pair(radius_a, 0.0)
+                         : std::make_pair(radius_b, dz);
+    armors.emplace_back(state.center_position, state.center_yaw, _r, _dz, 4, i);
+  }
+  return armors;
+}
+
+std::vector<auto_aim::ArmorPositionYaw>
+auto_aim::RobotTarget::getArmorsFromTargetState(
+    const TargetState &state) const {
+  return RobotTarget::getArmorsFromTargetState(
+      state, target_state_.radius_a, target_state_.radius_b, target_state_.dz);
+}
+
+auto_aim::RobotTargetState auto_aim::RobotTarget::getTargetStateFromArmor(
+    const ArmorPositionYaw &armor) const {
+  auto armor_x = armor.position.x();
+  auto armor_y = armor.position.y();
+  auto center_x =
+      armor_x + config_.default_radius * std::cos(armor.yaw.theta());
+  auto center_y =
+      armor_y + config_.default_radius * std::sin(armor.yaw.theta());
+  auto center_z = armor.position.z();
+  RobotTargetState state;
+  state.type = target_state_.type;
+  state.center_position = Eigen::Vector3d{center_x, center_y, center_z};
+  state.center_yaw = armor.yaw.theta();
+  state.radius_a = config_.default_radius;
+  state.radius_b = config_.default_radius;
+  state.dz = config_.default_dz;
+  return state;
+}
+
+std::pair<auto_aim::TargetState, auto_aim::TrackState>
+auto_aim::RobotTarget::getTargetTrackState() const {
+  std::scoped_lock lk{state_mtx_};
+  return {
+      target_state_.getStateWithArmorsFunc(
+          [ra = target_state_.radius_a, rb = target_state_.radius_b,
+           dz = target_state_.dz](const TargetState &state) {
+            return getArmorsFromTargetState(state, ra, rb, dz);
+          }),
+      track_state_,
+  };
+}
+
+auto_aim::TrackState::State auto_aim::RobotTarget::track(
+    const std::vector<types::Armor> &armors,
+    const std::chrono::system_clock::time_point &stamp) {
+  std::vector<ArmorPositionYaw> selected_armors;
   // 调用auto_aim::Armor对types::Armor的构造函数
   std::copy_if(armors.begin(), armors.end(),
                std::back_inserter(selected_armors),
                [this](const types::Armor &armor) -> bool {
-                 return armor.type == type_;
+                 return armor.type == target_state_.type;
                });
   double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
-                  stamp - stamp_last_tracking_)
+                  stamp - track_state_.stamp_last_update)
                   .count();
-  auto status_updated = (type_ == types::ArmorType::Base)
-                            ? updateBase(selected_armors)
-                        : (type_ == types::ArmorType::Outpost)
-                            ? updateOutpost(selected_armors, dt)
-                            : updateRobot(selected_armors, dt);
-  if (status_updated.track_status == TrackStatus::Tracking) {
-    LOG_DEBUG(logger_, "[Target {}]: Updated. dt{}, k{}.",
-              rfl::enum_to_string(type_), dt, status_.k);
-    // 更新成功就更新状态
-    std::scoped_lock lk{status_mtx_};
-    this->stamp_last_tracking_ = stamp; // 只在有观测时更新时间戳
-    this->status_ = status_updated;
-    status_.k += 1;
-  } else if (status_updated.track_status == TrackStatus::TempLost) {
-    LOG_INFO(logger_, "[Target {}]: Temp lost! dt{}, k{}.",
-             rfl::enum_to_string(type_), dt, status_.k);
-    std::scoped_lock lk{status_mtx_};
-    this->status_ = status_updated;
-    // TODO 再检查一下时间戳相关
-    status_.k += 1;
-  } else if (status_updated.track_status == TrackStatus::Lost &&
-             status_.track_status != TrackStatus::Lost) {
-    LOG_INFO(logger_, "[Target {}]: Reset! dt{}, k{}.",
-             rfl::enum_to_string(type_), dt, status_.k);
-    std::scoped_lock lk{status_mtx_};
-    this->isam2_ = gtsam::ISAM2{};
-    this->status_.track_status = TrackStatus::Lost;
-    status_.k = 0;
+  auto [traget_state, track_state] = update(selected_armors, dt);
+  if (track_state == TrackState::State::TRACKING) {
+    if (track_state_.state != TrackState::State::TRACKING) {
+      track_state_.state = TrackState::State::TRACKING;
+      LOG_INFO(logger_, "[Target {}]: {} -> TRACKING. dt{}, k{}.",
+               rfl::enum_to_string(target_state_.type),
+               rfl::enum_to_string(track_state_.state), dt, track_state_.k);
+    }
+    std::scoped_lock lk{state_mtx_};
+    target_state_ = traget_state;
+    track_state_.stamp_last_tracking = stamp;
+    track_state_.stamp_last_update = stamp;
+    track_state_.k += 1;
+  } else if (track_state == TrackState::State::TEMPLOST) {
+    if (track_state_.state != TrackState::State::TEMPLOST) {
+      track_state_.state = TrackState::State::TEMPLOST;
+      LOG_INFO(logger_, "[Target {}]: TRACKING -> TEMPLOST. dt{}, k{}.",
+               rfl::enum_to_string(target_state_.type), dt, track_state_.k);
+    }
+    std::scoped_lock lk{state_mtx_};
+    target_state_ = traget_state;
+    track_state_.stamp_last_update = stamp;
+    track_state_.k += 1;
+  } else if (track_state == TrackState::State::LOST) {
+    if (track_state_.state != TrackState::State::LOST) {
+      LOG_INFO(logger_, "[Target {}]: {} -> LOST. dt{}, k{}.",
+               rfl::enum_to_string(target_state_.type),
+               rfl::enum_to_string(track_state_.state), dt, track_state_.k);
+      std::scoped_lock lk{state_mtx_};
+      track_state_.state = TrackState::State::LOST;
+      track_state_.k = 0;
+      isam2_ = gtsam::ISAM2{};
+    }
   }
-  return status_;
+  return track_state_.state;
+}
+
+std::array<double, 3> auto_aim::RobotTarget::getRadiusARadiusBDZ() const {
+  std::scoped_lock lk{state_mtx_};
+  return std::array{target_state_.radius_a, target_state_.radius_b,
+                    target_state_.dz};
 }
 
 using namespace gtsam::symbol_shorthand;
 
-void auto_aim::Target::addMotionValuesFactors(
+void auto_aim::RobotTarget::addMotionValuesFactors(
     gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
-    TargetStatus status, double dt) const {
-  auto status_predict = status.predict(dt);
-  Eigen::Vector3d predict_position = status_predict.center_position;
-  gtsam::Rot2 predict_yaw = status_predict.center_yaw;
-  values.insert(X(status.k), predict_position);
-  values.insert(R(status.k), predict_yaw);
-  values.insert(V(status.k), status_predict.center_velocity);
-  values.insert(W(status.k), status_predict.center_vyaw);
-  if (status.k == 0) {
-    graph.addPrior(X(0), status_predict.center_position,
+    const TargetState &target_state, std::uint64_t k, double dt) const {
+  values.insert(X(k), target_state.center_position);
+  values.insert(R(k), gtsam::Rot2::fromAngle(target_state.center_yaw));
+  values.insert(V(k), target_state.center_velocity);
+  values.insert(W(k), target_state.center_vyaw);
+  if (k == 0) {
+    graph.addPrior(X(0), target_state.center_position,
                    gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
                        config_.translation_prior_noise.x,
                        config_.translation_prior_noise.y,
                        config_.translation_prior_noise.z,
                    }));
     graph.addPrior(
-        R(0), gtsam::Rot2::fromAngle(status_.center_yaw),
+        R(0), gtsam::Rot2::fromAngle(target_state.center_yaw),
         gtsam::noiseModel::Isotropic::Sigma(1, config_.yaw_prior_noise));
-    graph.addPrior(V(0), status_predict.center_velocity,
+    graph.addPrior(V(0), target_state.center_velocity,
                    gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
                        config_.velocity_prior_noise.x,
                        config_.velocity_prior_noise.y,
                        config_.velocity_prior_noise.z,
                    }));
     graph.addPrior(
-        W(0), status_predict.center_vyaw,
+        W(0), target_state.center_vyaw,
         gtsam::noiseModel::Isotropic::Sigma(1, config_.vyaw_prior_noise));
   } else {
-    graph.add(
-        TranslationFactor{gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
-                              config_.translation_factor_noise.x,
-                              config_.translation_factor_noise.y,
-                              config_.translation_factor_noise.z,
-                          }),
-                          X(status.k - 1), V(status.k - 1), X(status.k), dt});
+    graph.add(TranslationFactor{
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
+            config_.translation_factor_noise.x,
+            config_.translation_factor_noise.y,
+            config_.translation_factor_noise.z,
+        }),
+        X(k - 1),
+        V(k - 1),
+        X(k),
+        dt,
+    });
     graph.add(YawFactor{
         gtsam::noiseModel::Isotropic::Sigma(1, config_.yaw_factor_noise),
-        R(status.k - 1), W(status.k - 1), R(status.k), dt});
-    graph.add(VelocityFactor{gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
-                                 config_.velocity_factor_noise.x,
-                                 config_.velocity_factor_noise.y,
-                                 config_.velocity_factor_noise.z,
-                             }),
-                             V(status.k - 1), V(status.k)});
+        R(k - 1),
+        W(k - 1),
+        R(k),
+        dt,
+    });
+    graph.add(VelocityFactor{
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3{
+            config_.velocity_factor_noise.x,
+            config_.velocity_factor_noise.y,
+            config_.velocity_factor_noise.z,
+        }),
+        V(k - 1),
+        V(k),
+    });
     graph.add(VyawFactor{
         gtsam::noiseModel::Isotropic::Sigma(1, config_.vyaw_factor_noise),
-        W(status.k - 1), W(status.k)});
+        W(k - 1),
+        W(k),
+    });
   }
 }
 
-auto_aim::TargetStatus
-auto_aim::Target::updateRobot(const std::vector<Armor> &armors,
-                              double dt) const {
-  // 首帧观测缺失，为欠约束系统，返回失败
-  if (status_.track_status == TrackStatus::Lost && armors.empty())
-    return {.track_status = TrackStatus::Lost};
-
-  auto status = status_;
-  if (status_.track_status != TrackStatus::Lost &&
-      dt > config_.robot.lost_threshold_sec) {
-    LOG_INFO(logger_, "[Target {}]: Time out! dt{}.",
-             rfl::enum_to_string(type_), dt);
-    if (armors.empty())
-      return {.track_status = TrackStatus::Lost};
-    isam2_ = gtsam::ISAM2{};
-    status = getStatusFromArmor(armors.front(), TrackStatus::Lost, 0);
-    LOG_DEBUG(logger_,
-              "[Target {}]: get status from armor! xa{}, ya{}, xc{}, yc{}",
-              rfl::enum_to_string(type_), armors.front().position.x(),
-              armors.front().position.y(), status.center_position.x(),
-              status.center_position.y());
-  }
-
-  gtsam::Values values;
-  gtsam::NonlinearFactorGraph graph;
-  // 首帧观测初始化常量并添加先验
-  if (status.k == 0) {
-    values.insert(A(0), config_.robot.default_radius_a);
-    values.insert(B(0), config_.robot.default_radius_b);
-    values.insert(Z(0), config_.robot.default_dz);
+void auto_aim::RobotTarget::addArmorValuesFactors(
+    gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
+    const std::vector<std::pair<ArmorPositionYaw, ArmorIndex>> &armor_indexs,
+    std::uint64_t k) const {
+  if (k == 0) {
+    values.insert(A(0), config_.default_radius);
+    values.insert(B(0), config_.default_radius);
+    values.insert(Z(0), config_.default_dz);
     graph.addPrior(
         A(0),
-        tools::logisticInverse(config_.robot.default_radius_a,
-                               config_.robot.radius_min,
-                               config_.robot.radius_max),
-        gtsam::noiseModel::Isotropic::Sigma(1, config_.robot.ra_prior_noise));
+        tools::logisticInverse(config_.default_radius, config_.radius_min,
+                               config_.radius_max),
+        gtsam::noiseModel::Isotropic::Sigma(1, config_.radius_prior_noise));
     graph.addPrior(
         B(0),
-        tools::logisticInverse(config_.robot.default_radius_b,
-                               config_.robot.radius_min,
-                               config_.robot.radius_max),
-        gtsam::noiseModel::Isotropic::Sigma(1, config_.robot.rb_prior_noise));
+        tools::logisticInverse(config_.default_radius, config_.radius_min,
+                               config_.radius_max),
+        gtsam::noiseModel::Isotropic::Sigma(1, config_.radius_prior_noise));
     graph.addPrior(
-        Z(0), config_.robot.default_dz,
-        gtsam::noiseModel::Isotropic::Sigma(1, config_.robot.dz_prior_noise));
+        Z(0), config_.default_dz,
+        gtsam::noiseModel::Isotropic::Sigma(1, config_.dz_prior_noise));
   }
-  // 添加运动因子或先验
-  addMotionValuesFactors(values, graph, status, dt);
-
-  // 添加装甲板观测因子，非首帧时aromrs可以为空（直到超时）
-  bool has_obs_factor{false};
-  for (const auto &obs : armors) {
-    auto matched_indexs = matchArmor(obs, dt);
-    if (matched_indexs.empty()) {
-      LOG_WARNING(logger_, "[Target {}]: No armor matched obs:xa{},ya{}!",
-                  rfl::enum_to_string(type_), obs.position.x(),
-                  obs.position.y());
-      continue;
-    } else {
-      has_obs_factor = true;
-    }
-    auto index = matched_indexs.front().first;
+  for (const auto &[armor, index] : armor_indexs) {
     if (index == ArmorIndex::_0 || index == ArmorIndex::_2) {
       graph.add(ArmorRadiusAFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
-              config_.robot.ra_factor_noise.x,
-              config_.robot.ra_factor_noise.y,
-              config_.robot.ra_factor_noise.z,
-              config_.robot.ra_factor_noise.yaw,
+              config_.obs_factor_noise.x,
+              config_.obs_factor_noise.y,
+              config_.obs_factor_noise.z,
+              config_.obs_factor_noise.w,
           }),
           A(0),
-          R(status.k),
-          X(status.k),
-          obs.position,
-          obs.yaw.theta(),
+          R(k),
+          X(k),
+          armor.position,
+          armor.yaw.theta(),
           index,
-          config_.robot.radius_min,
-          config_.robot.radius_max,
+          config_.radius_min,
+          config_.radius_max,
       });
     } else {
       graph.add(ArmorRadiusBDZFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
-              config_.robot.rbdz_factor_noise.x,
-              config_.robot.rbdz_factor_noise.y,
-              config_.robot.rbdz_factor_noise.z,
-              config_.robot.rbdz_factor_noise.yaw,
+              config_.obs_factor_noise.x,
+              config_.obs_factor_noise.y,
+              config_.obs_factor_noise.z,
+              config_.obs_factor_noise.w,
           }),
           B(0),
           Z(0),
-          R(status.k),
-          X(status.k),
-          obs.position,
-          obs.yaw.theta(),
+          R(k),
+          X(k),
+          armor.position,
+          armor.yaw.theta(),
           index,
-          config_.robot.radius_min,
-          config_.robot.radius_max,
+          config_.radius_min,
+          config_.radius_max,
       });
     }
-  } // end of armors loop
+  }
+}
+
+std::pair<auto_aim::RobotTargetState, auto_aim::TrackState::State>
+auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
+                              double dt) const {
+  // 超时丢失
+  if (track_state_.state != TrackState::State::LOST &&
+      // 注意dt是从update算的，得手动补偿下track到update的间隔
+      dt + std::chrono::duration_cast<std::chrono::duration<double>>(
+               track_state_.stamp_last_update -
+               track_state_.stamp_last_tracking)
+                  .count() >
+          config_.lost_threshold_sec) {
+    LOG_INFO(logger_, "[Target {}]: Time out! dt{}.",
+             rfl::enum_to_string(target_state_.type), dt);
+    return {{}, TrackState::State::LOST};
+  }
+  // 切换到跟踪状态前需要由观测初始化target_state
+  auto target_state = target_state_;
+  if (track_state_.state == TrackState::State::LOST) {
+    if (armors.empty()) {
+      return {{}, TrackState::State::LOST};
+    } else {
+      target_state = getTargetStateFromArmor(armors.front());
+    }
+  }
+  // 匹配装甲板
+  std::vector<std::pair<ArmorPositionYaw, ArmorIndex>> matched_armors;
+  for (const auto &armor : armors) {
+    auto match_result = Target::matchArmor(
+        getArmorsFromTargetState(target_state), armor,
+        config_.max_match_distance_m,
+        tools::angle2Radian((config_.max_match_yaw_diff_degree)));
+    if (!match_result.empty())
+      matched_armors.emplace_back(armor, match_result.front().index);
+  }
+  if (matched_armors.size() < armors.size()) {
+    LOG_DEBUG(logger_, "[Target {}]: Miss match {} armors!",
+              rfl::enum_to_string(target_state.type),
+              armors.size() - matched_armors.size());
+  }
+
+  gtsam::Values values;
+  gtsam::NonlinearFactorGraph graph;
+  addMotionValuesFactors(values, graph, target_state, track_state_.k, dt);
+  addArmorValuesFactors(values, graph, matched_armors, track_state_.k);
 
   try {
     // 进行增量优化并返回结果
     this->isam2_.update(graph, values);
-    return TargetStatus{
-        .type = type_,
-        .radius_a = tools::logisticFunction(
-            isam2_.calculateEstimate<double>(A(0)), config_.robot.radius_min,
-            config_.robot.radius_max),
-        .radius_b = tools::logisticFunction(
-            isam2_.calculateEstimate<double>(B(0)), config_.robot.radius_min,
-            config_.robot.radius_max),
-        .dz = isam2_.calculateEstimate<double>(Z(0)),
-        .center_position = isam2_.calculateEstimate<gtsam::Point3>(X(status.k)),
-        .center_velocity =
-            isam2_.calculateEstimate<gtsam::Vector3>(V(status.k)),
-        .center_yaw =
-            isam2_.calculateEstimate<gtsam::Rot2>(R(status.k)).theta(),
-        .center_vyaw = isam2_.calculateEstimate<double>(W(status.k)),
-        .track_status =
-            has_obs_factor ? TrackStatus::Tracking : TrackStatus::TempLost,
-        .k = status.k,
-    };
+    target_state.center_position =
+        isam2_.calculateEstimate<gtsam::Point3>(X(track_state_.k));
+    target_state.center_velocity =
+        isam2_.calculateEstimate<gtsam::Vector3>(V(track_state_.k));
+    target_state.center_yaw =
+        isam2_.calculateEstimate<gtsam::Rot2>(R(track_state_.k)).theta();
+    target_state.center_vyaw =
+        isam2_.calculateEstimate<double>(W(track_state_.k));
+    target_state.radius_a =
+        tools::logisticFunction(isam2_.calculateEstimate<double>(A(0)),
+                                config_.radius_min, config_.radius_max);
+    target_state.radius_b =
+        tools::logisticFunction(isam2_.calculateEstimate<double>(B(0)),
+                                config_.radius_min, config_.radius_max);
+    target_state.dz = isam2_.calculateEstimate<double>(Z(0));
+    return {target_state, matched_armors.empty() ? TrackState::State::TEMPLOST
+                                                 : TrackState::State::TRACKING};
   } catch (const std::exception &e) {
     LOG_ERROR(logger_, "[Target {}]: {}\ncurrent k: {}.",
-              rfl::enum_to_string(type_), e.what(), status.k);
-    return {.track_status = TrackStatus::Lost};
+              rfl::enum_to_string(target_state.type), e.what(), track_state_.k);
+    return {{}, TrackState::State::LOST};
   }
-}
-
-auto_aim::TargetStatus
-auto_aim::Target::updateBase(const std::vector<Armor> &armors) const {
-  if (armors.empty())
-    return {.track_status = TrackStatus::Lost};
-  Eigen::Vector3d position = armors.front().position;
-  double yaw = armors.front().yaw.theta();
-  return TargetStatus{
-      .type = type_,
-      .radius_a = 0,
-      .radius_b = 0,
-      .dz = 0,
-      .center_position = position,
-      .center_velocity = Eigen::Vector3d::Zero(),
-      .center_yaw = yaw,
-      .center_vyaw = 0,
-      .track_status = TrackStatus::Tracking,
-  };
 }

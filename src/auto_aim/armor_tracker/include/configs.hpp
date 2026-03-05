@@ -3,6 +3,7 @@
 #include "confs/Basic.hpp"
 #include "confs/IceoryxServiceDescription.hpp"
 
+#include "math/ballistic_trajectory.hpp"
 #include "quill/core/LogLevel.h"
 
 #include <array>
@@ -10,39 +11,9 @@
 namespace auto_aim {
 
 struct RobotConfig {
-  double lost_threshold_sec; // 超时重置因子图的阈值
-  double ra_prior_noise;
-  double rb_prior_noise;
-  double dz_prior_noise;
-  double default_radius_a;
-  double default_radius_b;
-  double default_dz;
-  double radius_min;
-  double radius_max;
-  struct {
-    double x;
-    double y;
-    double z;
-    double yaw;
-  } ra_factor_noise;
-  struct {
-    double x;
-    double y;
-    double z;
-    double yaw;
-  } rbdz_factor_noise;
-};
-
-struct OutpostConfig {
-  double lost_threshold_sec; // 超时重置因子图的阈值
-  double default_radius;
-  double default_dz_a;
-  double default_dz_b;
-};
-
-struct TargetConfig {
   double max_match_distance_m;
   double max_match_yaw_diff_degree;
+  double lost_threshold_sec; // 超时重置因子图的阈值
   // 先验噪声
   double yaw_prior_noise;
   double vyaw_prior_noise;
@@ -53,22 +24,24 @@ struct TargetConfig {
   double vyaw_factor_noise;
   confs::Vector3d translation_factor_noise;
   confs::Vector3d velocity_factor_noise;
+  double radius_prior_noise;
+  double default_radius;
+  double radius_min;
+  double radius_max;
+  double dz_prior_noise;
+  double default_dz;
+  confs::Vector4d obs_factor_noise;
+};
 
-  RobotConfig robot;
-  OutpostConfig outpost;
+struct OutpostConfig {
+  double lost_threshold_sec; // 超时重置因子图的阈值
+  double default_radius;
+  double default_dz_a;
+  double default_dz_b;
 };
 
 struct TrajectoryConfig {
-  double g = 9.8;
-  double k = 0.01903;
-  double length_gimbal_to_barrel = 0.107;
-  double time_step = 0.0004;
-  int max_pitch_iterate_count = 100;
-  double min_pitch_error = 0.008;
-  double gimbal_pitch_min_degree = -5.0;
-  double gimbal_pitch_max_degree = 30.0;
-  double half_search_range_degree = 5.0;
-  double max_fly_time = 1.0;
+  tools::ballistic::BallisticConfig ballistic_conf;
   int max_aim_iterate_count = 20;
   int max_aim_switch_armor_count;
   double aim_ok_error_m = 0.005;
@@ -78,11 +51,11 @@ struct PlannerConfig {
   double dt_sec;                    // MPC更新的间隔时间
   double fail_polling_interval_sec; // 非ontask时轮询task的时间间隔
   int trajectory_half_horizon;      // 生成的瞄准轨迹一半在过去，一半在未来
-  bool analytical_yaw0;
+  bool rk45_yaw0;
   bool iterative_yaw0;
-  bool analytical_traj; // 是否使用解析解
-  bool iterative_traj;  // 是否考虑子弹飞行时敌人的运动
-  int shoot_offset;     // 预判几个MPC帧，在iterative_fly_time时应当为0
+  bool rk45_traj;      // 是否使用解析解
+  bool iterative_traj; // 是否考虑子弹飞行时敌人的运动
+  int shoot_offset;    // 预判几个MPC帧，在iterative_fly_time时应当为0
   double yaw_offset;
   double pitch_offset;
   double fire_thresh;
@@ -100,10 +73,9 @@ struct PlannerConfig {
 
 struct TrackerConfigs {
   quill::LogLevel log_level;
-  bool debug_mode;
+  bool plot_info;
   bool awalys_on_task;
   bool show_image;
-  bool publish_target_armors;
   double tf_query_tolerance_ms;
   std::string camera_name;
   std::string camera_frame_id; // 这两个用在tf上
@@ -111,7 +83,7 @@ struct TrackerConfigs {
   confs::IceoryxServiceDescription armors_sub_topic;
   confs::IceoryxServiceDescription armors_pub_topic;
   confs::IceoryxServiceDescription serial_topic;
-  TargetConfig target_conf;
+  RobotConfig robot_conf;
   PlannerConfig planner_conf;
 };
 } // namespace auto_aim

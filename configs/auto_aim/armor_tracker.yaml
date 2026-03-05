@@ -1,5 +1,5 @@
 log_level: Info
-debug_mode: true
+plot_info: true
 awalys_on_task: true
 show_image: false
 publish_target_armors: false
@@ -13,20 +13,20 @@ armors_sub_topic:
   event: data
 armors_pub_topic:
   service: armors
-  instance: tracker
-  event: debug
+  instance: fake_ap
+  event: data
 serial_topic:
   service: aim_command
   instance: tracker
   event: data
 target_conf:
-  max_match_distance_m: 1.0
-  max_match_yaw_diff_degree: 45.0
+  max_match_distance_m: 0.5
+  max_match_yaw_diff_degree: 30.0
 
   yaw_prior_noise: 0.2
   vyaw_prior_noise: 0.5 
   yaw_factor_noise: 0.05 
-  vyaw_factor_noise: 0.05  #最好和dt一致
+  vyaw_factor_noise: 0.1
 
   translation_prior_noise:
     x: 0.1
@@ -47,24 +47,24 @@ target_conf:
 
   robot:
     lost_threshold_sec: 0.5
-    ra_prior_noise: 0.3
-    rb_prior_noise: 0.3
-    dz_prior_noise: 0.05
+    ra_prior_noise: 0.5
+    rb_prior_noise: 0.5
+    dz_prior_noise: 0.1
     radius_min: 0.15
     radius_max: 0.5
-    default_radius_a: 0.35
-    default_radius_b: 0.21
+    default_radius_a: 0.26
+    default_radius_b: 0.26
     default_dz: 0.0
     ra_factor_noise:
-      x: 0.03
-      y: 0.03
-      z: 0.03
-      yaw: 0.05
+      x: 0.05
+      y: 0.05
+      z: 0.05
+      yaw: 1.0
     rbdz_factor_noise:
-      x: 0.03
-      y: 0.03
-      z: 0.03
-      yaw: 0.05
+      x: 0.05
+      y: 0.05
+      z: 0.05
+      yaw: 1.0
   outpost:
     lost_threshold_sec: 0.8
     default_radius: 0.26
@@ -74,10 +74,10 @@ planner_conf:
   dt_sec: 0.01
   fail_polling_interval_sec: 0.2
   trajectory_half_horizon: 50
-  analytical_yaw0: false
-  iterative_yaw0: true
+  analytical_yaw0: true
+  iterative_yaw0: false
   analytical_traj: true
-  iterative_traj: true
+  iterative_traj: false
   shoot_offset: 0
   yaw_offset: 0.0
   pitch_offset: 0.0
@@ -98,7 +98,7 @@ planner_conf:
     time_step: 0.0002
     max_pitch_iterate_count: 100
     min_pitch_error: 0.01
-    gimbal_pitch_min_degree: -5.0
+    gimbal_pitch_min_degree: -10.0
     gimbal_pitch_max_degree: 30.0
     half_search_range_degree: 45
     max_fly_time: 1.0

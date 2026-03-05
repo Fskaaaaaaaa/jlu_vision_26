@@ -110,12 +110,13 @@ void auto_aim::Robot::publishArmors() {
     return;
   }
   auto armors = this->getArmorMsgsFromStatus();
+  auto now = tools::getTimeNowNanoSec();
   for (auto &&armor : armors) {
     armor_pub_.loan()
         .and_then([&](iox::popo::Sample<msgs::Armor, msgs::Header> &sample) {
           sample.getUserHeader().frame_id = {iox::TruncateToCapacity,
                                              config_.pub_conf.frame_id.c_str()};
-          sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
+          sample.getUserHeader().stamp_ns = now;
           sample->armor_color = armor.armor_color;
           sample->armor_type = armor.armor_type;
           sample->distance_to_image_center = armor.distance_to_image_center;

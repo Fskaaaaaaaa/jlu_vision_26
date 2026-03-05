@@ -18,7 +18,7 @@ public:
   Planner(quill::Logger *logger, const PlannerConfig &config);
 
   msgs::AimCommand
-  plan(const TargetStatus &target_state,
+  plan(const TargetState &target_state,
        const std::chrono::system_clock::time_point &target_stamp,
        double bullet_speed);
 
@@ -26,10 +26,10 @@ public:
   std::atomic<double> aim0_predict_time_;
 
 private:
-  msgs::AimCommand plan(const TargetStatus &target_state,
-                        double dt_image_to_now, double bullet_speed);
+  msgs::AimCommand plan(const TargetState &target_state, double dt_image_to_now,
+                        double bullet_speed);
   std::pair<Eigen::MatrixXd, double>
-  getTrajectoryYaw0(const TargetStatus &target_state, double dt_image_to_now,
+  getTrajectoryYaw0(const TargetState &target_state, double dt_image_to_now,
                     double bullet_speed);
   quill::Logger *logger_;
   PlannerConfig config_;

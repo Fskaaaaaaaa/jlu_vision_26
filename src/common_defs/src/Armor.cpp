@@ -23,5 +23,6 @@ types::Armor::Armor(
 }
 
 Eigen::Vector3d types::Armor::getRpy() const {
-  return this->orientation.matrix().eulerAngles(0, 1, 2);
+  Eigen::Vector3d ypr = this->orientation.matrix().eulerAngles(2, 1, 0);
+  return {ypr.z(), ypr.y(), ypr.x()};
 }
