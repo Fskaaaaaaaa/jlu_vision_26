@@ -1,4 +1,4 @@
-log_level: TraceL1
+log_level: Debug
 plot_info: true
 always_on_task: true
 show_image: false
@@ -15,8 +15,8 @@ serial_topic:
   instance: tracker
   event: data
 robot_conf:
-  max_match_distance_m: 0.5
-  max_match_yaw_diff_degree: 30.0
+  max_match_distance_m: 0.4
+  max_match_yaw_diff_degree: 15.0
   lost_threshold_sec: 0.5
   yaw_prior_noise: 90.0
   vyaw_prior_noise: 90.0
@@ -29,7 +29,7 @@ robot_conf:
     y: 0.5
     z: 0.5
 
-  yaw_factor_noise: 0.05 
+  yaw_factor_noise: 0.1
   vyaw_factor_noise: 0.05
   translation_factor_noise:
     x: 0.03
@@ -50,13 +50,19 @@ robot_conf:
     radial_error_m: 0.03
     height_error_m: 0.03
     yaw_error_rad: 0.05
+  radius_oscillation_reset:
+    enable: true
+    window_size: 16
+    min_flip_count: 3
+    min_step_m: 0.015
+    min_span_m: 0.03
 
 planner_conf:
-  dt_sec: 0.01
-  fail_polling_interval_sec: 0.2
-  trajectory_half_horizon: 50
-  rk45_yaw0: false
-  iterative_yaw0: false
+  dt_sec: 0.005
+  fail_polling_interval_sec: 0.1
+  trajectory_half_horizon: 100
+  rk45_yaw0: true
+  iterative_yaw0: true
   rk45_traj: false
   iterative_traj: false
   shoot_offset: 0
@@ -86,3 +92,5 @@ planner_conf:
     max_aim_iterate_count: 100
     max_aim_switch_armor_count: 10
     aim_ok_error_m: 0.02
+    armor_front_facing_min_dot_product: 0.0
+    armor_switch_distance_hysteresis_m: 0.03

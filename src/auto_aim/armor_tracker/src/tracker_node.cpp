@@ -15,7 +15,6 @@
 #include "opencv2/core/mat.hpp"
 #include "planner.hpp"
 #include "target.hpp"
-#include "trajectory.hpp"
 #include "types.hpp"
 #include "types/Armor.hpp"
 #include "types/ArmorPoints.hpp"
@@ -79,6 +78,12 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
   this->plan_thread_ = std::jthread{[this]() {
     LOG_INFO(logger_, "plan_thread start!");
     while (!iox::hasTerminationRequested()) {
+      // static std::chrono::system_clock::time_point last_plan_stamp;
+      // auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(
+      //               std::chrono::system_clock::now() - last_plan_stamp)
+      //               .count();
+      // last_plan_stamp = std::chrono::system_clock::now();
+      // std::cout << dt * 1000 << std::endl;
       bool on_task =
           configs_.always_on_task ? true : task_mode_listener_.isOnTask();
       if (!on_task || !targets_.contains(aiming_target_.load())) { // 无锁定状态
@@ -161,7 +166,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                 auto state_predict =
                     target_state.predict(planner_.aim0_predict_time_.load());
                 auto [aimed_armor, armor_index] =
-                    Trajectory::getClosestArmorIndexFromTarget(state_predict);
+                    planner_.selectAimingArmor(state_predict);
                 // 绘制正在瞄准的装甲板（绿色）
                 drawArmor(aimed_armor, target_state.type, copy, stamp,
                           tools::Color::bgr::GREEN);

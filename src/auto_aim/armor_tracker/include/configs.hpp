@@ -52,6 +52,8 @@ struct TrajectoryConfig {
   int max_aim_iterate_count = 20;
   int max_aim_switch_armor_count;
   double aim_ok_error_m = 0.005;
+  double armor_front_facing_min_dot_product = 0.0;
+  double armor_switch_distance_hysteresis_m = 0.03;
 };
 
 struct PlannerConfig {

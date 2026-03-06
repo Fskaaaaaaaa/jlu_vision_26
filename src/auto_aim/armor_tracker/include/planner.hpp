@@ -10,6 +10,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <optional>
 
 namespace auto_aim {
 
@@ -21,6 +22,8 @@ public:
   plan(const TargetState &target_state,
        const std::chrono::system_clock::time_point &target_stamp,
        double bullet_speed_mps);
+  std::pair<ArmorPositionYaw, ArmorIndex>
+  selectAimingArmor(const TargetState &target_state) const;
 
   // for debug usage
   std::atomic<double> aim0_predict_time_;
@@ -29,7 +32,13 @@ private:
   msgs::AimCommand plan(const TargetState &target_state,
                         double dt_image_to_now_sec,
                         double bullet_speed_mps);
-  std::pair<Eigen::MatrixXd, double>
+  std::optional<TargetAimSolution>
+  solveAimWithMethodFallback(const TargetState &target_state,
+                             double dt_image_to_now_sec,
+                             double bullet_speed_mps, bool use_rk45,
+                             bool iterative_fly_time,
+                             std::optional<ArmorIndex> &preferred_armor_index);
+  AimTrajectoryReference
   buildTrajectoryReference(const TargetState &target_state,
                            double dt_image_to_now_sec,
                            double bullet_speed_mps);

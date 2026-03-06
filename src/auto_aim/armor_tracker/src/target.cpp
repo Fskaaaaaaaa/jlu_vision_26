@@ -166,39 +166,40 @@ auto_aim::TrackState::State auto_aim::RobotTarget::track(
   double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
                   stamp - track_state_.stamp_last_update)
                   .count();
-  auto [traget_state, track_state] = update(selected_armors, dt);
-  if (track_state == TrackState::State::TRACKING) {
+  auto [estimated_target_state, updated_track_state] =
+      update(selected_armors, dt);
+  if (updated_track_state == TrackState::State::TRACKING) {
     if (track_state_.state != TrackState::State::TRACKING) {
       LOG_INFO(logger_, "[Target {}]: {} -> TRACKING. dt{}, k{}.",
                rfl::enum_to_string(target_state_.type),
                rfl::enum_to_string(track_state_.state), dt, track_state_.k);
     }
     std::scoped_lock lk{state_mtx_};
-    target_state_ = traget_state;
-    track_state_.state = track_state;
+    target_state_ = estimated_target_state;
+    track_state_.state = updated_track_state;
     track_state_.stamp_last_tracking = stamp;
     track_state_.stamp_last_update = stamp;
     track_state_.k += 1;
-  } else if (track_state == TrackState::State::TEMPLOST) {
+  } else if (updated_track_state == TrackState::State::TEMPLOST) {
     if (track_state_.state != TrackState::State::TEMPLOST) {
       LOG_INFO(logger_, "[Target {}]: TRACKING -> TEMPLOST. dt{}, k{}.",
                rfl::enum_to_string(target_state_.type), dt, track_state_.k);
     }
     std::scoped_lock lk{state_mtx_};
-    target_state_ = traget_state;
-    track_state_.state = track_state;
+    target_state_ = estimated_target_state;
+    track_state_.state = updated_track_state;
     track_state_.stamp_last_update = stamp;
     track_state_.k += 1;
-  } else if (track_state == TrackState::State::LOST) {
+  } else if (updated_track_state == TrackState::State::LOST) {
     if (track_state_.state != TrackState::State::LOST) {
       LOG_INFO(logger_, "[Target {}]: {} -> LOST. dt{}, k{}.",
                rfl::enum_to_string(target_state_.type),
                rfl::enum_to_string(track_state_.state), dt, track_state_.k);
-      std::scoped_lock lk{state_mtx_};
-      track_state_.state = TrackState::State::LOST;
-      track_state_.k = 0;
-      isam2_ = gtsam::ISAM2{};
     }
+    std::scoped_lock lk{state_mtx_};
+    track_state_.state = TrackState::State::LOST;
+    track_state_.k = 0;
+    isam2_ = gtsam::ISAM2{};
   }
   return track_state_.state;
 }
@@ -368,9 +369,9 @@ auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
   }
   auto matched_armors = matchArmorsUnique(target_state, armors);
   if (matched_armors.size() < armors.size()) {
-    LOG_DEBUG(logger_, "[Target {}]: Miss match {} armors!",
+    LOG_DEBUG(logger_, "[Target {}]: Miss match {} armors! k = {}.",
               rfl::enum_to_string(target_state.type),
-              armors.size() - matched_armors.size());
+              armors.size() - matched_armors.size(), track_state_.k);
   }
 
   gtsam::Values values;
