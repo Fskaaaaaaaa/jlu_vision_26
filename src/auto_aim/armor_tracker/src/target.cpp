@@ -32,20 +32,13 @@ std::vector<auto_aim::ArmorMatchResult> auto_aim::Target::matchArmor(
     const std::vector<ArmorPositionYaw> &armors, const ArmorPositionYaw &obs,
     double max_match_distance, double max_match_yaw_diff) {
   std::vector<ArmorMatchResult> results;
-  int i = 0;
-  // std::cout << "\nstart matching armor!\nobs armor: xyz"
-  //           << obs.position.transpose() << " yaw" << obs.yaw.degrees()
-  //           << std::endl;
+  std::size_t i = 0;
   for (const auto &armor : armors) {
     auto distance = (armor.position - obs.position).norm();
     auto yaw_diff = std::abs(obs.yaw.localCoordinates(armor.yaw).x());
-    // std::cout << "armor xyz" << armor.position.transpose() << " yaw"
-    //           << armor.yaw.degrees() << " distance" << distance << "
-    //           yaw_diff"
-    //           << yaw_diff << '\n'
-    //           << std::endl;
     if (distance <= max_match_distance && yaw_diff <= max_match_yaw_diff)
-      results.emplace_back(static_cast<ArmorIndex>(i++), distance, yaw_diff);
+      results.emplace_back(static_cast<ArmorIndex>(i), distance, yaw_diff);
+    ++i;
   }
   std::ranges::sort(results, std::ranges::less{}, &ArmorMatchResult::distance);
   return results;
@@ -91,6 +84,44 @@ auto_aim::RobotTarget::getArmorsFromTargetState(
                                                state.radius_b, state.dz);
 }
 
+std::vector<std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>>
+auto_aim::RobotTarget::matchArmorsUnique(
+    const RobotTargetState &state,
+    const std::vector<ArmorPositionYaw> &obs_armors) const {
+  auto armors_for_association = RobotTarget::getArmorsFromTargetState(
+      state, config_.default_radius, config_.default_radius,
+      config_.default_dz);
+  std::vector<MatchCandidate> candidates;
+  for (std::size_t obs_i = 0; obs_i < obs_armors.size(); ++obs_i) {
+    auto match_result = Target::matchArmor(
+        armors_for_association, obs_armors[obs_i], config_.max_match_distance_m,
+        tools::angle2Radian(config_.max_match_yaw_diff_degree));
+    for (const auto &match : match_result)
+      candidates.emplace_back(obs_i, match.index, match.distance,
+                              match.yaw_diff);
+  }
+  std::ranges::sort(
+      candidates, [](const MatchCandidate &a, const MatchCandidate &b) -> bool {
+        if (a.distance != b.distance)
+          return a.distance < b.distance;
+        return a.yaw_diff < b.yaw_diff;
+      });
+  std::array<bool, 4> used_index{false, false, false, false};
+  std::vector<bool> used_obs(obs_armors.size(), false);
+  std::vector<std::pair<ArmorPositionYaw, ArmorIndex>> matched_armors;
+  matched_armors.reserve(candidates.size());
+  for (const auto &candidate : candidates) {
+    auto idx = static_cast<std::size_t>(candidate.index);
+    if (used_obs.at(candidate.obs_i) || used_index.at(idx))
+      continue;
+    used_obs.at(candidate.obs_i) = true;
+    used_index.at(idx) = true;
+    matched_armors.emplace_back(obs_armors.at(candidate.obs_i),
+                                candidate.index);
+  }
+  return matched_armors;
+}
+
 auto_aim::RobotTargetState auto_aim::RobotTarget::getTargetStateFromArmor(
     const ArmorPositionYaw &armor) const {
   auto armor_x = armor.position.x();
@@ -127,7 +158,6 @@ auto_aim::TrackState::State auto_aim::RobotTarget::track(
     const std::vector<types::Armor> &armors,
     const std::chrono::system_clock::time_point &stamp) {
   std::vector<ArmorPositionYaw> selected_armors;
-  // 调用auto_aim::Armor对types::Armor的构造函数
   std::copy_if(armors.begin(), armors.end(),
                std::back_inserter(selected_armors),
                [this](const types::Armor &armor) -> bool {
@@ -317,13 +347,11 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
 std::pair<auto_aim::RobotTargetState, auto_aim::TrackState::State>
 auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
                               double dt) const {
-  // 超时丢失
   auto dt_tracking_to_update =
       std::chrono::duration_cast<std::chrono::duration<double>>(
           track_state_.stamp_last_update - track_state_.stamp_last_tracking)
           .count();
   if (track_state_.state != TrackState::State::LOST &&
-      // 注意dt是从update算的，得手动补偿下track到update的间隔
       dt + dt_tracking_to_update > config_.lost_threshold_sec) {
     LOG_INFO(logger_, "[Target {}]: Time out! dt{}.",
              rfl::enum_to_string(target_state_.type),
@@ -335,20 +363,10 @@ auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
     if (armors.empty()) {
       return {{}, TrackState::State::LOST};
     } else {
-      // 切换到跟踪状态前需要由观测初始化target_state
       target_state = getTargetStateFromArmor(armors.front());
     }
   }
-  // 匹配装甲板
-  std::vector<std::pair<ArmorPositionYaw, ArmorIndex>> matched_armors;
-  for (const auto &armor : armors) {
-    auto match_result = Target::matchArmor(
-        getArmorsFromTargetState(target_state), armor,
-        config_.max_match_distance_m,
-        tools::angle2Radian((config_.max_match_yaw_diff_degree)));
-    if (!match_result.empty())
-      matched_armors.emplace_back(armor, match_result.front().index);
-  }
+  auto matched_armors = matchArmorsUnique(target_state, armors);
   if (matched_armors.size() < armors.size()) {
     LOG_DEBUG(logger_, "[Target {}]: Miss match {} armors!",
               rfl::enum_to_string(target_state.type),
@@ -361,7 +379,6 @@ auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
   addArmorValuesFactors(values, graph, matched_armors, track_state_.k);
 
   try {
-    // 进行增量优化并返回结果
     this->isam2_.update(graph, values);
     target_state.center_position =
         isam2_.calculateEstimate<gtsam::Point3>(X(track_state_.k));

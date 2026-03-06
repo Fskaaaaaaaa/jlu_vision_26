@@ -6,6 +6,13 @@
 #include <gtsam/base/Vector.h>
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Rot2.h>
+#include <numbers>
+
+namespace {
+inline double armorPhase(auto_aim::ArmorIndex index) {
+  return static_cast<int>(index) * std::numbers::pi / 2.0;
+}
+} // namespace
 
 auto_aim::TranslationFactor::TranslationFactor(
     const gtsam::SharedNoiseModel &model, gtsam::Key x_pre, gtsam::Key v_pre,
@@ -91,30 +98,33 @@ gtsam::Vector auto_aim::ArmorRadiusAFactor::evaluateError(
     const double &ra, const gtsam::Rot2 &rotation, const gtsam::Point3 &center,
     gtsam::OptionalMatrixType H1, gtsam::OptionalMatrixType H2,
     gtsam::OptionalMatrixType H3) const {
-  // NOTE: 因子图不直接优化半径
   auto radius_a = tools::logisticFunction(ra, min_, max_);
-  ArmorPositionYaw armor{center, rotation.theta(), radius_a, 0.0,
-                         4,      armor_index_};
-  gtsam::Vector3 pos_err = armor.position - obs_armor_position_;
-  auto yaw_err = obs_armor_yaw_.localCoordinates(armor.yaw).x();
-  gtsam::Vector4 error{pos_err.x(), pos_err.y(), pos_err.z(), yaw_err};
-  // HACK: 注意armor.yaw是直接由rotation计算来的，所以算雅可比直接用了
-  // NOTE: 注意error减去的obs相当于常数，故相当于求armor(xyzyaw)对输入的雅可比
+  auto obs_theta = obs_armor_yaw_.theta();
+  auto nx = std::cos(obs_theta);
+  auto ny = std::sin(obs_theta);
+  auto tx = -ny;
+  auto ty = nx;
+  auto dx = center.x() - obs_armor_position_.x();
+  auto dy = center.y() - obs_armor_position_.y();
+  auto tangential_err = tx * dx + ty * dy;
+  auto radial_err = nx * dx + ny * dy - radius_a;
+  auto z_err = center.z() - obs_armor_position_.z();
+  auto pred_armor_yaw =
+      gtsam::Rot2::fromAngle(rotation.theta() + armorPhase(armor_index_));
+  auto yaw_err = obs_armor_yaw_.localCoordinates(pred_armor_yaw).x();
+  gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
   if (H1) {
     auto d_radius_d_ra = tools::logisticDerivative(radius_a, min_, max_);
-    (*H1) =
-        (gtsam::Matrix(4, 1) << -std::cos(armor.yaw.theta()) * d_radius_d_ra,
-         -std::sin(armor.yaw.theta()) * d_radius_d_ra, 0.0, 0.0)
-            .finished();
+    (*H1) = (gtsam::Matrix(4, 1) << 0.0, -d_radius_d_ra, 0.0, 0.0).finished();
   }
   if (H2) {
-    (*H2) = (gtsam::Matrix(4, 1) << radius_a * std::sin(armor.yaw.theta()),
-             -radius_a * std::cos(armor.yaw.theta()), 0.0, 1.0)
-                .finished();
+    (*H2) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, 1.0).finished();
   }
   if (H3) {
     (*H3) =
-        (gtsam::Matrix(4, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0).finished();
+        (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0, 0.0,
+         0.0, 0.0)
+            .finished();
   }
   return error;
 }
@@ -135,29 +145,35 @@ gtsam::Vector auto_aim::ArmorRadiusBDZFactor::evaluateError(
     gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
     gtsam::OptionalMatrixType H4) const {
   auto radius_b = tools::logisticFunction(rb, min_, max_);
-  ArmorPositionYaw armor{center, rotation.theta(), radius_b, dz,
-                         4,      armor_index_};
-  gtsam::Vector3 pos_err = armor.position - obs_armor_position_;
-  auto yaw_err = obs_armor_yaw_.localCoordinates(armor.yaw).x();
-  gtsam::Vector4 error{pos_err.x(), pos_err.y(), pos_err.z(), yaw_err};
+  auto obs_theta = obs_armor_yaw_.theta();
+  auto nx = std::cos(obs_theta);
+  auto ny = std::sin(obs_theta);
+  auto tx = -ny;
+  auto ty = nx;
+  auto dx = center.x() - obs_armor_position_.x();
+  auto dy = center.y() - obs_armor_position_.y();
+  auto tangential_err = tx * dx + ty * dy;
+  auto radial_err = nx * dx + ny * dy - radius_b;
+  auto z_err = center.z() + dz - obs_armor_position_.z();
+  auto pred_armor_yaw =
+      gtsam::Rot2::fromAngle(rotation.theta() + armorPhase(armor_index_));
+  auto yaw_err = obs_armor_yaw_.localCoordinates(pred_armor_yaw).x();
+  gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
   if (H1) {
     auto d_radius_d_rb = tools::logisticDerivative(radius_b, min_, max_);
-    (*H1) =
-        (gtsam::Matrix(4, 1) << -std::cos(armor.yaw.theta()) * d_radius_d_rb,
-         -std::sin(armor.yaw.theta()) * d_radius_d_rb, 0.0, 0.0)
-            .finished();
+    (*H1) = (gtsam::Matrix(4, 1) << 0.0, -d_radius_d_rb, 0.0, 0.0).finished();
   }
   if (H2) {
     (*H2) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 1.0, 0.0).finished();
   }
   if (H3) {
-    (*H3) = (gtsam::Matrix(4, 1) << radius_b * std::sin(armor.yaw.theta()),
-             -radius_b * std::cos(armor.yaw.theta()), 0.0, 1.0)
-                .finished();
+    (*H3) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, 1.0).finished();
   }
   if (H4) {
     (*H4) =
-        (gtsam::Matrix(4, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0).finished();
+        (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0, 0.0,
+         0.0, 0.0)
+            .finished();
   }
   return error;
 }

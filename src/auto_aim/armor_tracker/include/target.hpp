@@ -7,11 +7,11 @@
 
 #include "quill/Logger.h"
 #include <Eigen/Core>
-#include <array>
 #include <gtsam/nonlinear/ISAM2.h>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
 #include <gtsam/nonlinear/Values.h>
 
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <mutex>
@@ -54,6 +54,9 @@ private:
   static std::vector<ArmorPositionYaw>
   getArmorsFromTargetState(const TargetState &state, double radius_a,
                            double radius_b, double dz);
+  std::vector<std::pair<ArmorPositionYaw, ArmorIndex>>
+  matchArmorsUnique(const RobotTargetState &state,
+                    const std::vector<ArmorPositionYaw> &obs_armors) const;
   RobotTargetState getTargetStateFromArmor(const ArmorPositionYaw &armor) const;
   void addMotionValuesFactors(gtsam::Values &values,
                               gtsam::NonlinearFactorGraph &graph,

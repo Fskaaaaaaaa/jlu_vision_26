@@ -25,7 +25,7 @@ namespace auto_aim {
 // 三个装甲板时同理（都是均分圆周后由-x轴开始逆时针旋转）
 // Robot在13方向上使用dz，outpost在1使用dz_a，在2使用dz_b
 enum class ArmorIndex {
-  _0,
+  _0 = 0,
   _1,
   _2,
   _3,
@@ -89,10 +89,13 @@ struct TrackState {
   std::chrono::system_clock::time_point stamp_last_tracking;
 };
 
-struct [[deprecated]] ArmorMatchError {
+struct MatchCandidate {
+  std::size_t obs_i;
+  ArmorIndex index;
   double distance;
   double yaw_diff;
 };
+
 struct ArmorMatchResult {
   ArmorIndex index;
   double distance; // m

@@ -15,11 +15,11 @@ serial_topic:
   instance: tracker
   event: data
 robot_conf:
-  max_match_distance_m: 1.0
-  max_match_yaw_diff_degree: 45.0
+  max_match_distance_m: 0.5
+  max_match_yaw_diff_degree: 30.0
   lost_threshold_sec: 0.5
-  yaw_prior_noise: 0.2
-  vyaw_prior_noise: 0.5 
+  yaw_prior_noise: 90.0
+  vyaw_prior_noise: 90.0
   translation_prior_noise:
     x: 0.1
     y: 0.1
@@ -46,7 +46,7 @@ robot_conf:
   dz_prior_noise: 0.1
   default_dz: 0.0
   obs_factor_noise:
-    x: 0.03
+    x: 0.1
     y: 0.03
     z: 0.03
     w: 0.05

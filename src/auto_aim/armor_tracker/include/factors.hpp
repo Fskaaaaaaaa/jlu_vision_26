@@ -26,8 +26,8 @@ namespace auto_aim {
 //          [CV模型下的速度角速度因子]
 //          V(k-1)--VelocityFactor--V(k)
 //          W(k-1)--VyawFactor--W(k)
-//          [下面两个观测因子误差定义为由X+A/BZ推导的装甲板位置和直接观测的差(预测-观测)]
-//          [观测由构造时传入，注意需要手动匹配装甲板位置(来决定使用哪个因子)]
+//          [观测因子把中心-装甲板位移分解为切向/径向，半径只由径向项约束]
+//          [这样可避免yaw相位误差通过切向残差把半径拉小]
 //          A(0)--ArmorRadiusAFactor--X(k)
 //                                 \__R(k)
 //          B(0)--ArmorFactorRbDz--X(k)
