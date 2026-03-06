@@ -30,18 +30,14 @@ public:
 
 private:
   msgs::AimCommand plan(const TargetState &target_state,
-                        double dt_image_to_now_sec,
-                        double bullet_speed_mps);
-  std::optional<TargetAimSolution>
-  solveAimWithMethodFallback(const TargetState &target_state,
-                             double dt_image_to_now_sec,
-                             double bullet_speed_mps, bool use_rk45,
-                             bool iterative_fly_time,
-                             std::optional<ArmorIndex> &preferred_armor_index);
+                        double dt_image_to_now_sec, double bullet_speed_mps);
+  std::optional<TargetAimSolution> solveAimWithMethodFallback(
+      const TargetState &target_state, double dt_image_to_now_sec,
+      double bullet_speed_mps, bool use_rk45, bool iterative_fly_time,
+      std::optional<ArmorIndex> &preferred_armor_index);
   AimTrajectoryReference
   buildTrajectoryReference(const TargetState &target_state,
-                           double dt_image_to_now_sec,
-                           double bullet_speed_mps);
+                           double dt_image_to_now_sec, double bullet_speed_mps);
   quill::Logger *logger_;
   PlannerConfig config_;
   int trajectory_horizon_;
