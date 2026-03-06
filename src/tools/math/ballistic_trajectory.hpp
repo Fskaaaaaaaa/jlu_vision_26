@@ -40,15 +40,31 @@ public:
       : logger_(logger), config_(config) {};
 
   std::optional<PitchFlytime>
-  resolvePitchFlyTime(double distance, double height, double v0,
+  resolvePitchFlyTime(double target_distance_m, double target_height_m,
+                      double muzzle_velocity_mps,
                       Method method = Method::parabola) const;
-  BallisticState2D getBarrelStateFromPitch(double pitch, double v0) const;
+  BallisticState2D
+  getBarrelStateFromPitch(double pitch_rad, double muzzle_velocity_mps) const;
 
 private:
-  std::optional<PitchFlytime> resolveRk45(double distance, double height,
-                                          double v0) const;
-  std::optional<PitchFlytime> resolveParabola(double distance, double height,
-                                              double v0) const;
+  struct PitchResidual {
+    bool valid = false;
+    double height_error_m = 0.0;
+    double fly_time_sec = 0.0;
+  };
+
+  PitchResidual evaluatePitchByRk45(double pitch_rad, double target_distance_m,
+                                    double target_height_m,
+                                    double muzzle_velocity_mps) const;
+  std::optional<PitchFlytime> solvePitchByHybridMethod(
+      double pitch_left_rad, double pitch_right_rad, double target_distance_m,
+      double target_height_m, double muzzle_velocity_mps) const;
+  std::optional<PitchFlytime>
+  resolveRk45(double target_distance_m, double target_height_m,
+              double muzzle_velocity_mps) const;
+  std::optional<PitchFlytime>
+  resolveParabola(double target_distance_m, double target_height_m,
+                  double muzzle_velocity_mps) const;
   quill::Logger *logger_;
   BallisticConfig config_;
 };

@@ -45,11 +45,11 @@ robot_conf:
   radius_max: 0.5
   dz_prior_noise: 0.1
   default_dz: 0.0
-  obs_factor_noise:
-    x: 0.1
-    y: 0.03
-    z: 0.03
-    w: 0.05
+  armor_observation_noise:
+    tangential_error_m: 0.1
+    radial_error_m: 0.03
+    height_error_m: 0.03
+    yaw_error_rad: 0.05
 
 planner_conf:
   dt_sec: 0.01
@@ -77,9 +77,9 @@ planner_conf:
       g: 9.8
       k: 0.019
       barrel_length: 0.107
-      time_step: 0.01
+      time_step: 0.001
       max_fly_time: 0.8
-      max_pitch_iterate_count: 100
+      max_pitch_iterate_count: 80
       min_pitch_error_m: 0.01
       gimbal_pitch_max_degree: 30.0
       gimbal_pitch_min_degree: -10.0

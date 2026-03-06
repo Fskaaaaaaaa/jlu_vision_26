@@ -15,93 +15,109 @@ auto_aim::Trajectory::Trajectory(quill::Logger *logger,
     : logger_(logger), config_(config),
       solver_(logger_, config_.ballistic_conf) {}
 
-std::optional<auto_aim::YawPitchFlytime> auto_aim::Trajectory::resolveYawPitch(
-    double bullet_speed, const Eigen::Vector3d &aim_position, bool use_rk45,
-    double odom_x, double odom_y) {
-  auto distance_x = aim_position.x() - odom_x;
-  auto distance_y = aim_position.y() - odom_y;
-  auto distance = std::hypot(distance_x, distance_y);
-  auto yaw = std::atan2(distance_y, distance_x);
-  auto pitch_flytime_opt = solver_.resolvePitchFlyTime(
-      bullet_speed, distance, aim_position.z(),
+std::optional<auto_aim::YawPitchFlytime>
+auto_aim::Trajectory::solveYawPitchForArmorPosition(
+    double bullet_speed_mps, const Eigen::Vector3d &armor_position_m,
+    bool use_rk45, double odom_x_m, double odom_y_m) {
+  const double target_x_m = armor_position_m.x() - odom_x_m;
+  const double target_y_m = armor_position_m.y() - odom_y_m;
+  const double target_distance_m = std::hypot(target_x_m, target_y_m);
+  const double target_height_m = armor_position_m.z();
+  const double target_yaw_rad = std::atan2(target_y_m, target_x_m);
+  auto pitch_and_flytime = solver_.resolvePitchFlyTime(
+      target_distance_m, target_height_m, bullet_speed_mps,
       use_rk45 ? tools::ballistic::Method::rk45
                : tools::ballistic::Method::parabola);
-  if (!pitch_flytime_opt.has_value())
+  if (!pitch_and_flytime.has_value())
     return std::nullopt;
   return YawPitchFlytime{
-      .yaw = yaw,
-      .pitch = pitch_flytime_opt.value().pitch,
-      .fly_time = pitch_flytime_opt.value().fly_time,
+      .yaw = target_yaw_rad,
+      .pitch = pitch_and_flytime->pitch,
+      .fly_time = pitch_and_flytime->fly_time,
   };
 }
 
 std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>
 auto_aim::Trajectory::getClosestArmorIndexFromTarget(const TargetState &state) {
-  auto armors = state.armors();
-  double min_distance = DBL_MAX;
-  ArmorPositionYaw selected_armor;
-  ArmorIndex selected_index;
-  for (int i = 0; i < armors.size(); i++) {
-    const auto &armor = armors.at(i);
-    auto distance = std::hypot(armor.position.x(), armor.position.y());
-    if (distance < min_distance) {
-      selected_armor = armor;
-      selected_index = static_cast<ArmorIndex>(i);
+  const auto armors = state.armors();
+  double closest_distance_m = DBL_MAX;
+  ArmorPositionYaw closest_armor;
+  ArmorIndex closest_armor_index = ArmorIndex::_0;
+  for (std::size_t index = 0; index < armors.size(); ++index) {
+    const auto &armor = armors.at(index);
+    const double distance_to_gimbal_m =
+        std::hypot(armor.position.x(), armor.position.y());
+    if (distance_to_gimbal_m < closest_distance_m) {
+      closest_distance_m = distance_to_gimbal_m;
+      closest_armor = armor;
+      closest_armor_index = static_cast<ArmorIndex>(index);
     }
   }
-  return {selected_armor, selected_index};
+  return {closest_armor, closest_armor_index};
 }
 
-double auto_aim::Trajectory::calculateAimError(
-    double yaw, double pitch, double v0, double fly_time,
-    const Eigen::Vector3d &aim_position, bool use_rk45) {
+double auto_aim::Trajectory::evaluateImpactPositionError(
+    double yaw_rad, double pitch_rad, double bullet_speed_mps,
+    double fly_time_sec, const Eigen::Vector3d &armor_position_m,
+    bool use_rk45) {
   auto bullet_position =
       use_rk45
           ? tools::ballistic::rk45::getState3DByT(
-                solver_.getBarrelStateFromPitch(pitch, v0), yaw, fly_time,
+                solver_.getBarrelStateFromPitch(pitch_rad, bullet_speed_mps),
+                yaw_rad, fly_time_sec,
                 config_.ballistic_conf.time_step, config_.ballistic_conf.k,
                 config_.ballistic_conf.g)
           : tools::ballistic::parabola::getState3DByT(
-                {0, 0, pitch, v0}, yaw, fly_time, config_.ballistic_conf.g);
-  return (bullet_position.position - aim_position).norm();
+                {0, 0, pitch_rad, bullet_speed_mps}, yaw_rad, fly_time_sec,
+                config_.ballistic_conf.g);
+  return (bullet_position.position - armor_position_m).norm();
 }
 
 std::optional<auto_aim::YawPitchFlytime>
 auto_aim::Trajectory::resolveTarget(const TargetState &state,
-                                    double bullet_speed,
+                                    double bullet_speed_mps,
                                     double delay_time_image_to_now_sec,
                                     bool use_rk45, bool iterative_fly_time) {
-  auto state_d = state.predict(delay_time_image_to_now_sec);
-  auto [armor, index] = getClosestArmorIndexFromTarget(state_d);
+  auto predicted_target_state = state.predict(delay_time_image_to_now_sec);
+  auto [selected_armor, selected_armor_index] =
+      getClosestArmorIndexFromTarget(predicted_target_state);
   if (!iterative_fly_time)
-    return resolveYawPitch(bullet_speed, armor.position, use_rk45);
-  double error = DBL_MAX;
-  int iteration_count = 0;
-  int switch_armor_count = 0;
-  YawPitchFlytime result;
-  ArmorIndex last_index;
-  while (error >= config_.aim_ok_error_m) {
-    auto result_opt = resolveYawPitch(bullet_speed, armor.position, use_rk45);
-    if (!result_opt.has_value() ||
-        iteration_count++ > config_.max_aim_iterate_count) {
-      // 无解情况直接返回
+    return solveYawPitchForArmorPosition(bullet_speed_mps, selected_armor.position,
+                                         use_rk45);
+
+  double aiming_error_m = DBL_MAX;
+  int iteration_index = 0;
+  int switched_armor_count = 0;
+  std::optional<YawPitchFlytime> solved_yaw_pitch;
+  while (aiming_error_m >= config_.aim_ok_error_m) {
+    auto current_solution =
+        solveYawPitchForArmorPosition(bullet_speed_mps, selected_armor.position,
+                                      use_rk45);
+    if (!current_solution.has_value() ||
+        iteration_index++ > config_.max_aim_iterate_count) {
       LOG_WARNING(logger_,
                   "[Trajectory]: Fail to solve YawPitchFlytime in {} "
                   "iterations, error {}.",
-                  iteration_count, error);
+                  iteration_index, aiming_error_m);
       return std::nullopt;
     }
-    result = result_opt.value();
-    state_d = state.predict(delay_time_image_to_now_sec + result.fly_time);
-    std::tie(armor, index) = getClosestArmorIndexFromTarget(state_d);
-    last_index = index;
-    if (last_index != index)
-      if (++switch_armor_count >= config_.max_aim_switch_armor_count) {
-        LOG_WARNING(logger_, "[Trajectory]: Armor select unstable!");
-        return result;
-      }
-    error = calculateAimError(result.yaw, result.pitch, bullet_speed,
-                              result.fly_time, armor.position, use_rk45);
+    solved_yaw_pitch = current_solution;
+    predicted_target_state =
+        state.predict(delay_time_image_to_now_sec + current_solution->fly_time);
+    auto [next_armor, next_armor_index] =
+        getClosestArmorIndexFromTarget(predicted_target_state);
+    if (next_armor_index != selected_armor_index &&
+        ++switched_armor_count >= config_.max_aim_switch_armor_count) {
+      LOG_WARNING(logger_, "[Trajectory]: Armor select unstable!");
+      return current_solution;
+    }
+    selected_armor = next_armor;
+    selected_armor_index = next_armor_index;
+    aiming_error_m =
+        evaluateImpactPositionError(current_solution->yaw,
+                                    current_solution->pitch, bullet_speed_mps,
+                                    current_solution->fly_time,
+                                    selected_armor.position, use_rk45);
   }
-  return result;
+  return solved_yaw_pitch;
 }

@@ -306,10 +306,10 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
     if (index == ArmorIndex::_0 || index == ArmorIndex::_2) {
       graph.add(ArmorRadiusAFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
-              config_.obs_factor_noise.x,
-              config_.obs_factor_noise.y,
-              config_.obs_factor_noise.z,
-              config_.obs_factor_noise.w,
+              config_.armor_observation_noise.tangential_error_m,
+              config_.armor_observation_noise.radial_error_m,
+              config_.armor_observation_noise.height_error_m,
+              config_.armor_observation_noise.yaw_error_rad,
           }),
           A(0),
           R(k),
@@ -323,10 +323,10 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
     } else {
       graph.add(ArmorRadiusBDZFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
-              config_.obs_factor_noise.x,
-              config_.obs_factor_noise.y,
-              config_.obs_factor_noise.z,
-              config_.obs_factor_noise.w,
+              config_.armor_observation_noise.tangential_error_m,
+              config_.armor_observation_noise.radial_error_m,
+              config_.armor_observation_noise.height_error_m,
+              config_.armor_observation_noise.yaw_error_rad,
           }),
           B(0),
           Z(0),

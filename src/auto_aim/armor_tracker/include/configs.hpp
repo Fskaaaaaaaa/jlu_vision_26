@@ -10,6 +10,13 @@
 
 namespace auto_aim {
 
+struct ArmorObservationNoiseConfig {
+  double tangential_error_m;
+  double radial_error_m;
+  double height_error_m;
+  double yaw_error_rad;
+};
+
 struct RobotConfig {
   double max_match_distance_m;
   double max_match_yaw_diff_degree;
@@ -30,7 +37,7 @@ struct RobotConfig {
   double radius_max;
   double dz_prior_noise;
   double default_dz;
-  confs::Vector4d obs_factor_noise;
+  ArmorObservationNoiseConfig armor_observation_noise;
 };
 
 struct OutpostConfig {

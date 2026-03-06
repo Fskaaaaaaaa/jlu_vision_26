@@ -9,11 +9,13 @@
 
 #include <chrono>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 
 auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
     : logger_(logger), config_(config),
-      traj_solver_(logger_, config_.trajectory_conf), aim0_predict_time_(0) {
+      trajectory_solver_(logger_, config_.trajectory_conf),
+      aim0_predict_time_(0) {
   trajectory_horizon_ = config_.trajectory_half_horizon * 2;
   bullet_id_ = 0;
   {
@@ -62,50 +64,55 @@ auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
 msgs::AimCommand auto_aim::Planner::plan(
     const TargetState &target_state,
     const std::chrono::system_clock::time_point &target_stamp,
-    double bullet_speed) {
-  double dt_sec = std::chrono::duration_cast<std::chrono::duration<double>>(
-                      std::chrono::system_clock::now() - target_stamp)
-                      .count();
-  return plan(target_state, dt_sec, bullet_speed);
+    double bullet_speed_mps) {
+  const double dt_image_to_now_sec =
+      std::chrono::duration_cast<std::chrono::duration<double>>(
+          std::chrono::system_clock::now() - target_stamp)
+          .count();
+  return plan(target_state, dt_image_to_now_sec, bullet_speed_mps);
 }
 
 msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
-                                         double dt, double bullet_speed) {
-  // 0. Check bullet speed
-  if (bullet_speed < config_.min_bullet_speed ||
-      bullet_speed > config_.max_bullet_speed) {
+                                         double dt_image_to_now_sec,
+                                         double bullet_speed_mps) {
+  if (bullet_speed_mps < config_.min_bullet_speed ||
+      bullet_speed_mps > config_.max_bullet_speed) {
     LOG_WARNING(logger_, "[Planner]: Abnormal bullet speed {}, use default {}.",
-                bullet_speed, config_.default_bullet_speed);
-    bullet_speed = config_.default_bullet_speed;
+                bullet_speed_mps, config_.default_bullet_speed);
+    bullet_speed_mps = config_.default_bullet_speed;
   }
-  // 1. Get trajectory
-  Eigen::MatrixXd traj;
-  double yaw0;
+  Eigen::MatrixXd trajectory_reference;
+  double center_reference_yaw_rad = 0.0;
   try {
-    std::tie(traj, yaw0) = getTrajectoryYaw0(target_state, dt, bullet_speed);
+    std::tie(trajectory_reference, center_reference_yaw_rad) =
+        buildTrajectoryReference(target_state, dt_image_to_now_sec,
+                                 bullet_speed_mps);
   } catch (const std::exception &e) {
-    LOG_WARNING(logger_, "{}, bullet_speed: {}.", e.what(), bullet_speed);
+    LOG_WARNING(logger_, "{}, bullet_speed: {}.", e.what(), bullet_speed_mps);
     return {.control = false};
   }
-  // 3. Solve yaw
-  Eigen::VectorXd x0(2);
-  x0 << traj(0, 0), traj(1, 0);
-  tiny_set_x0(yaw_solver_, x0);
-  yaw_solver_->work->Xref = traj.block(0, 0, 2, trajectory_horizon_);
+  Eigen::VectorXd initial_state(2);
+  initial_state << trajectory_reference(0, 0), trajectory_reference(1, 0);
+  tiny_set_x0(yaw_solver_, initial_state);
+  yaw_solver_->work->Xref =
+      trajectory_reference.block(0, 0, 2, trajectory_horizon_);
   tiny_solve(yaw_solver_);
-  // 4. Solve pitch
-  x0 << traj(2, 0), traj(3, 0);
-  tiny_set_x0(pitch_solver_, x0);
-  pitch_solver_->work->Xref = traj.block(2, 0, 2, trajectory_horizon_);
+  initial_state << trajectory_reference(2, 0), trajectory_reference(3, 0);
+  tiny_set_x0(pitch_solver_, initial_state);
+  pitch_solver_->work->Xref =
+      trajectory_reference.block(2, 0, 2, trajectory_horizon_);
   tiny_solve(pitch_solver_);
 
   msgs::AimCommand cmd;
   cmd.control = true;
   cmd.target_yaw =
-      tools::limitRadian(traj(0, config_.trajectory_half_horizon) + yaw0);
-  cmd.target_pitch = traj(2, config_.trajectory_half_horizon);
+      tools::limitRadian(trajectory_reference(0, config_.trajectory_half_horizon) +
+                         center_reference_yaw_rad);
+  cmd.target_pitch =
+      trajectory_reference(2, config_.trajectory_half_horizon);
   cmd.yaw = tools::limitRadian(
-      yaw_solver_->work->x(0, config_.trajectory_half_horizon) + yaw0);
+      yaw_solver_->work->x(0, config_.trajectory_half_horizon) +
+      center_reference_yaw_rad);
   cmd.yaw_vel = yaw_solver_->work->x(1, config_.trajectory_half_horizon);
   cmd.yaw_acc = yaw_solver_->work->u(0, config_.trajectory_half_horizon);
   cmd.pitch = pitch_solver_->work->x(0, config_.trajectory_half_horizon);
@@ -113,10 +120,12 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
   cmd.pitch_acc = pitch_solver_->work->u(0, config_.trajectory_half_horizon);
   cmd.fire =
       std::hypot(
-          traj(0, config_.trajectory_half_horizon + config_.shoot_offset) -
+          trajectory_reference(
+              0, config_.trajectory_half_horizon + config_.shoot_offset) -
               yaw_solver_->work->x(0, config_.trajectory_half_horizon +
                                           config_.shoot_offset),
-          traj(2, config_.trajectory_half_horizon + config_.shoot_offset) -
+          trajectory_reference(
+              2, config_.trajectory_half_horizon + config_.shoot_offset) -
               pitch_solver_->work->x(0, config_.trajectory_half_horizon +
                                             config_.shoot_offset)) <
       config_.fire_thresh;
@@ -125,49 +134,92 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
 }
 
 std::pair<Eigen::MatrixXd, double>
-auto_aim::Planner::getTrajectoryYaw0(const TargetState &target_state,
-                                     double dt_image_to_now,
-                                     double bullet_speed) {
-  auto aim = [&](const TargetState &state, bool use_rk45, bool iterative,
-                 bool no_except) {
-    auto yaw_pitch_flytime_opt = traj_solver_.resolveTarget(
-        state, bullet_speed, dt_image_to_now, use_rk45, iterative);
-    static YawPitchFlytime last_aim;
-    if (!yaw_pitch_flytime_opt.has_value()) {
-      if (!no_except)
-        throw std::runtime_error("Unsolvable bullet trajectory!");
-      // HACK:
-      // 迭代情况下，求解轨迹需要的50次弹道时难免碰到“选板横跳、不可击中”的情况，
-      //  为避免规划失败，使用上一帧的解算结果来填补空缺
-      return last_aim;
+auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
+                                            double dt_image_to_now_sec,
+                                            double bullet_speed_mps) {
+  auto solveAimWithMethodFallback = [&](const TargetState &predicted_target_state,
+                                        bool use_rk45,
+                                        bool iterative_fly_time) {
+    auto solved_yaw_pitch = trajectory_solver_.resolveTarget(
+        predicted_target_state, bullet_speed_mps, dt_image_to_now_sec, use_rk45,
+        iterative_fly_time);
+    if (!solved_yaw_pitch.has_value() && use_rk45) {
+      solved_yaw_pitch = trajectory_solver_.resolveTarget(
+          predicted_target_state, bullet_speed_mps, dt_image_to_now_sec, false,
+          iterative_fly_time);
     }
-    return last_aim = yaw_pitch_flytime_opt.value();
+    return solved_yaw_pitch;
   };
-  auto aim0 =
-      aim(target_state, config_.rk45_yaw0, config_.iterative_yaw0, false);
-  double yaw0 = aim0.yaw; // mid
-  aim0_predict_time_.store(aim0.fly_time + dt_image_to_now);
-  Eigen::MatrixXd traj(4, trajectory_horizon_);
-  TargetState status = target_state.predict(
+
+  auto requireAimSolutionOrThrow = [&](const TargetState &predicted_target_state,
+                                       bool use_rk45,
+                                       bool iterative_fly_time) {
+    auto solved_yaw_pitch =
+        solveAimWithMethodFallback(predicted_target_state, use_rk45,
+                                   iterative_fly_time);
+    if (!solved_yaw_pitch.has_value())
+      throw std::runtime_error("Unsolvable bullet trajectory!");
+    return solved_yaw_pitch.value();
+  };
+
+  auto center_aim_solution = requireAimSolutionOrThrow(
+      target_state, config_.rk45_yaw0, config_.iterative_yaw0);
+  const double center_reference_yaw_rad = center_aim_solution.yaw;
+  aim0_predict_time_.store(center_aim_solution.fly_time + dt_image_to_now_sec);
+  Eigen::MatrixXd trajectory_reference(4, trajectory_horizon_);
+
+  TargetState target_state_for_current_frame = target_state.predict(
       -config_.dt_sec * (config_.trajectory_half_horizon + 1));
-  auto yaw_pitch_last =
-      aim(status, config_.rk45_traj, config_.iterative_traj, false);
-  status = status.predict(config_.dt_sec);
-  auto yaw_pitch = aim(status, config_.rk45_traj, config_.iterative_traj,
-                       false);                    // left
-  for (int i = 0; i < trajectory_horizon_; i++) { // until right
-    status = status.predict(config_.dt_sec);
-    auto yaw_pitch_next =
-        aim(status, config_.rk45_traj, config_.iterative_traj, true);
-    auto yaw_vel = tools::limitRadian(yaw_pitch_next.yaw - yaw_pitch_last.yaw) /
-                   (2 * config_.dt_sec);
-    auto pitch_vel =
-        (yaw_pitch_next.pitch - yaw_pitch_last.pitch) / (2 * config_.dt_sec);
-    // 这里将yaw映射到以yaw0为中心的相对角度
-    traj.col(i) << tools::limitRadian(yaw_pitch.yaw - yaw0), yaw_vel,
-        yaw_pitch.pitch, pitch_vel;
-    yaw_pitch_last = yaw_pitch;
-    yaw_pitch = yaw_pitch_next;
+  auto previous_solution_optional =
+      solveAimWithMethodFallback(target_state_for_current_frame,
+                                 config_.rk45_traj, config_.iterative_traj);
+  if (!previous_solution_optional.has_value()) {
+    LOG_TRACE_L1(logger_,
+                 "[Planner]: use center-aim fallback for first trajectory "
+                 "sample.");
   }
-  return {traj, yaw0};
+  auto previous_solution =
+      previous_solution_optional.value_or(center_aim_solution);
+  target_state_for_current_frame =
+      target_state_for_current_frame.predict(config_.dt_sec);
+  auto current_solution_optional =
+      solveAimWithMethodFallback(target_state_for_current_frame,
+                                 config_.rk45_traj, config_.iterative_traj);
+  if (!current_solution_optional.has_value()) {
+    LOG_TRACE_L1(
+        logger_,
+        "[Planner]: use previous-sample fallback for second trajectory sample.");
+  }
+  auto current_solution =
+      current_solution_optional.value_or(previous_solution);
+
+  for (int frame_index = 0; frame_index < trajectory_horizon_; ++frame_index) {
+    target_state_for_current_frame =
+        target_state_for_current_frame.predict(config_.dt_sec);
+    auto next_solution = solveAimWithMethodFallback(
+        target_state_for_current_frame, config_.rk45_traj,
+        config_.iterative_traj);
+    if (!next_solution.has_value()) {
+      next_solution = current_solution;
+      LOG_TRACE_L1(
+          logger_,
+          "[Planner]: use trajectory hold fallback at frame {} when aim fails.",
+          frame_index);
+    }
+
+    const double yaw_velocity =
+        tools::limitRadian(next_solution->yaw - previous_solution.yaw) /
+        (2 * config_.dt_sec);
+    const double pitch_velocity =
+        (next_solution->pitch - previous_solution.pitch) /
+        (2 * config_.dt_sec);
+    trajectory_reference.col(frame_index)
+        << tools::limitRadian(current_solution.yaw - center_reference_yaw_rad),
+        yaw_velocity,
+        current_solution.pitch, pitch_velocity;
+    previous_solution = current_solution;
+    current_solution = next_solution.value();
+  }
+
+  return {trajectory_reference, center_reference_yaw_rad};
 }
