@@ -10,6 +10,7 @@ namespace hardware {
 class HikRobot : public CameraBase {
 public:
   HikRobot(quill::Logger *logger, const confs::CameraParams &camera_params);
+  ~HikRobot() override;
   int captureImage(unsigned char *buffer, std::size_t buffer_size) override;
   int changeExposureGain(double exposure, double gain) override;
 

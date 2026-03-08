@@ -65,7 +65,9 @@ bool auto_aim::MTDetectorDL::push(const cv::Mat &bgr_img,
                                   const std::string &frame_id,
                                   std::chrono::system_clock::time_point stamp) {
   auto tensor = this->yolo_->preProcess(bgr_img);
-  auto request = this->yolo_->requestInfer(tensor);
+  ov::Tensor copy(tensor.get_element_type(), tensor.get_shape());
+  tensor.copy_to(copy);
+  auto request = this->yolo_->requestInfer(copy);
   request.start_async();
   return queue_.push({bgr_img.clone(), frame_id, stamp, std::move(request)});
 }

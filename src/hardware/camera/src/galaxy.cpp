@@ -69,7 +69,7 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
   int64_t payload_size;
   GXGetInt(camera_handle_, GX_INT_PAYLOAD_SIZE, &payload_size);
   if (!buffer_inited_) {
-    this->bayer_buffer_holder_.reserve(payload_size);
+    this->bayer_buffer_holder_.resize(payload_size);
     buffer_inited_ = true;
   }
   if (buffer_size < payload_size) {
@@ -145,10 +145,10 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
   const static std::unordered_map<DX_PIXEL_COLOR_FILTER,
                                   cv::ColorConversionCodes>
       type_map{
-          {BAYERGB, cv::COLOR_BayerGB2BGR},
-          {BAYERGR, cv::COLOR_BayerGR2BGR},
-          {BAYERRG, cv::COLOR_BayerRG2BGR},
-          {BAYERBG, cv::COLOR_BayerBG2BGR},
+          {BAYERGB, cv::COLOR_BayerGB2RGB},
+          {BAYERGR, cv::COLOR_BayerGR2RGB},
+          {BAYERRG, cv::COLOR_BayerRG2RGB},
+          {BAYERBG, cv::COLOR_BayerBG2RGB},
       };
   cv::cvtColor(
       cv::Mat{bayer_frame.nHeight, bayer_frame.nWidth, CV_8U,

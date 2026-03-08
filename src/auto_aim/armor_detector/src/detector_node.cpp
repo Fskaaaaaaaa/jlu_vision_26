@@ -299,7 +299,8 @@ void auto_aim::DetectorNode::drawArmor(const Armor &armor, cv::Mat &image,
   if (draw_text) {
     cv::putText(
         image,
-        rfl::enum_to_string(armor.type) + std::to_string(armor.confidence),
+        rfl::enum_to_string(armor.color) + rfl::enum_to_string(armor.type) +
+            std::to_string(armor.confidence),
         armor.center, cv::FONT_HERSHEY_SIMPLEX, 0.8, tools::Color::PURPLE, 2);
     cv::putText(image, "0", armor.left_light.bottom, cv::FONT_HERSHEY_SIMPLEX,
                 0.8, tools::Color::PURPLE, 2);

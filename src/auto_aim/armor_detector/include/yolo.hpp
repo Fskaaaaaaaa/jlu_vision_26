@@ -21,6 +21,7 @@ public:
 class YOLOv5 : public YOLOBase {
 public:
   YOLOv5(quill::Logger *logger, const YOLOConfig &config);
+  // NOTE: 返回的tensor是浅拷贝的，并发场景要自己深拷贝下保证生命周期
   ov::Tensor preProcess(const cv::Mat &bgr_image) override;
   // NOTE: 只是返回请求，阻塞推理还是并发要自己调用
   ov::InferRequest requestInfer(const ov::Tensor &input_tensor) override;

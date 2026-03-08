@@ -1,17 +1,16 @@
 log_level: Info
-# camera_type: galaxy
 camera_type: video
 camera_name: camera0
 camera_frame_id: camera
-image_publish_interval_ms: 5
+image_publish_interval_ms: 1
 cam_info_publish_interval_ms: 1000
 video_path: assets/demo.avi
 camera_info:
   view_width_px: 1440
   view_height_px: 1080
-  camera_matrix: [2410.6082812904583, 0.0, 720.9494148705954, 0.0, 2409.129686034073, 519.3402327013587, 0.0, 0.0, 1.0]
-  distortion_coefficients: [-0.09796198583636388, 0.23337065973353116, 9.352013680842097e-05, -0.0016149198668571397, 0.0]
+  camera_matrix: [2411.932469, 0.0, 713.916764, 0.0, 2411.465577, 519.494149, 0.0, 0.0, 1.0]
+  distortion_coefficients: [-0.093204, 0.153681, 0.000112, -0.000588, 0.0]
 camera_params:
   exposure_time: 3000
   gain: 15.0
-  frame_rate: 150
+  frame_rate: 100
