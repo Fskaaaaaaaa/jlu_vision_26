@@ -25,12 +25,13 @@
 #include <cmath>
 #include <cstdlib>
 #include <exception>
+#include <iomanip>
+#include <sstream>
 #include <stdexcept>
 #include <thread>
 
 hardware::Serial::Serial(quill::Logger *logger, const SerialConfigs &configs)
     : logger_(logger), configs_(configs),
-      // serial_(configs_.serial_conf.device_name,configs_.serial_conf.baudrate,)
       task_mode_pub_(types::IceoryxServiceDescription{
           configs_.iceoryx_conf.task_mode_topic}
                          .description),
@@ -54,6 +55,8 @@ hardware::Serial::Serial(quill::Logger *logger, const SerialConfigs &configs)
     serial_.setFlowcontrol(configs_.serial_conf.flowcontrol);
     serial_.setStopbits(configs_.serial_conf.stopbits);
     serial_.setPort(configs_.serial_conf.device_name);
+    auto timeout = serial::Timeout::simpleTimeout(50);
+    serial_.setTimeout(timeout);
   } catch (const std::invalid_argument &e) {
     LOG_CRITICAL(logger_, "error: {}", e.what());
     std::exit(EXIT_FAILURE);
@@ -101,19 +104,31 @@ void hardware::Serial::reopenPort() {
 }
 
 void hardware::Serial::receiveThread() {
-  std::vector<uint8_t> header(1);
-  std::vector<uint8_t> data;
-  data.reserve(sizeof(types::ReceivePacket));
+  constexpr std::size_t kPacketSize = sizeof(types::ReceivePacket);
+  std::vector<uint8_t> data(kPacketSize);
   while (!iox::hasTerminationRequested()) {
     try {
-      serial_.read(header, header.size());
-      if (!(header[0] == 0x5A)) {
-        LOG_DEBUG(logger_, "Invalid header: {}", header[0]);
+      if (serial_.read(data.data(), 1) != 1) {
         continue;
       }
-      data.resize(sizeof(types::ReceivePacket) - 1);
-      serial_.read(data, data.size());
-      data.insert(data.begin(), header[0]);
+      if (data[0] != 0x5A) {
+        LOG_DEBUG(logger_, "Invalid header: {}", data[0]);
+        continue;
+      }
+
+      std::size_t payload_read = 0;
+      while (payload_read < kPacketSize - 1 && !iox::hasTerminationRequested()) {
+        const auto bytes =
+            serial_.read(data.data() + 1 + payload_read, kPacketSize - 1 - payload_read);
+        if (bytes == 0) {
+          break;
+        }
+        payload_read += bytes;
+      }
+      if (payload_read != kPacketSize - 1) {
+        continue;
+      }
+
       auto packet = types::fromVector(data);
       bool crc_ok = crc16::verifyCRC16CheckSum(
           reinterpret_cast<const uint8_t *>(&packet), sizeof(packet));
@@ -121,6 +136,14 @@ void hardware::Serial::receiveThread() {
         LOG_ERROR(logger_, "CRC error!");
         continue;
       }
+      LOG_TRACE_L1(logger_, "receive packet:\n {}",
+                   std::invoke([&]() -> std::string {
+                     std::ostringstream oss;
+                     oss << std::hex << std::setfill('0');
+                     for (auto byte : data)
+                       oss << std::setw(2) << static_cast<int>(byte);
+                     return oss.str();
+                   }));
       // publish ReceivePacket
       auto now = tools::getTimeNowNanoSec();
       iox::cxx::string<10> frame_id{iox::TruncateToCapacity,
@@ -199,8 +222,16 @@ void hardware::Serial::onAimCommandReceivedCallback(
         crc16::appendCRC16CheckSum(reinterpret_cast<uint8_t *>(&cmd),
                                    sizeof(cmd));
         auto data = types::toVector(cmd);
+        LOG_TRACE_L1(self->logger_, "send packet:\n {}",
+                     std::invoke([&]() -> std::string {
+                       std::ostringstream oss;
+                       oss << std::hex << std::setfill('0');
+                       for (auto byte : data)
+                         oss << std::setw(2) << static_cast<int>(byte);
+                       return oss.str();
+                     }));
         try {
-          self->serial_.write(reinterpret_cast<uint8_t *>(&data), sizeof(data));
+          self->serial_.write(data);
         } catch (const std::exception &e) {
           LOG_WARNING(self->logger_, "[Gimbal] Failed to write serial: {}",
                       e.what());

@@ -7,7 +7,9 @@
 #include <Eigen/Core>
 #include <gtsam/geometry/Rot2.h>
 
+#include <deque>
 #include <functional>
+#include <optional>
 #include <vector>
 
 namespace auto_aim {
@@ -117,6 +119,21 @@ struct AimTrajectoryReference {
   Eigen::MatrixXd state_reference;
   double center_reference_yaw_rad = 0.0;
   int fallback_sample_count = 0;
+};
+
+struct Radius {
+  // NOTE: 每次更新都更新并便利corrnors，超过min_pro就设置为peak或valley，
+  // 两个都有值了就计算峰峰值，如果峰峰值超过阈值就返回就自增震荡count
+  Radius(int deque_size, double min_prominence, double min_p2p_value);
+  void update(double radius);
+
+  double radius;
+  int oscillation_count;
+
+private:
+  std::deque<double> conners;
+  std::optional<double> peak;
+  std::optional<double> valley;
 };
 
 } // namespace auto_aim
