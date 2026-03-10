@@ -88,9 +88,10 @@ std::vector<std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>>
 auto_aim::RobotTarget::matchArmorsUnique(
     const RobotTargetState &state,
     const std::vector<ArmorPositionYaw> &obs_armors) const {
-  auto armors_for_association = RobotTarget::getArmorsFromTargetState(
-      state, config_.default_radius, config_.default_radius,
-      config_.default_dz);
+  // auto armors_for_association = RobotTarget::getArmorsFromTargetState(
+  //     state, config_.default_radius, config_.default_radius,
+  //     config_.default_dz);
+  auto armors_for_association = RobotTarget::getArmorsFromTargetState(state);
   std::vector<MatchCandidate> candidates;
   for (std::size_t obs_i = 0; obs_i < obs_armors.size(); ++obs_i) {
     auto match_result = Target::matchArmor(
@@ -281,23 +282,17 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
     gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
     const std::vector<std::pair<ArmorPositionYaw, ArmorIndex>> &armor_indexs,
     std::uint64_t k) const {
+  auto default_radius = tools::logisticInverse(
+      config_.default_radius, config_.radius_min, config_.radius_max);
   if (k == 0) {
-    values.insert(A(0), tools::logisticInverse(config_.default_radius,
-                                               config_.radius_min,
-                                               config_.radius_max));
-    values.insert(B(0), tools::logisticInverse(config_.default_radius,
-                                               config_.radius_min,
-                                               config_.radius_max));
+    values.insert(A(0), default_radius);
+    values.insert(B(0), default_radius);
     values.insert(Z(0), config_.default_dz);
     graph.addPrior(
-        A(0),
-        tools::logisticInverse(config_.default_radius, config_.radius_min,
-                               config_.radius_max),
+        A(0), default_radius,
         gtsam::noiseModel::Isotropic::Sigma(1, config_.radius_prior_noise));
     graph.addPrior(
-        B(0),
-        tools::logisticInverse(config_.default_radius, config_.radius_min,
-                               config_.radius_max),
+        B(0), default_radius,
         gtsam::noiseModel::Isotropic::Sigma(1, config_.radius_prior_noise));
     graph.addPrior(
         Z(0), config_.default_dz,
