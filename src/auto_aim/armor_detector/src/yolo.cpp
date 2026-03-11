@@ -31,15 +31,15 @@ auto_aim::YOLOv5::YOLOv5(quill::Logger *logger, const YOLOConfig &config)
   LOG_INFO(logger_, "success compile yolov5 model.");
 }
 
-ov::Tensor auto_aim::YOLOv5::preProcess(const cv::Mat &bgr_image) {
-  auto x_scale = static_cast<double>(yolo_input_size) / bgr_image.rows;
-  auto y_scale = static_cast<double>(yolo_input_size) / bgr_image.cols;
+ov::Tensor auto_aim::YOLOv5::preProcess(const cv::Mat &image) {
+  auto x_scale = static_cast<double>(yolo_input_size) / image.rows;
+  auto y_scale = static_cast<double>(yolo_input_size) / image.cols;
   auto scale = std::min(x_scale, y_scale);
-  auto h = static_cast<int>(bgr_image.rows * scale);
-  auto w = static_cast<int>(bgr_image.cols * scale);
+  auto h = static_cast<int>(image.rows * scale);
+  auto w = static_cast<int>(image.cols * scale);
   cv::Mat input{yolo_input_size, yolo_input_size, CV_8UC3, cv::Scalar(0, 0, 0)};
   cv::Rect roi{0, 0, w, h};
-  cv::resize(bgr_image, input(roi), {w, h});
+  cv::resize(image, input(roi), {w, h});
   // NOTE: 填充黑边再缩放成640x640，分辨率降至0.75倍，优先保证视野
   ov::Tensor input_tensor{
       ov::element::u8, {1, yolo_input_size, yolo_input_size, 3}, input.data};

@@ -247,13 +247,13 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   });
   // NOTE:
   // 更新所有目标。track由图像时间戳驱动，图像到现在的时间补偿由planner完成
-  bool all_target_lost{true};
+  bool all_targets_lost{true};
   for (auto &[type, target] : self->targets_) {
     auto track_state = target->track(armors, image_stamp);
     if (track_state != TrackState::State::LOST)
-      all_target_lost = false;
+      all_targets_lost = false;
   }
-  if (all_target_lost)
+  if (all_targets_lost)
     self->aiming_target_.store(types::ArmorType::Negative);
 
   if (!self->configs_.plot_info ||

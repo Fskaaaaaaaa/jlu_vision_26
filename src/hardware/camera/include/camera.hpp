@@ -1,5 +1,4 @@
 #pragma once
-#include "basic/time_tools.hpp"
 #include "configs.hpp"
 #include "iceoryx_posh/popo/listener.hpp"
 #include "msgs/CameraInfo.hpp"
@@ -7,6 +6,7 @@
 #include "msgs/Header.hpp"
 #include "msgs/Image.hpp"
 
+#include <chrono>
 #include <iceoryx_posh/popo/publisher.hpp>
 #include <iceoryx_posh/popo/sample.hpp>
 #include <iceoryx_posh/popo/subscriber.hpp>
@@ -23,9 +23,10 @@ namespace hardware {
 class CameraBase {
 public:
   virtual ~CameraBase() = default;
-  virtual int captureImage(unsigned char *buffer, std::size_t buffer_size) = 0;
+  virtual bool readImage(unsigned char *buffer, std::size_t buffer_size,
+                         std::chrono::system_clock::time_point &stamp) = 0;
   // NOTE: 从得到的工业相机sdk定义的图像类型写入缓冲区（ioxsample）
-  virtual int changeExposureGain(double exposure, double gain) = 0;
+  virtual bool changeExposureGain(double exposure, double gain) = 0;
 };
 
 class Camera {

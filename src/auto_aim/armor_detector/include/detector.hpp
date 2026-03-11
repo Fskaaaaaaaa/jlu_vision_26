@@ -19,12 +19,12 @@ using ImageArmorsFrameIdStamp =
 
 class STDetector {
 public:
-  virtual std::vector<Armor> detect(const cv::Mat &bgr_img) = 0;
+  virtual std::vector<Armor> detect(const cv::Mat &image) = 0;
 };
 
 class MTDetector {
 public:
-  virtual bool push(const cv::Mat &bgr_img, const std::string &frame_id,
+  virtual bool push(const cv::Mat &image, const std::string &frame_id,
                     std::chrono::system_clock::time_point stamp) = 0;
   virtual ImageArmorsFrameIdStamp pop() = 0;
 };
@@ -34,14 +34,14 @@ public:
 // TODO
 class STDetectorTrad : public STDetector {
 public:
-  std::vector<Armor> detect(const cv::Mat &bgr_img) override { return {}; };
+  std::vector<Armor> detect(const cv::Mat &image) override { return {}; };
 
 private:
 };
 
 class MTDetectorTrad : public MTDetector {
 public:
-  bool push(const cv::Mat &bgr_img, const std::string &frame_id,
+  bool push(const cv::Mat &image, const std::string &frame_id,
             std::chrono::system_clock::time_point stamp) override {
     return {};
   };
@@ -57,7 +57,7 @@ class STDetectorDL : public STDetector {
 public:
   STDetectorDL(quill::Logger *logger, YOLOVersion yolo_version,
                const YOLOConfig &yolo_config);
-  std::vector<Armor> detect(const cv::Mat &bgr_img) override;
+  std::vector<Armor> detect(const cv::Mat &image) override;
 
 private:
   quill::Logger *logger_;
@@ -68,7 +68,7 @@ class MTDetectorDL : public MTDetector {
 public:
   MTDetectorDL(quill::Logger *logger, YOLOVersion yolo_version,
                const YOLOConfig &yolo_config, int queue_size);
-  bool push(const cv::Mat &bgr_img, const std::string &frame_id,
+  bool push(const cv::Mat &image, const std::string &frame_id,
             std::chrono::system_clock::time_point stamp) override;
   ImageArmorsFrameIdStamp pop() override;
 

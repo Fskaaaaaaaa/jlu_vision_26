@@ -4,6 +4,7 @@
 #include "opencv2/videoio.hpp"
 #include "quill/LogMacros.h"
 
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
 
@@ -13,10 +14,12 @@ hardware::VideoCapture::VideoCapture(quill::Logger *logger,
   LOG_INFO(logger_, "VideoCapture start!");
 }
 
-int hardware::VideoCapture::captureImage(unsigned char *buffer,
-                                         std::size_t buffer_size) {
+bool hardware::VideoCapture::readImage(
+    unsigned char *buffer, std::size_t buffer_size,
+    std::chrono::system_clock::time_point &stamp) {
   cv::Mat frame;
   video_ >> frame;
+  stamp = std::chrono::system_clock::now();
   if (frame.empty()) {
     LOG_INFO(logger_, "The video has finished playing and will restart.");
     video_.set(cv::CAP_PROP_POS_FRAMES, 0);
@@ -57,6 +60,6 @@ int hardware::VideoCapture::captureImage(unsigned char *buffer,
   return 0;
 }
 
-int hardware::VideoCapture::changeExposureGain(double exposure, double gain) {
+bool hardware::VideoCapture::changeExposureGain(double exposure, double gain) {
   return 0;
 }

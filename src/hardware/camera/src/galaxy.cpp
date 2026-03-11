@@ -1,12 +1,15 @@
 #include "galaxy.hpp"
+#include "basic/time_tools.hpp"
+#include "confs/CameraParams.hpp"
 
 #include "GxIAPI.h"
-#include "confs/CameraParams.hpp"
 #include "opencv2/core/hal/interface.h"
 #include "opencv2/core/mat.hpp"
 #include "opencv2/imgproc.hpp"
 #include "quill/LogMacros.h"
 #include "quill/Logger.h"
+
+#include <chrono>
 #include <cstdlib>
 #include <unordered_map>
 
@@ -60,8 +63,8 @@ hardware::Galaxy::Galaxy(quill::Logger *logger,
                 GX_COMMAND_ACQUISITION_START); // 发送控制命令
 }
 
-int hardware::Galaxy::captureImage(unsigned char *buffer,
-                                   std::size_t buffer_size) {
+bool hardware::Galaxy::readImage(unsigned char *buffer, std::size_t buffer_size,
+                                 std::chrono::system_clock::time_point &stamp) {
   GX_FRAME_DATA bayer_frame{};
   GX_STATUS status;
 
@@ -75,7 +78,7 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
   if (buffer_size < payload_size) {
     LOG_ERROR(logger_, "Insufficient buffer size! require {}, actual {}",
               payload_size, buffer_size);
-    return EXIT_FAILURE;
+    return false;
   }
   bayer_frame.pImgBuf = bayer_buffer_holder_.data();
 
@@ -93,7 +96,6 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
       }
       status = GXOpenDeviceByIndex(1, &camera_handle_); // 通过序号打开设备
       if (!GX_SUCCESS(status)) {
-        // std::cout<<device_count<<std::endl;
         LOG_ERROR(this->logger_, "Can not open camera, status = {}", status);
       } else {
         GXSetBool(camera_handle_, GX_BOOL_REVERSE_X, 1);
@@ -114,15 +116,21 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
 
   // Fetch image
   status = GXGetImage(camera_handle_, &bayer_frame, 500); // 直接获取一帧图像
-
   if (!GX_SUCCESS(status)) {
     LOG_WARNING(logger_, "Get buffer failed, status = {}", status);
     GXSendCommand(camera_handle_, GX_COMMAND_ACQUISITION_STOP);
     status = GXSendCommand(camera_handle_, GX_COMMAND_ACQUISITION_START);
     LOG_INFO(logger_, "status = {}", status);
     fail_conut_++;
-    return EXIT_FAILURE;
+    return false;
   }
+
+  // HACK: 没有考虑相机重启
+  static auto base_system_stamp{tools::getTimeNowNanoSec()};
+  static auto base_image_stamp{bayer_frame.nTimestamp};
+  stamp = tools::nanoSecToChronoPoint(
+      base_system_stamp + (bayer_frame.nTimestamp - base_image_stamp));
+
   DX_PIXEL_COLOR_FILTER bayer_type;
   switch (bayer_frame.nPixelFormat) { // 每个像素在图像中存储的颜色信息的格式
   case GX_PIXEL_FORMAT_BAYER_GR8:
@@ -140,7 +148,7 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
   default:
     LOG_CRITICAL(logger_, "Unsupported Bayer layout: {}!",
                  bayer_frame.nPixelFormat);
-    return EXIT_FAILURE;
+    return false;
   }
   const static std::unordered_map<DX_PIXEL_COLOR_FILTER,
                                   cv::ColorConversionCodes>
@@ -158,10 +166,10 @@ int hardware::Galaxy::captureImage(unsigned char *buffer,
   LOG_DEBUG(logger_, "Get image: {}x{}", bayer_frame.nWidth,
             bayer_frame.nHeight);
   fail_conut_ = 0;
-  return EXIT_SUCCESS;
+  return true;
 }
 
-int hardware::Galaxy::changeExposureGain(double exposure, double gain) {
+bool hardware::Galaxy::changeExposureGain(double exposure, double gain) {
   GX_STATUS status;
   if (exposure != camera_params_.exposure_time) {
     status = GXSetFloat(camera_handle_, GX_FLOAT_EXPOSURE_TIME, exposure);
@@ -183,5 +191,5 @@ int hardware::Galaxy::changeExposureGain(double exposure, double gain) {
       camera_params_.gain = gain;
     }
   }
-  return status;
+  return GX_SUCCESS(status);
 }

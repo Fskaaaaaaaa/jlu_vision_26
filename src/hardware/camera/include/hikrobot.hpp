@@ -2,6 +2,7 @@
 #include "camera.hpp"
 #include "quill/Logger.h"
 
+#include <chrono>
 #include <cstddef>
 #include <opencv2/opencv.hpp>
 #include <string>
@@ -11,8 +12,9 @@ class HikRobot : public CameraBase {
 public:
   HikRobot(quill::Logger *logger, const confs::CameraParams &camera_params);
   ~HikRobot() override;
-  int captureImage(unsigned char *buffer, std::size_t buffer_size) override;
-  int changeExposureGain(double exposure, double gain) override;
+  bool readImage(unsigned char *buffer, std::size_t buffer_size,
+                 std::chrono::system_clock::time_point &stamp) override;
+  bool changeExposureGain(double exposure, double gain) override;
 
 private:
   void setFloatValue(const std::string &name, double value);

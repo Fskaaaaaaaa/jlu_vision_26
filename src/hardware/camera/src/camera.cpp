@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "basic/time_tools.hpp"
 #include "configs.hpp"
 #include "galaxy.hpp"
 #include "hikrobot.hpp"
@@ -78,36 +79,28 @@ hardware::Camera::Camera(quill::Logger *logger, const CameraConfigs &configs)
 }
 
 bool hardware::Camera::publishImage() {
-  int status;
+  bool success;
   this->image_pub_.loan()
       .and_then([&](iox::popo::Sample<msgs::Image1440x1080_8UC3, msgs::Header>
                         &sample) {
-        status = this->camera_->captureImage(sample->data, sample->data_size);
-        // XXX:
-        // 相机采集照片和写入缓冲区都需要时间，理论上应该初始化时间戳再采集
-        // 但这里为了测量通信开销，暂且设成发布前的时间了
-        // BUG:
-        // 当图像发布频率和detector订阅处理步调不一致时，会出现严重的通信延迟抖动
-        // 理想情况的延迟在0.1ms左右，抖动时最高可达到20～30ms
-        // 估计是接受到的sample占用shm不释放导致的
-        // 暂时的解决方案是让运行频率：detector > camera
-        // update 26.3.3
-        // 当图像发布频率高于detector处理频率时，启动自瞄时会明显有一段“暖机”
-        // 及帧率会缓慢地从十几帧爬升到三十至四十帧，可能会突然抖动掉回十几帧后重新爬升
+        std::chrono::system_clock::time_point stamp;
+        success =
+            this->camera_->readImage(sample->data, sample->data_size, stamp);
         sample.getUserHeader().frame_id = {iox::TruncateToCapacity,
                                            configs_.camera_frame_id.c_str()};
-        sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
-        if (status == 0) {
+        // NOTE: 这里改成用硬件时间戳，不知道会不会更精准
+        // 另外硬件时间戳是systemclock还是steady_clock还不太确定
+        sample.getUserHeader().stamp_ns = tools::chronoPointToNanoSec(stamp);
+        if (success)
           sample.publish();
-        } else {
+        else
           LOG_WARNING(logger_, "something wrong on getting image!");
-        }
       })
       .or_else([&](auto) {
-        status = EXIT_FAILURE;
+        success = false;
         LOG_WARNING(logger_, "unable loan sample to publish image!");
       });
-  return status == EXIT_SUCCESS;
+  return success;
 }
 
 bool hardware::Camera::publishCamInfo() {

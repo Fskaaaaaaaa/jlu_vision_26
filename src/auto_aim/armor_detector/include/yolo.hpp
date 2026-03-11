@@ -12,7 +12,7 @@ namespace auto_aim {
 
 class YOLOBase {
 public:
-  virtual ov::Tensor preProcess(const cv::Mat &bgr_image) = 0;
+  virtual ov::Tensor preProcess(const cv::Mat &image) = 0;
   virtual ov::InferRequest requestInfer(const ov::Tensor &input_tensor) = 0;
   virtual std::vector<Armor> postProcess(const ov::Tensor &output_tensor,
                                          cv::Size input_image_size) = 0;
@@ -22,7 +22,7 @@ class YOLOv5 : public YOLOBase {
 public:
   YOLOv5(quill::Logger *logger, const YOLOConfig &config);
   // NOTE: 返回的tensor是浅拷贝的，并发场景要自己深拷贝下保证生命周期
-  ov::Tensor preProcess(const cv::Mat &bgr_image) override;
+  ov::Tensor preProcess(const cv::Mat &image) override;
   // NOTE: 只是返回请求，阻塞推理还是并发要自己调用
   ov::InferRequest requestInfer(const ov::Tensor &input_tensor) override;
   std::vector<Armor> postProcess(const ov::Tensor &output_tensor,

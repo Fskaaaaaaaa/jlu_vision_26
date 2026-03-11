@@ -5,14 +5,16 @@
 #include "DxImageProc.h"
 #include "GxIAPI.h"
 #include "quill/Logger.h"
+#include <chrono>
 #include <cstddef>
 
 namespace hardware {
 class Galaxy : public CameraBase {
 public:
   Galaxy(quill::Logger *logger, const confs::CameraParams &camera_params);
-  int captureImage(unsigned char *buffer, std::size_t buffer_size) override;
-  int changeExposureGain(double exposure, double gain) override;
+  bool readImage(unsigned char *buffer, std::size_t buffer_size,
+                 std::chrono::system_clock::time_point &stamp) override;
+  bool changeExposureGain(double exposure, double gain) override;
 
 private:
   quill::Logger *logger_;

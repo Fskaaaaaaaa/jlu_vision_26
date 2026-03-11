@@ -1088,15 +1088,15 @@ typedef enum GX_LINE_SOURCE_ENTRY {
 } GX_LINE_SOURCE_ENTRY;
 
 typedef enum GX_EVENT_SELECTOR_ENTRY {
-  GX_ENUM_EVENT_SELECTOR_EXPOSUREEND = 0x0004,   ///< 曝光结束
-  GX_ENUM_EVENT_SELECTOR_BLOCK_DISCARD = 0x9000, ///< 图像帧丢弃
-  GX_ENUM_EVENT_SELECTOR_EVENT_OVERRUN = 0x9001, ///< 事件队列溢出
+  GX_ENUM_EVENT_SELECTOR_EXPOSUREEND = 0x0004,            ///< 曝光结束
+  GX_ENUM_EVENT_SELECTOR_BLOCK_DISCARD = 0x9000,          ///< 图像帧丢弃
+  GX_ENUM_EVENT_SELECTOR_EVENT_OVERRUN = 0x9001,          ///< 事件队列溢出
   GX_ENUM_EVENT_SELECTOR_FRAMESTART_OVERTRIGGER = 0x9002, ///< 触发信号溢出
-  GX_ENUM_EVENT_SELECTOR_BLOCK_NOT_EMPTY = 0x9003, ///< 图像帧存不为空
-  GX_ENUM_EVENT_SELECTOR_INTERNAL_ERROR = 0x9004,  ///< 内部错误事件
+  GX_ENUM_EVENT_SELECTOR_BLOCK_NOT_EMPTY = 0x9003,        ///< 图像帧存不为空
+  GX_ENUM_EVENT_SELECTOR_INTERNAL_ERROR = 0x9004,         ///< 内部错误事件
   GX_ENUM_EVENT_SELECTOR_FRAMEBURSTSTART_OVERTRIGGER =
-      0x9005,                                      ///< 多帧触发屏蔽事件
-  GX_ENUM_EVENT_SELECTOR_FRAMESTART_WAIT = 0x9006, ///< 帧等待事件
+      0x9005,                                           ///< 多帧触发屏蔽事件
+  GX_ENUM_EVENT_SELECTOR_FRAMESTART_WAIT = 0x9006,      ///< 帧等待事件
   GX_ENUM_EVENT_SELECTOR_FRAMEBURSTSTART_WAIT = 0x9007, ///< 多帧等待事件
 } GX_EVENT_SELECTOR_ENTRY;
 
@@ -1335,11 +1335,11 @@ typedef struct GX_FRAME_CALLBACK_PARAM {
 
 typedef struct GX_FRAME_DATA {
   GX_FRAME_STATUS nStatus; ///< 图像的返回状态
-  void *pImgBuf;        ///< 图像buffer地址（开启chunkdata后，pImgBuf
-                        ///< 包含图像数据和帧信息数据 ）
-  int32_t nWidth;       ///< 图像的宽
-  int32_t nHeight;      ///< 图像的高
-  int32_t nPixelFormat; ///< 图像的PixFormat
+  void *pImgBuf;           ///< 图像buffer地址（开启chunkdata后，pImgBuf
+                           ///< 包含图像数据和帧信息数据 ）
+  int32_t nWidth;          ///< 图像的宽
+  int32_t nHeight;         ///< 图像的高
+  int32_t nPixelFormat;    ///< 图像的PixFormat
   int32_t
       nImgSize; ///< 图像大小数据大小，单位字节（开启chunkdata后，nImgsize为图像数据大小+帧信息大小）
   uint64_t nFrameID;   ///< 图像的帧号

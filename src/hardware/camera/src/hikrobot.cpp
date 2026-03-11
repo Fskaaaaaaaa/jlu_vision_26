@@ -1,12 +1,14 @@
 #include "hikrobot.hpp"
+#include "basic/time_tools.hpp"
 #include "confs/CameraParams.hpp"
 
 #include "MvCameraControl.h"
 #include "quill/LogMacros.h"
-#include <cstdlib>
-#include <cstdint>
-#include <thread>
+
 #include <chrono>
+#include <cstdint>
+#include <cstdlib>
+#include <thread>
 #include <unordered_map>
 
 // XXX: 一坨狗屎，一点异常处理都没有
@@ -39,7 +41,7 @@ hardware::HikRobot::HikRobot(quill::Logger *logger,
       break;
     // XXX: 可能导致ub
   }
-  if (device_list.nDeviceNum == 0 || device_list.pDeviceInfo == nullptr) {
+  if (device_list.nDeviceNum == 0) {
     LOG_CRITICAL(logger_, "No camera found after retries.");
     std::exit(EXIT_FAILURE);
   }
@@ -84,8 +86,8 @@ hardware::HikRobot::HikRobot(quill::Logger *logger,
   }
   ret = MV_CC_SetImageNodeNum(handle_, 3);
   if (ret != MV_OK) {
-    LOG_WARNING(logger_, "MV_CC_SetImageNodeNum(3) failed: {} (0x{:08X})",
-                ret, static_cast<std::uint32_t>(ret));
+    LOG_WARNING(logger_, "MV_CC_SetImageNodeNum(3) failed: {} (0x{:08X})", ret,
+                static_cast<std::uint32_t>(ret));
   }
 
   // 开始采集
@@ -108,8 +110,8 @@ hardware::HikRobot::~HikRobot() {
   }
   ret = MV_CC_CloseDevice(handle_);
   if (ret != MV_OK) {
-    LOG_WARNING(logger_, "MV_CC_CloseDevice failed in dtor: {} (0x{:08X})",
-                ret, static_cast<std::uint32_t>(ret));
+    LOG_WARNING(logger_, "MV_CC_CloseDevice failed in dtor: {} (0x{:08X})", ret,
+                static_cast<std::uint32_t>(ret));
   }
   ret = MV_CC_DestroyHandle(handle_);
   if (ret != MV_OK) {
@@ -136,12 +138,13 @@ void hardware::HikRobot::setEnumValue(const std::string &name,
                 ret);
 }
 
-int hardware::HikRobot::captureImage(unsigned char *buffer,
-                                     std::size_t buffer_size) {
+bool hardware::HikRobot::readImage(
+    unsigned char *buffer, std::size_t buffer_size,
+    std::chrono::system_clock::time_point &stamp) {
   if (buffer_size < payload_size_) {
     LOG_ERROR(logger_, "Insufficient buffer size! require {}, actual {}",
               payload_size_, buffer_size);
-    return EXIT_FAILURE;
+    return false;
   }
   if (error_count_ > 5) {
     LOG_DEBUG(logger_, "[hikrobot]: error_count: {}, restart grabbing!",
@@ -156,7 +159,7 @@ int hardware::HikRobot::captureImage(unsigned char *buffer,
       LOG_ERROR(logger_, "MV_CC_StartGrabbing failed: {} (0x{:08X})", ret,
                 static_cast<std::uint32_t>(ret));
       error_count_++;
-      return EXIT_FAILURE;
+      return false;
     }
     error_count_ = 0;
   }
@@ -167,11 +170,14 @@ int hardware::HikRobot::captureImage(unsigned char *buffer,
     LOG_ERROR(logger_, "MV_CC_GetImageBuffer failed: {} (0x{:08X})", ret,
               static_cast<std::uint32_t>(ret));
     error_count_++;
-    return EXIT_FAILURE;
+    return false;
   }
 
-  int status = EXIT_FAILURE;
+  bool success{false};
   const auto &frame_info = raw.stFrameInfo;
+
+  stamp = tools::nanoSecToChronoPoint(frame_info.nHostTimeStamp * 1000000ull);
+
   auto pixel_type = frame_info.enPixelType;
   const static std::unordered_map<MvGvspPixelType, cv::ColorConversionCodes>
       type_map = {{PixelType_Gvsp_BayerGR8, cv::COLOR_BayerGR2RGB},
@@ -184,39 +190,37 @@ int hardware::HikRobot::captureImage(unsigned char *buffer,
               static_cast<std::uint32_t>(pixel_type));
   } else {
     const auto required_size = static_cast<std::size_t>(frame_info.nWidth) *
-                               static_cast<std::size_t>(frame_info.nHeight) *
-                               3;
+                               static_cast<std::size_t>(frame_info.nHeight) * 3;
     if (buffer_size < required_size) {
       LOG_ERROR(logger_, "Insufficient buffer for frame! require {}, actual {}",
                 required_size, buffer_size);
     } else {
-      cv::cvtColor(cv::Mat{cv::Size(frame_info.nWidth, frame_info.nHeight),
-                           CV_8U, raw.pBufAddr},
-                   cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3,
-                           buffer},
-                   iter->second);
-      status = EXIT_SUCCESS;
+      cv::cvtColor(
+          cv::Mat{cv::Size(frame_info.nWidth, frame_info.nHeight), CV_8U,
+                  raw.pBufAddr},
+          cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
+          iter->second);
+      success = true;
     }
   }
 
   ret = MV_CC_FreeImageBuffer(handle_, &raw);
-  if (ret != MV_OK) {
+  if (ret != MV_OK)
     LOG_WARNING(logger_, "MV_CC_FreeImageBuffer failed: {} (0x{:08X})", ret,
                 static_cast<std::uint32_t>(ret));
-  }
 
-  if (status == EXIT_SUCCESS) {
+  if (success)
     error_count_ = 0;
-  } else {
+  else
     error_count_++;
-  }
-  return status;
+
+  return success;
 }
 
-int hardware::HikRobot::changeExposureGain(double exposure, double gain) {
+bool hardware::HikRobot::changeExposureGain(double exposure, double gain) {
   LOG_INFO(logger_, "Try to change exposure time to {}.", exposure);
   setFloatValue("ExposureTime", exposure);
   LOG_INFO(logger_, "Try to change gain to {}.", gain);
   setFloatValue("Gain", gain);
-  return EXIT_SUCCESS;
+  return true;
 }

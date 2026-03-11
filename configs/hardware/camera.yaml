@@ -1,5 +1,5 @@
 log_level: Info
-camera_type: hik
+camera_type: galaxy
 camera_name: camera0
 camera_frame_id: camera
 image_publish_interval_ms: 1

@@ -15,8 +15,8 @@ serial_topic:
   instance: tracker
   event: data
 robot_conf:
-  max_match_distance_m: 0.4
-  max_match_yaw_diff_degree: 15.0
+  max_match_distance_m: 1.0
+  max_match_yaw_diff_degree: 20.0
   lost_threshold_sec: 0.5
   yaw_prior_noise: 9.0
   vyaw_prior_noise: 9.0
@@ -30,15 +30,15 @@ robot_conf:
     z: 0.5
 
   yaw_factor_noise: 0.1
-  vyaw_factor_noise: 0.5
+  vyaw_factor_noise: 0.8
   translation_factor_noise:
-    x: 0.03
-    y: 0.03
-    z: 0.03
+    x: 0.05
+    y: 0.05
+    z: 0.05
   velocity_factor_noise:
-    x: 0.01
-    y: 0.01
-    z: 0.01
+    x: 0.05
+    y: 0.05
+    z: 0.05
   radius_prior_noise: 0.18
   radius_min: 0.15
   default_radius: 0.26
@@ -46,8 +46,8 @@ robot_conf:
   dz_prior_noise: 0.1
   default_dz: 0.0
   armor_observation_noise:
-    tangential_error_m: 0.08
-    radial_error_m: 0.018
+    tangential_error_m: 0.1
+    radial_error_m: 0.001
     height_error_m: 0.05
     yaw_error_rad: 0.02
 
