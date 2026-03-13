@@ -8,11 +8,9 @@
 #include <gtsam/geometry/Rot2.h>
 #include <numbers>
 
-namespace {
-inline double armorPhase(auto_aim::ArmorIndex index) {
+inline double getArmorBetweenYawFromIndex(auto_aim::ArmorIndex index) {
   return static_cast<int>(index) * std::numbers::pi / 2.0;
 }
-} // namespace
 
 auto_aim::TranslationFactor::TranslationFactor(
     const gtsam::SharedNoiseModel &model, gtsam::Key x_pre, gtsam::Key v_pre,
@@ -84,7 +82,7 @@ auto_aim::VyawFactor::evaluateError(const double &w_pre, const double &w_cur,
   return error;
 }
 
-auto_aim::ArmorRadiusAFactor::ArmorRadiusAFactor(
+auto_aim::ArmorRadiusCenterZFactor::ArmorRadiusCenterZFactor(
     const gtsam::SharedNoiseModel &model, gtsam::Key rad_a, gtsam::Key rot_cur,
     gtsam::Key x_cur, const Eigen::Vector3d &obs_armor_position,
     double obs_armor_yaw, ArmorIndex armor_index, double radius_min,
@@ -94,7 +92,7 @@ auto_aim::ArmorRadiusAFactor::ArmorRadiusAFactor(
       obs_armor_yaw_(gtsam::Rot2::fromAngle(obs_armor_yaw)),
       armor_index_(armor_index), min_(radius_min), max_(radius_max) {}
 
-gtsam::Vector auto_aim::ArmorRadiusAFactor::evaluateError(
+gtsam::Vector auto_aim::ArmorRadiusCenterZFactor::evaluateError(
     const double &ra, const gtsam::Rot2 &rotation, const gtsam::Point3 &center,
     gtsam::OptionalMatrixType H1, gtsam::OptionalMatrixType H2,
     gtsam::OptionalMatrixType H3) const {
@@ -109,8 +107,8 @@ gtsam::Vector auto_aim::ArmorRadiusAFactor::evaluateError(
   auto tangential_err = tx * dx + ty * dy;
   auto radial_err = nx * dx + ny * dy - radius_a;
   auto z_err = center.z() - obs_armor_position_.z();
-  auto pred_armor_yaw =
-      gtsam::Rot2::fromAngle(rotation.theta() + armorPhase(armor_index_));
+  auto pred_armor_yaw = gtsam::Rot2::fromAngle(
+      rotation.theta() + getArmorBetweenYawFromIndex(armor_index_));
   auto yaw_err = obs_armor_yaw_.localCoordinates(pred_armor_yaw).x();
   gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
   if (H1) {
@@ -121,15 +119,14 @@ gtsam::Vector auto_aim::ArmorRadiusAFactor::evaluateError(
     (*H2) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, 1.0).finished();
   }
   if (H3) {
-    (*H3) =
-        (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0, 0.0,
-         0.0, 0.0)
-            .finished();
+    (*H3) = (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0,
+             0.0, 0.0, 0.0)
+                .finished();
   }
   return error;
 }
 
-auto_aim::ArmorRadiusBDZFactor::ArmorRadiusBDZFactor(
+auto_aim::ArmorRadiusDZFactor::ArmorRadiusDZFactor(
     const gtsam::SharedNoiseModel &model, gtsam::Key rad_b, gtsam::Key dz,
     gtsam::Key rot_cur, gtsam::Key x_cur,
     const Eigen::Vector3d &obs_armor_position, double obs_armor_yaw,
@@ -139,7 +136,7 @@ auto_aim::ArmorRadiusBDZFactor::ArmorRadiusBDZFactor(
       obs_armor_yaw_(gtsam::Rot2::fromAngle(obs_armor_yaw)),
       armor_index_(armor_index), min_(radius_min), max_(radius_max) {}
 
-gtsam::Vector auto_aim::ArmorRadiusBDZFactor::evaluateError(
+gtsam::Vector auto_aim::ArmorRadiusDZFactor::evaluateError(
     const double &rb, const double &dz, const gtsam::Rot2 &rotation,
     const gtsam::Point3 &center, gtsam::OptionalMatrixType H1,
     gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
@@ -155,8 +152,8 @@ gtsam::Vector auto_aim::ArmorRadiusBDZFactor::evaluateError(
   auto tangential_err = tx * dx + ty * dy;
   auto radial_err = nx * dx + ny * dy - radius_b;
   auto z_err = center.z() + dz - obs_armor_position_.z();
-  auto pred_armor_yaw =
-      gtsam::Rot2::fromAngle(rotation.theta() + armorPhase(armor_index_));
+  auto pred_armor_yaw = gtsam::Rot2::fromAngle(
+      rotation.theta() + getArmorBetweenYawFromIndex(armor_index_));
   auto yaw_err = obs_armor_yaw_.localCoordinates(pred_armor_yaw).x();
   gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
   if (H1) {
@@ -170,10 +167,9 @@ gtsam::Vector auto_aim::ArmorRadiusBDZFactor::evaluateError(
     (*H3) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, 1.0).finished();
   }
   if (H4) {
-    (*H4) =
-        (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0, 0.0,
-         0.0, 0.0)
-            .finished();
+    (*H4) = (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0,
+             0.0, 0.0, 0.0)
+                .finished();
   }
   return error;
 }

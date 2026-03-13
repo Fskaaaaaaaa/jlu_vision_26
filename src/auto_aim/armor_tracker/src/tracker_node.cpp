@@ -98,7 +98,8 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
         continue; // 锁定的敌人已经丢失
       }
-      auto bullet_speed = gimbal_listener_.getLatestInfo().bullet_speed;
+      auto [roll, pitch, yaw, pitch_vel, yaw_vel, bullet_speed] =
+          gimbal_listener_.getLatestInfo();
       auto cmd = planner_.plan(target_state, track_state.stamp_last_update,
                                bullet_speed);
       if (!cmd.control) {
@@ -140,6 +141,12 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
         plotter_.plot("pitch_vel", cmd.pitch_vel);
         plotter_.plot("pitch_acc", cmd.pitch_acc);
         plotter_.plot("bullet_id", cmd.bullet_id);
+        plotter_.plot("gimbal_roll", roll);
+        plotter_.plot("gimbal_pitch", pitch);
+        plotter_.plot("gimbal_yaw", yaw);
+        plotter_.plot("gimbal_pitch_vel", pitch_vel);
+        plotter_.plot("gimbal_yaw_vel", yaw_vel);
+        plotter_.plot("bullet_speed", bullet_speed);
       }
       std::this_thread::sleep_for(std::chrono::milliseconds{
           static_cast<int>(configs_.planner_conf.dt_sec * 1000)});

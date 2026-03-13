@@ -1,6 +1,4 @@
 #include "pnp_solver.hpp"
-#include "basic/colors.hpp"
-#include "basic/image_tools.hpp"
 #include "math/angle_tools.hpp"
 #include "types/ArmorPoints.hpp"
 
@@ -22,7 +20,11 @@ auto_aim::PnPSolver::PnPSolver(quill::Logger *logger, const PnPConfig &config,
 
 std::optional<auto_aim::PnPResult>
 auto_aim::PnPSolver::solvePnP(Armor &armor) const {
-  const auto &object_points = types::points::getArmorPointsCV(armor.type);
+  const auto &object_points = types::points::getArmorPointsCV(
+      (armor.type == types::ArmorType::Outpost &&
+       config_.outpost_is_small_armor)
+          ? types::ArmorType::Three
+          : armor.type);
   std::vector<cv::Point2f> image_points{
       {armor.left_light.bottom},
       {armor.left_light.top},

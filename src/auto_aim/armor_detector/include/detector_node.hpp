@@ -2,6 +2,7 @@
 #pragma once
 
 #include "ba_solver.hpp"
+#include "basic/plotter.hpp"
 #include "configs.hpp"
 #include "detector.hpp"
 #include "hardware/camera_params_changer.hpp"
@@ -52,8 +53,6 @@ private:
 
   hardware::CameraParamsChanger cam_params_changer_;
   std::unique_ptr<hardware::TaskModeListener> task_mode_listener_;
-  // std::unique_ptr<hardware::ImageListener<msgs::Image1440x1080_8UC3>>
-  //     image_listener_;
   std::unique_ptr<hardware::ImagePoller<msgs::Image1440x1080_8UC3>>
       image_poller_;
 
@@ -66,6 +65,8 @@ private:
   std::unique_ptr<BASolver> ba_solver_;
 
   std::jthread pop_thread_;
+
+  tools::Plotter plotter_;
 };
 
 } // namespace auto_aim

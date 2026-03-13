@@ -12,6 +12,8 @@ use_ba: false
 show_detect_result: true
 show_optimize_result: true
 show_pnp_result: true
+plot_pnp_result: true
+all_is_three: false
 step_by_step_debug: false
 default_enemy_color: Blue
 camera_name: camera0
@@ -53,6 +55,7 @@ pnp_conf:
   project_error_ratio_thres: 3.0
   roll_thres_degree: 15.0
   frame_axes_length: 0.1
+  outpost_is_small_armor: true
 ba_conf:
   measurement_noise_px_xy: 0.5
   prior_noise:

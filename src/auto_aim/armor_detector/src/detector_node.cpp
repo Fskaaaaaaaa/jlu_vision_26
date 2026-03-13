@@ -15,6 +15,7 @@
 #include "msgs/Image.hpp"
 #include "pnp_solver.hpp"
 #include "types.hpp"
+#include "types/ArmorType.hpp"
 #include "types/EnemyColor.hpp"
 #include "types/IceoryxServiceDescription.hpp"
 #include "types/TaskMode.hpp"
@@ -186,9 +187,8 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
     armor.frame_id = frame_id;
     armor.stamp = stamp;
     bool pca_success{true}, ba_success{true};
-    if (configs_.use_pca) {
+    if (configs_.use_pca)
       pca_success = this->lightbar_corrector_->correctCorners(armor, gray_img);
-    }
     armor.distance_to_image_center =
         this->pnp_solver_->calculateDistanceToCenter(armor.center);
     auto pnp_opt = this->pnp_solver_->solvePnP(armor);
@@ -196,19 +196,23 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
       LOG_WARNING(logger_, "PNP failed!");
       return true; // 删除无解装甲板
     }
-    if (configs_.show_pnp_result)
-      this->pnp_solver_->drawFrameAxes(pnp_opt.value(), result_img);
     if (configs_.use_ba)
       ba_success = this->ba_solver_->optimizeArmorPose(armor);
     armor.key_frame = pca_success && ba_success;
+
+    if (configs_.show_pnp_result)
+      this->pnp_solver_->drawFrameAxes(pnp_opt.value(), result_img);
+    if (configs_.all_is_three)
+      armor.type = types::ArmorType::Three;
+
     return false;
   });
   // NOTE: 发布装甲板或心跳信号
-  if (!armors.empty()) {
+  if (!armors.empty())
     this->publishArmors(armors);
-  } else {
+  else
     this->publishHeartbeat(stamp);
-  }
+
   if (configs_.show_optimize_result) {
     static std::chrono::system_clock::time_point last_stamp{
         std::chrono::system_clock::now()};
@@ -233,6 +237,15 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
     for (const auto &armor : armors)
       this->drawArmor(armor, result_img, tools::Color::bgr::GREEN);
   }
+  if (configs_.plot_pnp_result)
+    for (const auto &armor : armors) {
+      auto armor_name =
+          rfl::enum_to_string(armor.color) + rfl::enum_to_string(armor.type);
+      plotter_.plot(armor_name + "Camera_x", armor.position.x());
+      plotter_.plot(armor_name + "Camera_y", armor.position.y());
+      plotter_.plot(armor_name + "Camera_z", armor.position.z());
+      plotter_.plot(armor_name + "Distance", armor.position.norm());
+    }
   return debug ? std::optional{result_img} : std::nullopt;
 }
 

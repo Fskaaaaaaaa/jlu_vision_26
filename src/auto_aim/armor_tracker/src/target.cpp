@@ -300,7 +300,7 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
   }
   for (const auto &[armor, index] : armor_indexs) {
     if (index == ArmorIndex::_0 || index == ArmorIndex::_2) {
-      graph.add(ArmorRadiusAFactor{
+      graph.add(ArmorRadiusCenterZFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
               config_.armor_observation_noise.tangential_error_m,
               config_.armor_observation_noise.radial_error_m,
@@ -317,7 +317,7 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
           config_.radius_max,
       });
     } else {
-      graph.add(ArmorRadiusBDZFactor{
+      graph.add(ArmorRadiusDZFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
               config_.armor_observation_noise.tangential_error_m,
               config_.armor_observation_noise.radial_error_m,

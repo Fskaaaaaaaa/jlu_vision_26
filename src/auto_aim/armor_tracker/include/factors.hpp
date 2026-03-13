@@ -96,16 +96,17 @@ public:
                               gtsam::OptionalMatrixType H2) const override;
 };
 
-class ArmorRadiusAFactor
+class ArmorRadiusCenterZFactor
     : public gtsam::NoiseModelFactorN<double, gtsam::Rot2, gtsam::Point3> {
   using Base = gtsam::NoiseModelFactorN<double, gtsam::Rot2, gtsam::Point3>;
 
 public:
-  ArmorRadiusAFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_a,
-                     gtsam::Key rot_cur, gtsam::Key x_cur,
-                     const Eigen::Vector3d &obs_armor_position,
-                     double obs_armor_yaw, ArmorIndex armor_index,
-                     double radius_min, double radius_max);
+  ArmorRadiusCenterZFactor(const gtsam::SharedNoiseModel &model,
+                           gtsam::Key rad_a, gtsam::Key rot_cur,
+                           gtsam::Key x_cur,
+                           const Eigen::Vector3d &obs_armor_position,
+                           double obs_armor_yaw, ArmorIndex armor_index,
+                           double radius_min, double radius_max);
 
   gtsam::Vector evaluateError(const double &ra, const gtsam::Rot2 &rotation,
                               const gtsam::Point3 &center,
@@ -119,18 +120,18 @@ private:
   ArmorIndex armor_index_;
   double min_, max_;
 };
-class ArmorRadiusBDZFactor
+class ArmorRadiusDZFactor
     : public gtsam::NoiseModelFactorN<double, double, gtsam::Rot2,
                                       gtsam::Point3> {
   using Base =
       gtsam::NoiseModelFactorN<double, double, gtsam::Rot2, gtsam::Vector3>;
 
 public:
-  ArmorRadiusBDZFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_b,
-                       gtsam::Key dz, gtsam::Key rot_cur, gtsam::Key x_cur,
-                       const Eigen::Vector3d &obs_armor_position,
-                       double obs_armor_yaw, ArmorIndex armor_index,
-                       double radius_min, double radius_max);
+  ArmorRadiusDZFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_b,
+                      gtsam::Key dz, gtsam::Key rot_cur, gtsam::Key x_cur,
+                      const Eigen::Vector3d &obs_armor_position,
+                      double obs_armor_yaw, ArmorIndex armor_index,
+                      double radius_min, double radius_max);
 
   gtsam::Vector
   evaluateError(const double &rb, const double &dz, const gtsam::Rot2 &rotation,
