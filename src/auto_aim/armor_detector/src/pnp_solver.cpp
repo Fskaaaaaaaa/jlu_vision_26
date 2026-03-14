@@ -7,6 +7,7 @@
 #include "opencv2/core/types.hpp"
 #include "quill/LogMacros.h"
 #include "types/ArmorType.hpp"
+#include <numbers>
 #include <opencv2/core/eigen.hpp>
 
 #include <optional>
@@ -80,18 +81,17 @@ void auto_aim::PnPSolver::sortPnPResult(const Armor &armor,
   Eigen::Matrix3d R0, R1;
   cv::cv2eigen(R0_cv, R0);
   cv::cv2eigen(R1_cv, R1);
-  // NOTE: 从z朝前的相机系拧回z朝上的ROS系
+  // NOTE: 从z朝前的相机系拧到z朝上的ROS系
   Eigen::Matrix3d R_camera_to_ros = Eigen::Matrix3d::Zero();
   R_camera_to_ros << 0, 0, 1, -1, 0, 0, 0, -1, 0;
   Eigen::Vector3d rpy0 = tools::rotationMatrixToRPY(R_camera_to_ros * R0);
   Eigen::Vector3d rpy1 = tools::rotationMatrixToRPY(R_camera_to_ros * R1);
-  if (rpy0(0) > tools::angle2Radian(config_.roll_thres_degree) ||
-      rpy1(0) > tools::angle2Radian(config_.roll_thres_degree)) {
-    LOG_DEBUG(logger_, "[sortPnPResult]: large roll: roll0{}, roll1{}.",
-              rpy0(0), rpy1(0));
+  auto roll0 = tools::radian2Angle(tools::limitRadian(
+      rpy0(0), {-std::numbers::pi / 2, std::numbers::pi / 2}));
+  if (roll0 > config_.roll_thres_degree) {
+    LOG_DEBUG(logger_, "[sortPnPResult]: large roll0: {}.", roll0);
     return;
   }
-
   double l_angle = tools::radian2Angle(
       std::atan2(armor.left_light.axis.y, armor.left_light.axis.x));
   double r_angle = tools::radian2Angle(

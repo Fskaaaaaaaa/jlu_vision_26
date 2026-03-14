@@ -197,7 +197,6 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
       [&armors, subscriber,
        self](const iox::popo::Sample<const msgs::Armor, const msgs::Header>
                  &sample) {
-        // 过滤掉自己发布的装甲板
         if (subscriber->getServiceDescription().getInstanceIDString() ==
             self->armors_sub_.getServiceDescription().getInstanceIDString()) {
           types::Armor armor{sample};

@@ -1,0 +1,43 @@
+working_dir: "."
+processes:
+  iox_roudi:
+    command: iox-roudi -c configs/iox-roudi_config.toml
+    ready_log_line: "RouDi is ready for clients"
+    availability:
+      restart: always
+  camera:
+    command: build/linux/x86_64/release/camera
+    availability:
+      restart: always
+    depends_on:
+      iox_roudi:
+        condition: process_log_ready
+  static_tf_bc:
+    command: build/linux/x86_64/release/static_tf_bc -c configs/odom_coord/static_tf_bc_no_gimbal.yaml
+    depends_on:
+      iox_roudi:
+        condition: process_log_ready
+  rmviz3d:
+    command: build/linux/x86_64/release/rmviz3d -c configs/status_feedback/rmviz3d_for_detector.yaml
+    depends_on:
+      iox_roudi:
+        condition: process_log_ready
+      static_tf_bc:
+        condition: process_started
+  detector:
+    command: build/linux/x86_64/release/armor_detector
+    depends_on:
+      camera:
+        condition: process_started
+  tracker:
+    command: startup/armor_tracker_with_system_tbb.bash
+    depends_on:
+      camera:
+        condition: process_started
+      static_tf_bc:
+        condition: process_started
+  plot_juggler:
+    command: ~/Applications/PlotJuggler-x86_64_97452b746c8c6b582d2297a9866b00a4.AppImage #-l configs/startup/spin.xml
+    depends_on:
+      tracker:
+        condition: process_started

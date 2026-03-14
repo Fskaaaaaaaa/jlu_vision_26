@@ -31,21 +31,24 @@ bool auto_aim::LightCornerCorrector::correctCorners(Armor &armor,
                                 FindCornerOrder::Top);
     auto bottom = this->findCorner(gray_img, lightbar, axis.value(),
                                    FindCornerOrder::Bottom);
-    bool top_ok{false};
-    bool bottom_ok{false};
-    if (top.has_value()) {
+    lightbar.pca_ok = top.has_value() && bottom.has_value();
+    if (lightbar.pca_ok) {
       lightbar.top = top.value();
-      top_ok = true;
-    }
-    if (bottom.has_value()) {
       lightbar.bottom = bottom.value();
-      bottom_ok = true;
     }
-    return lightbar.pca_ok = top_ok && bottom_ok;
+    return lightbar.pca_ok;
   };
 
-  return process_lightbar(armor.left_light, gray_img) &&
-         process_lightbar(armor.right_light, gray_img);
+  // HACK: 为了避免“只优化缩短近灯条导致pnpyaw错误”，只保留两边都优化成功的情景
+  auto left_copy = armor.left_light;
+  auto right_copy = armor.right_light;
+  auto success = process_lightbar(left_copy, gray_img) &&
+                 process_lightbar(right_copy, gray_img);
+  if (success) {
+    armor.right_light = right_copy;
+    armor.left_light = left_copy;
+  }
+  return success;
 }
 
 std::optional<auto_aim::SymmetryAxis>

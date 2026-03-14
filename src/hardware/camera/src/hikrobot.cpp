@@ -3,6 +3,7 @@
 #include "confs/CameraParams.hpp"
 
 #include "MvCameraControl.h"
+#include "opencv2/core.hpp"
 #include "quill/LogMacros.h"
 
 #include <chrono>
@@ -163,7 +164,7 @@ bool hardware::HikRobot::readImage(
     }
     error_count_ = 0;
   }
-  MV_FRAME_OUT raw{};
+  MV_FRAME_OUT raw;
   unsigned int nMsec = 100;
   int ret = MV_CC_GetImageBuffer(handle_, &raw, nMsec);
   if (ret != MV_OK) {
@@ -184,11 +185,11 @@ bool hardware::HikRobot::readImage(
                   {PixelType_Gvsp_BayerRG8, cv::COLOR_BayerRG2RGB},
                   {PixelType_Gvsp_BayerGB8, cv::COLOR_BayerGB2RGB},
                   {PixelType_Gvsp_BayerBG8, cv::COLOR_BayerBG2RGB}};
-  const auto iter = type_map.find(pixel_type);
-  if (iter == type_map.end()) {
+  if (!type_map.contains(pixel_type)) {
     LOG_ERROR(logger_, "Unsupported pixel type: {}",
               static_cast<std::uint32_t>(pixel_type));
   } else {
+    const auto pixel_type_cv = type_map.at(pixel_type);
     const auto required_size = static_cast<std::size_t>(frame_info.nWidth) *
                                static_cast<std::size_t>(frame_info.nHeight) * 3;
     if (buffer_size < required_size) {
@@ -199,7 +200,12 @@ bool hardware::HikRobot::readImage(
           cv::Mat{cv::Size(frame_info.nWidth, frame_info.nHeight), CV_8U,
                   raw.pBufAddr},
           cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
-          iter->second);
+          pixel_type_cv);
+      // HACK: 步兵相机倒装，暂时直接写死，但感觉放到配置文件里更好
+      cv::rotate(
+          cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
+          cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
+          cv::ROTATE_180);
       success = true;
     }
   }

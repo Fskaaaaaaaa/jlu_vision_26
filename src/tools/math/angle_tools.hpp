@@ -48,7 +48,7 @@ rpyAngleToQuaterniond(const Eigen::Vector3d &rpy_angle) {
 }
 
 inline Eigen::Vector3d rotationMatrixToRPY(const Eigen::Matrix3d &R) {
-  Eigen::Vector3d ypr = R.eulerAngles(0, 1, 2);
+  Eigen::Vector3d ypr = R.eulerAngles(2, 1, 0);
   return {ypr(2), ypr(1), ypr(0)};
 }
 

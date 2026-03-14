@@ -1,7 +1,7 @@
 log_level: Info
 robot_conf:
-  r1: 0.3
-  r2: 0.2
+  r1: 0.26
+  r2: 0.26
   dz: 0.1
   armor_type: Three
   armor_color: Blue

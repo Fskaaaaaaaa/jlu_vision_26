@@ -44,7 +44,7 @@ auto_aim::MTDetectorDL::MTDetectorDL(quill::Logger *logger,
                                      int queue_size)
     // XXX: 这里直接捕获了this,要避免拷贝赋值
     : logger_(logger), queue_(16, [this] {
-        LOG_DEBUG(logger_, "[MultiThreadDetector] queue is full!");
+        LOG_DEBUG(logger_, "[MultiThreadDetector]: queue is full!");
       }) {
   switch (yolo_version) {
   case YOLOVersion::YOLOv5:
@@ -74,6 +74,7 @@ bool auto_aim::MTDetectorDL::push(const cv::Mat &bgr_img,
 
 auto_aim::ImageArmorsFrameIdStamp auto_aim::MTDetectorDL::pop() {
   auto [img, frame_id, stamp, infer_request] = queue_.pop();
+  // XXX: 出队快于入队时会发生UB，但SP也没有处理，一般不会发生
   infer_request.wait();
   auto output = infer_request.get_output_tensor();
   auto armors = this->yolo_->postProcess(output, {img.cols, img.rows});

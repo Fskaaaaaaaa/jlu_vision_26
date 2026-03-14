@@ -245,6 +245,9 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
       plotter_.plot(armor_name + "Camera_y", armor.position.y());
       plotter_.plot(armor_name + "Camera_z", armor.position.z());
       plotter_.plot(armor_name + "Distance", armor.position.norm());
+      plotter_.plot(armor_name + "Roll", armor.getRpy()(0));
+      plotter_.plot(armor_name + "Pitch", armor.getRpy()(1));
+      plotter_.plot(armor_name + "Yaw", armor.getRpy()(2));
     }
   return debug ? std::optional{result_img} : std::nullopt;
 }

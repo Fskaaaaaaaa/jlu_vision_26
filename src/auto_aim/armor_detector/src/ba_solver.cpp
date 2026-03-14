@@ -84,7 +84,7 @@ bool auto_aim::BASolver::optimizeArmorPose(Armor &armor) const {
     Eigen::Vector3d rpy = tools::rotationMatrixToRPY(R_in_ros);
     gtsam::Vector6 sigmas;
     auto initial_pose =
-        gtsam::Pose3(gtsam::Rot3::RzRyRx(rpy.x(), rpy.y(), rpy.z()), pose);
+        gtsam::Pose3(gtsam::Rot3::RzRyRx(rpy.z(), rpy.y(), rpy.x()), pose);
 
     // 添加先验约束
     sigmas << config_.prior_noise.roll, config_.prior_noise.pitch,
@@ -137,9 +137,11 @@ bool auto_aim::BASolver::optimizeArmorPose(Armor &armor) const {
 
     // 获取优化结果
     auto optimized = result.at<gtsam::Pose3>(X(0));
+
     Eigen::Matrix3d R_ros_to_camera = R_camera_to_ros.inverse();
     Eigen::Matrix3d optimized_R =
-        R_ros_to_camera * optimized.rotation().matrix();
+        R_ros_to_camera *
+        tools::rpyToQuaterniond(optimized.rotation().rpy()).matrix();
     Eigen::Vector3d optimized_position =
         R_ros_to_camera * optimized.translation();
     armor.position = optimized_position;

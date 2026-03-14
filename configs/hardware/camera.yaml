@@ -1,5 +1,6 @@
 log_level: Info
-camera_type: galaxy
+camera_type: hik
+# camera_type: galaxy
 camera_name: camera0
 camera_frame_id: camera
 image_publish_interval_ms: 1
@@ -14,3 +15,11 @@ camera_params:
   exposure_time: 3000
   gain: 15.0
   frame_rate: 70
+
+# NOTE: hik12mm
+# camera matrix
+# 3575.803240 0.000000 709.923596
+# 0.000000 3576.834341 578.217633
+# 0.000000 0.000000 1.000000
+# distortion
+# -0.047529 0.669217 0.001359 0.000568 0.000000
