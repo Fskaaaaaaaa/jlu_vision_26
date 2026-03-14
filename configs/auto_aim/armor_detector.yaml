@@ -3,7 +3,7 @@ camera_params:
   exposure_time: 3000
   gain: 15.0
   frame_rate: -1.0
-use_muti_thread: true
+use_muti_thread: false
 queue_size: 4
 detect_when_idle: true
 use_DL: true
@@ -25,7 +25,7 @@ yolo_version: YOLOv5
 yolo_conf:
   device: CPU
   model_path: assets/0526.onnx
-  use_latency_performancemode: false
+  use_latency_performancemode: true
   score_thresh: 0.7
   nms_iou_thresh: 0.3
   accept_thresh: 0.8

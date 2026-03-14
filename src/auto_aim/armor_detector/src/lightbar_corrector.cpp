@@ -5,6 +5,10 @@
 
 #include "quill/LogMacros.h"
 
+#include <algorithm>
+#include <array>
+#include <execution>
+#include <functional>
 #include <numeric>
 #include <optional>
 
@@ -14,8 +18,7 @@ auto_aim::LightCornerCorrector::LightCornerCorrector(
 
 bool auto_aim::LightCornerCorrector::correctCorners(Armor &armor,
                                                     const cv::Mat &gray_img) {
-  auto process_lightbar = [this](LightBar &lightbar,
-                                 const cv::Mat &gray_img) -> bool {
+  auto process_lightbar = [&](LightBar &lightbar) -> bool {
     if (lightbar.width <= this->config_.pass_optimize_lightbar_width) {
       LOG_DEBUG(logger_, "[pca]: lightbar width too short!");
       return false;
@@ -40,13 +43,14 @@ bool auto_aim::LightCornerCorrector::correctCorners(Armor &armor,
   };
 
   // HACK: 为了避免“只优化缩短近灯条导致pnpyaw错误”，只保留两边都优化成功的情景
-  auto left_copy = armor.left_light;
-  auto right_copy = armor.right_light;
-  auto success = process_lightbar(left_copy, gray_img) &&
-                 process_lightbar(right_copy, gray_img);
+  // 稍微并发下减少下延迟。串行一次矫正10ms太吓人了。
+  std::array<LightBar, 2> copys{armor.right_light, armor.left_light};
+  auto success =
+      std::transform_reduce(std::execution::par, copys.begin(), copys.end(),
+                            true, std::logical_and<>(), process_lightbar);
   if (success) {
-    armor.right_light = right_copy;
-    armor.left_light = left_copy;
+    armor.right_light = copys.at(0);
+    armor.left_light = copys.at(1);
   }
   return success;
 }
