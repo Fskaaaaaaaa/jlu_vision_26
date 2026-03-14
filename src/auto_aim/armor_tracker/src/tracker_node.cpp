@@ -211,17 +211,18 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   auto image_stamp = armors.front().stamp; // 假设一次接收的armors来自同一帧
   std::erase_if(armors, [](const types::Armor &a) { return a.heart_beat; });
   LOG_TRACE_L1(self->logger_, "receive {} valid armors.", armors.size());
-  std::sort(armors.begin(), armors.end(),
-            [](const types::Armor &a, const types::Armor &b) -> bool {
-              return a.distance_to_image_center < b.distance_to_image_center;
-            });
+  std::ranges::sort(
+      armors, [](const types::Armor &a, const types::Armor &b) -> bool {
+        return a.distance_to_image_center < b.distance_to_image_center;
+      });
   // 选择光心最近装甲板作为打击目标
-  if (!armors.empty())
+  if (!armors.empty()) {
     if (self->aiming_target_.load() != armors.front().type) {
       self->aiming_target_.store(armors.front().type);
       LOG_INFO(self->logger_, "Select target {}!",
                rfl::enum_to_string(armors.front().type));
     }
+  }
   // 将坐标变换到odom系并抹除变换失败的装甲板
   std::erase_if(armors, [&](types::Armor &armor) {
     // 过滤掉非同一帧的装甲板
@@ -262,9 +263,24 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   if (all_targets_lost)
     self->aiming_target_.store(types::ArmorType::Negative);
 
+  // NOTE: 下面的都是发布调试波形的了
   if (!self->configs_.plot_info ||
       self->aiming_target_.load() == types::ArmorType::Negative)
     return;
+  if (!armors.empty()) {
+    const auto &armor = armors.front();
+    auto armor_name = rfl::enum_to_string(armor.color) +
+                      rfl::enum_to_string(armor.type) +
+                      self->configs_.odom_frame_id;
+    auto rpy = armor.getRpy();
+    auto xyz = armor.position;
+    self->plotter_.plot(armor_name + "Roll", rpy(0));
+    self->plotter_.plot(armor_name + "Pitch", rpy(1));
+    self->plotter_.plot(armor_name + "Yaw", rpy(2));
+    self->plotter_.plot(armor_name + "X", xyz.x());
+    self->plotter_.plot(armor_name + "Y", xyz.y());
+    self->plotter_.plot(armor_name + "Z", xyz.z());
+  }
   const auto &target_ptr = self->targets_.at(self->aiming_target_.load());
   auto state = target_ptr->getTargetTrackState().first;
   auto type_name = rfl::enum_to_string(state.type);

@@ -48,8 +48,12 @@ rpyAngleToQuaterniond(const Eigen::Vector3d &rpy_angle) {
 }
 
 inline Eigen::Vector3d rotationMatrixToRPY(const Eigen::Matrix3d &R) {
-  Eigen::Vector3d ypr = R.eulerAngles(2, 1, 0);
-  return {ypr(2), ypr(1), ypr(0)};
+  // External RPY (fixed axes) from rotation matrix:
+  // R = Rz(yaw) * Ry(pitch) * Rx(roll)
+  const double yaw = std::atan2(R(1, 0), R(0, 0));
+  const double pitch = std::atan2(-R(2, 0), std::hypot(R(2, 1), R(2, 2)));
+  const double roll = std::atan2(R(2, 1), R(2, 2));
+  return {roll, pitch, yaw};
 }
 
 } // namespace tools

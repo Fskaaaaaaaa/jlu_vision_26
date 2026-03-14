@@ -57,7 +57,7 @@ auto_aim::PnPSolver::solvePnP(Armor &armor) const {
   cv::Rodrigues(result.rvecs.at(0), R_cv);
   Eigen::Matrix3d R = Eigen::Matrix3d::Zero();
   cv::cv2eigen(R_cv, R);
-  armor.orientation = Eigen::Quaterniond(R);
+  armor.orientation = Eigen::Quaterniond{R};
   return result;
 }
 
@@ -96,8 +96,8 @@ void auto_aim::PnPSolver::sortPnPResult(const Armor &armor,
       std::atan2(armor.left_light.axis.y, armor.left_light.axis.x));
   double r_angle = tools::radian2Angle(
       std::atan2(armor.right_light.axis.y, armor.right_light.axis.x));
-  double angle = (l_angle + r_angle) / 2;
-  double armor_angle = angle + 90.;
+  double angle = (l_angle + r_angle) / 2.0;
+  double armor_angle = angle + 90.0;
   if (armor.type == types::ArmorType::Outpost)
     armor_angle = -armor_angle;
   // NOTE: 因为装甲板是向内倾斜的（前哨相反）

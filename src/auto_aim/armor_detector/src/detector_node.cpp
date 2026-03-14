@@ -239,11 +239,11 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
   }
   if (configs_.plot_pnp_result)
     for (const auto &armor : armors) {
-      auto armor_name =
-          rfl::enum_to_string(armor.color) + rfl::enum_to_string(armor.type);
-      plotter_.plot(armor_name + "Camera_x", armor.position.x());
-      plotter_.plot(armor_name + "Camera_y", armor.position.y());
-      plotter_.plot(armor_name + "Camera_z", armor.position.z());
+      auto armor_name = rfl::enum_to_string(armor.color) +
+                        rfl::enum_to_string(armor.type) + configs_.camera_name;
+      plotter_.plot(armor_name + "X", armor.position.x());
+      plotter_.plot(armor_name + "Y", armor.position.y());
+      plotter_.plot(armor_name + "Z", armor.position.z());
       plotter_.plot(armor_name + "Distance", armor.position.norm());
       plotter_.plot(armor_name + "Roll", armor.getRpy()(0));
       plotter_.plot(armor_name + "Pitch", armor.getRpy()(1));
