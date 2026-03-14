@@ -79,6 +79,18 @@ public:
     return queue_.empty();
   }
 
+  bool full() {
+    std::unique_lock<std::mutex> lock(mutex_);
+    return queue_.size() >= max_size_;
+  }
+
+  size_t size() {
+    std::unique_lock<std::mutex> lock(mutex_);
+    return queue_.size();
+  }
+
+  size_t capacity() const { return max_size_; }
+
   void clear() {
     std::unique_lock<std::mutex> lock(mutex_);
     while (!queue_.empty()) {

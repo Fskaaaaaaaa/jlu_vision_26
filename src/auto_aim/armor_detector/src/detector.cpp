@@ -6,8 +6,10 @@
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
 
+#include <algorithm>
 #include <cstdlib>
 #include <memory>
+#include <tuple>
 
 auto_aim::STDetectorDL::STDetectorDL(quill::Logger *logger,
                                      YOLOVersion yolo_version,
@@ -43,7 +45,7 @@ auto_aim::MTDetectorDL::MTDetectorDL(quill::Logger *logger,
                                      const YOLOConfig &yolo_config,
                                      int queue_size)
     // XXX: 这里直接捕获了this,要避免拷贝赋值
-    : logger_(logger), queue_(16, [this] {
+    : logger_(logger), queue_(std::max(1, queue_size), [this] {
         LOG_DEBUG(logger_, "[MultiThreadDetector]: queue is full!");
       }) {
   switch (yolo_version) {
@@ -64,6 +66,10 @@ auto_aim::MTDetectorDL::MTDetectorDL(quill::Logger *logger,
 bool auto_aim::MTDetectorDL::push(const cv::Mat &bgr_img,
                                   const std::string &frame_id,
                                   std::chrono::system_clock::time_point stamp) {
+  if (queue_.full()) {
+    LOG_DEBUG(logger_, "[MultiThreadDetector]: queue is full!");
+    return false;
+  }
   cv::Mat copy;
   bgr_img.copyTo(copy);
   auto tensor = this->yolo_->preProcess(copy);

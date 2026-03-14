@@ -37,12 +37,14 @@ ov::Tensor auto_aim::YOLOv5::preProcess(const cv::Mat &image) {
   auto scale = std::min(x_scale, y_scale);
   auto h = static_cast<int>(image.rows * scale);
   auto w = static_cast<int>(image.cols * scale);
-  cv::Mat input{yolo_input_size, yolo_input_size, CV_8UC3, cv::Scalar(0, 0, 0)};
+  ov::Tensor input_tensor{ov::element::u8,
+                          {1, yolo_input_size, yolo_input_size, 3}};
+  cv::Mat input{yolo_input_size, yolo_input_size, CV_8UC3,
+                input_tensor.data<unsigned char>()};
+  input.setTo(cv::Scalar(0, 0, 0));
   cv::Rect roi{0, 0, w, h};
   cv::resize(image, input(roi), {w, h});
   // NOTE: 填充黑边再缩放成640x640，分辨率降至0.75倍，优先保证视野
-  ov::Tensor input_tensor{
-      ov::element::u8, {1, yolo_input_size, yolo_input_size, 3}, input.data};
   return input_tensor;
 }
 
