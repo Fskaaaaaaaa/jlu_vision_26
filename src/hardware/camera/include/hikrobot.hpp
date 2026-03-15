@@ -19,12 +19,14 @@ public:
 private:
   void setFloatValue(const std::string &name, double value);
   void setEnumValue(const std::string &name, unsigned int value);
+  bool setBoolValue(const std::string &name, bool value);
 
   quill::Logger *logger_;
   confs::CameraParams camera_params_;
   void *handle_;
   std::vector<char> bayer_buffer_holder_;
   bool buffer_inited_;
+  bool use_software_rotate_;
   int error_count_;
   std::size_t payload_size_;
 };

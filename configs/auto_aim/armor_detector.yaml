@@ -1,4 +1,4 @@
-log_level: Info
+log_level: Debug
 camera_params:
   exposure_time: 3000
   gain: 15.0
@@ -7,7 +7,7 @@ use_muti_thread: false
 queue_size: 4
 detect_when_idle: true
 use_DL: true
-use_pca: true
+use_pca: false
 use_ba: false
 show_detect_result: true
 show_optimize_result: true

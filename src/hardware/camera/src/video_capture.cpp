@@ -57,9 +57,9 @@ bool hardware::VideoCapture::readImage(
   cv::Rect roi(cropX, cropY, target_size.width, target_size.height);
   cv::Mat(target_size, CV_8UC3, buffer) = scaled(roi);
   cv::resize(frame, cv::Mat{target_size, CV_8UC3, buffer}, target_size);
-  return 0;
+  return true;
 }
 
 bool hardware::VideoCapture::changeExposureGain(double exposure, double gain) {
-  return 0;
+  return true;
 }

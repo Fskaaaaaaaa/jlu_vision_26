@@ -1,9 +1,10 @@
 log_level: Info
 camera_type: hik
+# camera_type: video
 # camera_type: galaxy
 camera_name: camera0
 camera_frame_id: camera
-image_publish_interval_ms: 1
+image_publish_interval_ms: 0
 cam_info_publish_interval_ms: 1000
 video_path: assets/demo.avi
 camera_info:
@@ -14,7 +15,7 @@ camera_info:
 camera_params:
   exposure_time: 3000
   gain: 15.0
-  frame_rate: 70
+  frame_rate: 60
 
 # NOTE: hik12mm
 # camera matrix

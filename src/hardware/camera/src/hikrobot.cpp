@@ -16,7 +16,8 @@
 hardware::HikRobot::HikRobot(quill::Logger *logger,
                              const confs::CameraParams &camera_params)
     : logger_(logger), camera_params_(camera_params), handle_(nullptr),
-      buffer_inited_(false), error_count_(0), payload_size_(0) {
+      buffer_inited_(false), use_software_rotate_(true), error_count_(0),
+      payload_size_(0) {
   LOG_INFO(logger_, "start hik camera.");
   // 查找并打开设备
   MV_CC_DEVICE_INFO_LIST device_list{};
@@ -79,6 +80,14 @@ hardware::HikRobot::HikRobot(quill::Logger *logger,
   setEnumValue("GainAuto", MV_GAIN_MODE_OFF);
   setFloatValue("ExposureTime", camera_params_.exposure_time);
   setFloatValue("Gain", camera_params_.gain);
+
+  use_software_rotate_ =
+      !setBoolValue("ReverseX", true) || !setBoolValue("ReverseY", true);
+  if (use_software_rotate_) {
+    LOG_WARNING(logger_,
+                "[hikrobot]: device reverse not supported, use software "
+                "rotate 180.");
+  }
   ret = MV_CC_SetFrameRate(handle_, camera_params_.frame_rate);
   if (ret != MV_OK) {
     LOG_WARNING(logger_, "MV_CC_SetFrameRate({}) failed: {} (0x{:08X})",
@@ -137,6 +146,16 @@ void hardware::HikRobot::setEnumValue(const std::string &name,
   if (ret != MV_OK)
     LOG_WARNING(logger_, "MV_CC_SetEnumValue({}, {}) failed: {}", name, value,
                 ret);
+}
+
+bool hardware::HikRobot::setBoolValue(const std::string &name, bool value) {
+  int ret = MV_CC_SetBoolValue(handle_, name.c_str(), value ? 1 : 0);
+  if (ret != MV_OK) {
+    LOG_WARNING(logger_, "MV_CC_SetBoolValue({}, {}) failed: {}", name, value,
+                ret);
+    return false;
+  }
+  return true;
 }
 
 bool hardware::HikRobot::readImage(
@@ -201,11 +220,12 @@ bool hardware::HikRobot::readImage(
                   raw.pBufAddr},
           cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
           pixel_type_cv);
-      // HACK: 步兵相机倒装，暂时直接写死，但感觉放到配置文件里更好
-      cv::rotate(
-          cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
-          cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
-          cv::ROTATE_180);
+      if (use_software_rotate_) {
+        cv::rotate(
+            cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
+            cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
+            cv::ROTATE_180);
+      }
       success = true;
     }
   }

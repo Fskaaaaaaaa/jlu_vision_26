@@ -7,8 +7,6 @@
 
 #include <algorithm>
 #include <array>
-#include <execution>
-#include <functional>
 #include <numeric>
 #include <optional>
 
@@ -43,16 +41,16 @@ bool auto_aim::LightCornerCorrector::correctCorners(Armor &armor,
   };
 
   // HACK: 为了避免“只优化缩短近灯条导致pnpyaw错误”，只保留两边都优化成功的情景
-  // 稍微并发下减少下延迟。串行一次矫正10ms太吓人了。
   std::array<LightBar, 2> copys{armor.right_light, armor.left_light};
-  auto success =
-      std::transform_reduce(std::execution::par, copys.begin(), copys.end(),
-                            true, std::logical_and<>(), process_lightbar);
-  if (success) {
-    armor.right_light = copys.at(0);
-    armor.left_light = copys.at(1);
+  if (!process_lightbar(copys.at(0))) {
+    return false;
   }
-  return success;
+  if (!process_lightbar(copys.at(1))) {
+    return false;
+  }
+  armor.right_light = copys.at(0);
+  armor.left_light = copys.at(1);
+  return true;
 }
 
 std::optional<auto_aim::SymmetryAxis>
