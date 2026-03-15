@@ -78,12 +78,6 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
   this->plan_thread_ = std::jthread{[this]() {
     LOG_INFO(logger_, "plan_thread start!");
     while (!iox::hasTerminationRequested()) {
-      // static std::chrono::system_clock::time_point last_plan_stamp;
-      // auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(
-      //               std::chrono::system_clock::now() - last_plan_stamp)
-      //               .count();
-      // last_plan_stamp = std::chrono::system_clock::now();
-      // std::cout << dt * 1000 << std::endl;
       bool on_task =
           configs_.always_on_task ? true : task_mode_listener_.isOnTask();
       if (!on_task || !targets_.contains(aiming_target_.load())) { // 无锁定状态
@@ -132,6 +126,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
           });
       // plot瞄准信息
       if (configs_.plot_info) {
+        plotter_.plot("fire", cmd.fire);
         plotter_.plot("target_yaw", cmd.target_yaw);
         plotter_.plot("target_pitch", cmd.target_pitch);
         plotter_.plot("yaw", cmd.yaw);

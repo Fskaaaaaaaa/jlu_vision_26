@@ -64,7 +64,8 @@ struct PlannerConfig {
   bool iterative_yaw0;
   bool rk45_traj;      // 是否使用解析解
   bool iterative_traj; // 是否考虑子弹飞行时敌人的运动
-  int shoot_offset;    // 预判几个MPC帧，在iterative_fly_time时应当为0
+  bool no_predict;
+  int shoot_offset; // 预判几个MPC帧，在iterative_fly_time时应当为0
   double yaw_offset;
   double pitch_offset;
   double fire_thresh;
