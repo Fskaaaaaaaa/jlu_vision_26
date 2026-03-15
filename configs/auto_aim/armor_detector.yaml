@@ -7,7 +7,7 @@ use_muti_thread: false
 queue_size: 4
 detect_when_idle: true
 use_DL: true
-use_pca: false
+use_pca: true
 use_ba: false
 show_detect_result: true
 show_optimize_result: true
@@ -46,7 +46,7 @@ trad_conf:
 pca_conf:
   pass_optimize_lightbar_width: 3
   normalize_max_brightness: 25.0
-  lightbar_min_mean_brightness: 50.0
+  lightbar_min_mean_brightness: 30.0
   padding_scale: 0.07
   search_start_ratio: 0.4
   search_end_ratio: 0.6

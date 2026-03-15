@@ -7,6 +7,9 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
+#include <execution>
+#include <functional>
 #include <numeric>
 #include <optional>
 
@@ -42,15 +45,14 @@ bool auto_aim::LightCornerCorrector::correctCorners(Armor &armor,
 
   // HACK: 为了避免“只优化缩短近灯条导致pnpyaw错误”，只保留两边都优化成功的情景
   std::array<LightBar, 2> copys{armor.right_light, armor.left_light};
-  if (!process_lightbar(copys.at(0))) {
-    return false;
+  auto success =
+      std::transform_reduce(std::execution::par, copys.begin(), copys.end(),
+                            true, std::logical_and<>(), process_lightbar);
+  if (success) {
+    armor.right_light = copys.at(0);
+    armor.left_light = copys.at(1);
   }
-  if (!process_lightbar(copys.at(1))) {
-    return false;
-  }
-  armor.right_light = copys.at(0);
-  armor.left_light = copys.at(1);
-  return true;
+  return success;
 }
 
 std::optional<auto_aim::SymmetryAxis>
@@ -84,28 +86,25 @@ auto_aim::LightCornerCorrector::findSymmetryAxis(const cv::Mat &gray_img,
 
   // Calculate the centroid
   cv::Moments moments = cv::moments(roi, false);
+  if (moments.m00 == 0) {
+    LOG_DEBUG(logger_, "[pca]: moments m00 is zero!");
+    return std::nullopt;
+  }
   cv::Point2f centroid =
       cv::Point2f(moments.m10 / moments.m00, moments.m01 / moments.m00) +
       cv::Point2f(light_box.x, light_box.y);
 
-  // Initialize the PointCloud
-  std::vector<cv::Point2f> points;
-  for (int i = 0; i < roi.rows; i++) {
-    for (int j = 0; j < roi.cols; j++) {
-      for (int k = 0; k < std::round(roi.at<float>(i, j)); k++) {
-        points.emplace_back(cv::Point2f(j, i));
-      }
-    }
+  // NOTE: 从点云-主成分分析换成矩分析了，前者太慢了。但还是接着叫PCA吧
+  double mu20 = moments.mu20;
+  double mu11 = moments.mu11;
+  double mu02 = moments.mu02;
+  if (mu20 == 0.0 && mu11 == 0.0 && mu02 == 0.0) {
+    LOG_DEBUG(logger_, "[pca]: moments are zero!");
+    return std::nullopt;
   }
-  cv::Mat points_mat = cv::Mat(points).reshape(1);
-
-  // PCA (Principal Component Analysis)
-  auto pca = cv::PCA(points_mat, cv::Mat(), cv::PCA::DATA_AS_ROW);
-
-  // Get the symmetry axis
-  cv::Point2f axis = cv::Point2f(pca.eigenvectors.at<float>(0, 0),
-                                 pca.eigenvectors.at<float>(0, 1));
-
+  double theta = 0.5 * std::atan2(2.0 * mu11, mu20 - mu02);
+  cv::Point2f axis = cv::Point2f(static_cast<float>(std::cos(theta)),
+                                 static_cast<float>(std::sin(theta)));
   // Normalize the axis
   axis /= cv::norm(axis);
 
