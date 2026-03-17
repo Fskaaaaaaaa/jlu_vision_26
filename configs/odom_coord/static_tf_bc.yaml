@@ -18,9 +18,9 @@ static_broudcaster_conf:
       child_frame_id: camera
       translation:
         x: 0.0
-        y: 0.0
-        z: 0.0
+        y: -0.045
+        z: 0.08557
       rpy_angle:
-        roll: 90.0
-        pitch: -90.0
-        yaw: 0.0
+        roll: -90.0
+        pitch: 0.0
+        yaw: -90.0

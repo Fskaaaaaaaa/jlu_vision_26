@@ -117,9 +117,10 @@ void hardware::Serial::receiveThread() {
       }
 
       std::size_t payload_read = 0;
-      while (payload_read < kPacketSize - 1 && !iox::hasTerminationRequested()) {
-        const auto bytes =
-            serial_.read(data.data() + 1 + payload_read, kPacketSize - 1 - payload_read);
+      while (payload_read < kPacketSize - 1 &&
+             !iox::hasTerminationRequested()) {
+        const auto bytes = serial_.read(data.data() + 1 + payload_read,
+                                        kPacketSize - 1 - payload_read);
         if (bytes == 0) {
           break;
         }
@@ -188,7 +189,7 @@ void hardware::Serial::receiveThread() {
           });
       Eigen::Isometry3d T{Eigen::Isometry3d::Identity()};
       T.rotate(tools::rpyToQuaterniond(
-          Eigen::Vector3d{packet.roll, packet.pitch, packet.yaw}));
+          Eigen::Vector3d{-packet.roll, -packet.pitch, packet.yaw}));
       this->tf_pub_.publishTransform(
           T, configs_.odom_frame_id, configs_.gimbal_fram_id,
           std::chrono::system_clock::now() +
