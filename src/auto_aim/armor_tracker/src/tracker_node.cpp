@@ -221,6 +221,8 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   // 将坐标变换到odom系并抹除变换失败的装甲板
   std::erase_if(armors, [&](types::Armor &armor) {
     // 过滤掉非同一帧的装甲板
+    if (self->configs_.erase_no_key_frame && !armor.key_frame)
+      return true;
     if (armor.stamp != image_stamp)
       return true;
     try {

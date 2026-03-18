@@ -68,6 +68,7 @@ struct PlannerConfig {
   int shoot_offset; // 预判几个MPC帧，在iterative_fly_time时应当为0
   double yaw_offset;
   double pitch_offset;
+  int predict_offset_ms; // 为了补偿云台响应延迟导致的滞后，感觉不如去压力电控（）
   double fire_thresh;
   double max_yaw_acc;
   std::array<double, 2> Q_yaw;
@@ -86,6 +87,7 @@ struct TrackerConfigs {
   bool plot_info;
   bool always_on_task;
   bool show_image;
+  bool erase_no_key_frame;
   double tf_query_tolerance_ms;
   std::string camera_name;
   std::string camera_frame_id; // 这两个用在tf上

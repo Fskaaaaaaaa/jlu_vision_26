@@ -2,6 +2,7 @@ log_level: Debug
 plot_info: true
 always_on_task: true
 show_image: true
+erase_no_key_frame: true
 tf_query_tolerance_ms: 200.0
 camera_name: camera0
 camera_frame_id: camera
@@ -63,6 +64,7 @@ planner_conf:
   shoot_offset: 0
   yaw_offset: 0.0
   pitch_offset: 0.0
+  predict_offset_ms: 150
   fire_thresh: 0.005
   max_yaw_acc: 50.0
   Q_yaw: [9e6, 0]

@@ -13,7 +13,7 @@ static_broudcaster_conf:
         roll: 0.0
         pitch: 0.0
         yaw: 0.0
-    # TODO: odom到gimbal的变换由serial发布
+    # NOTE: odom到gimbal的变换由serial发布
     - parent_frame_id: gimbal
       child_frame_id: camera
       translation:

@@ -65,9 +65,12 @@ msgs::AimCommand auto_aim::Planner::plan(
     const std::chrono::system_clock::time_point &target_stamp,
     double bullet_speed_mps) {
   const double dt_image_to_now_sec =
-      std::chrono::duration_cast<std::chrono::duration<double>>(
-          std::chrono::system_clock::now() - target_stamp)
-          .count();
+      config_.no_predict
+          ? 0.0
+          : std::chrono::duration_cast<std::chrono::duration<double>>(
+                std::chrono::system_clock::now() - target_stamp +
+                std::chrono::milliseconds{config_.predict_offset_ms})
+                .count();
   return plan(target_state, dt_image_to_now_sec, bullet_speed_mps);
 }
 
@@ -81,15 +84,15 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
                                          double bullet_speed_mps) {
   if (bullet_speed_mps < config_.min_bullet_speed ||
       bullet_speed_mps > config_.max_bullet_speed) {
-    LOG_WARNING(logger_, "[Planner]: Abnormal bullet speed {}, use default {}.",
-                bullet_speed_mps, config_.default_bullet_speed);
+    LOG_DEBUG(logger_, "[Planner]: Abnormal bullet speed {}, use default {}.",
+              bullet_speed_mps, config_.default_bullet_speed);
     bullet_speed_mps = config_.default_bullet_speed;
   }
 
   AimTrajectoryReference reference;
   try {
-    reference =
-        buildTrajectoryReference(target_state, dt_image_to_now_sec, bullet_speed_mps);
+    reference = buildTrajectoryReference(target_state, dt_image_to_now_sec,
+                                         bullet_speed_mps);
   } catch (const std::exception &e) {
     LOG_WARNING(logger_, "{}, bullet_speed: {}.", e.what(), bullet_speed_mps);
     return {.control = false};
@@ -99,7 +102,8 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
   initial_state << reference.state_reference(0, 0),
       reference.state_reference(1, 0);
   tiny_set_x0(yaw_solver_, initial_state);
-  yaw_solver_->work->Xref = reference.state_reference.block(0, 0, 2, trajectory_horizon_);
+  yaw_solver_->work->Xref =
+      reference.state_reference.block(0, 0, 2, trajectory_horizon_);
   tiny_solve(yaw_solver_);
 
   initial_state << reference.state_reference(2, 0),
@@ -111,18 +115,19 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
 
   msgs::AimCommand cmd;
   cmd.control = true;
-  cmd.target_yaw =
-      tools::limitRadian(reference.state_reference(
-                             0, config_.trajectory_half_horizon) +
-                         reference.center_reference_yaw_rad);
+  cmd.target_yaw = tools::limitRadian(
+      reference.state_reference(0, config_.trajectory_half_horizon) +
+      reference.center_reference_yaw_rad + config_.yaw_offset);
   cmd.target_pitch =
-      reference.state_reference(2, config_.trajectory_half_horizon);
+      reference.state_reference(2, config_.trajectory_half_horizon) +
+      config_.pitch_offset;
   cmd.yaw = tools::limitRadian(
       yaw_solver_->work->x(0, config_.trajectory_half_horizon) +
-      reference.center_reference_yaw_rad);
+      reference.center_reference_yaw_rad + config_.yaw_offset);
   cmd.yaw_vel = yaw_solver_->work->x(1, config_.trajectory_half_horizon);
   cmd.yaw_acc = yaw_solver_->work->u(0, config_.trajectory_half_horizon);
-  cmd.pitch = pitch_solver_->work->x(0, config_.trajectory_half_horizon);
+  cmd.pitch = pitch_solver_->work->x(0, config_.trajectory_half_horizon) +
+              config_.pitch_offset;
   cmd.pitch_vel = pitch_solver_->work->x(1, config_.trajectory_half_horizon);
   cmd.pitch_acc = pitch_solver_->work->u(0, config_.trajectory_half_horizon);
   cmd.fire =
@@ -173,8 +178,7 @@ auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
 
   const auto center_solution = center_solution_optional.value();
   AimTrajectoryReference reference;
-  reference.center_reference_yaw_rad =
-      center_solution.yaw_pitch_fly_time.yaw;
+  reference.center_reference_yaw_rad = center_solution.yaw_pitch_fly_time.yaw;
   reference.state_reference = Eigen::MatrixXd(4, trajectory_horizon_);
   aim0_predict_time_.store(center_solution.yaw_pitch_fly_time.fly_time +
                            dt_image_to_now_sec);
@@ -186,8 +190,9 @@ auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
       config_.rk45_traj, config_.iterative_traj, preferred_armor_index);
   if (!previous_solution_optional.has_value()) {
     ++reference.fallback_sample_count;
-    LOG_TRACE_L1(logger_,
-                 "[Planner]: use center-aim fallback for first trajectory sample.");
+    LOG_TRACE_L1(
+        logger_,
+        "[Planner]: use center-aim fallback for first trajectory sample.");
   }
   auto previous_solution = previous_solution_optional.has_value()
                                ? previous_solution_optional->yaw_pitch_fly_time
@@ -200,9 +205,10 @@ auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
       config_.rk45_traj, config_.iterative_traj, preferred_armor_index);
   if (!current_solution_optional.has_value()) {
     ++reference.fallback_sample_count;
-    LOG_TRACE_L1(logger_,
-                 "[Planner]: use previous-sample fallback for second trajectory "
-                 "sample.");
+    LOG_TRACE_L1(
+        logger_,
+        "[Planner]: use previous-sample fallback for second trajectory "
+        "sample.");
   }
   auto current_solution = current_solution_optional.has_value()
                               ? current_solution_optional->yaw_pitch_fly_time
@@ -230,9 +236,8 @@ auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
         (2 * config_.dt_sec);
     const double pitch_velocity =
         (next_solution.pitch - previous_solution.pitch) / (2 * config_.dt_sec);
-    reference.state_reference.col(frame_index)
-        << tools::limitRadian(current_solution.yaw -
-                              reference.center_reference_yaw_rad),
+    reference.state_reference.col(frame_index) << tools::limitRadian(
+        current_solution.yaw - reference.center_reference_yaw_rad),
         yaw_velocity, current_solution.pitch, pitch_velocity;
     previous_solution = current_solution;
     current_solution = next_solution;
