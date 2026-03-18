@@ -169,12 +169,12 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                     target_state.predict(planner_.aim0_predict_time_.load());
                 auto [aimed_armor, armor_index] =
                     planner_.selectAimingArmor(state_predict);
-                // 绘制正在瞄准的装甲板（绿色）
-                drawArmor(aimed_armor, target_state.type, copy, stamp,
-                          tools::Color::bgr::GREEN);
                 const auto &target = targets_.at(aim_target);
                 // 绘制所有目标装甲板（红色）
                 drawTarget(*target, copy, stamp);
+                // 绘制正在瞄准的装甲板（绿色）
+                drawArmor(aimed_armor, target_state.type, copy, stamp,
+                          tools::Color::bgr::GREEN);
               }
               cv::imshow("tracker", copy);
               cv::waitKey(1);
