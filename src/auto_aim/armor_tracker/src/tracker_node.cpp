@@ -1,4 +1,5 @@
 // Copyright (c) 2026 I dont have 30k. All Rights Reserved.
+// TODO 防御性编程添加相机离线检测，或者相机离线后发布警告图像
 #include "tracker_node.hpp"
 #include "basic/colors.hpp"
 #include "basic/image_tools.hpp"
@@ -81,6 +82,14 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       bool on_task =
           configs_.always_on_task ? true : task_mode_listener_.isOnTask();
       if (!on_task || !targets_.contains(aiming_target_.load())) { // 无锁定状态
+        aimcommand_pub_.loan().and_then(
+            [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
+              sample.getUserHeader().frame_id = {
+                  iox::TruncateToCapacity, configs_.odom_frame_id.c_str()};
+              sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
+              sample->control = false;
+              sample.publish();
+            });
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
         continue;
@@ -88,6 +97,14 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       auto [target_state, track_state] =
           targets_.at(aiming_target_.load())->getTargetTrackState();
       if (track_state.state == TrackState::State::LOST) {
+        aimcommand_pub_.loan().and_then(
+            [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
+              sample.getUserHeader().frame_id = {
+                  iox::TruncateToCapacity, configs_.odom_frame_id.c_str()};
+              sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
+              sample->control = false;
+              sample.publish();
+            });
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
         continue; // 锁定的敌人已经丢失
@@ -292,13 +309,12 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   if (state.type == types::ArmorType::Outpost) {
     // TODO
   } else if (state.type != types::ArmorType::Base) {
-    auto robot_ptr = dynamic_cast<RobotTarget *>(target_ptr.get());
-    if (robot_ptr != nullptr) {
-      auto [ra, rb, dz] = robot_ptr->getRadiusARadiusBDZ();
-      self->plotter_.plot(type_name + "r_a", ra);
-      self->plotter_.plot(type_name + "r_b", rb);
-      self->plotter_.plot(type_name + "dz", dz);
-    }
+    auto ra = target_ptr->get("ra");
+    auto rb = target_ptr->get("rb");
+    auto dz = target_ptr->get("dz");
+    self->plotter_.plot(type_name + "r_a", ra);
+    self->plotter_.plot(type_name + "r_b", rb);
+    self->plotter_.plot(type_name + "dz", dz);
   }
 }
 

@@ -11,7 +11,6 @@
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
 #include <gtsam/nonlinear/Values.h>
 
-#include <array>
 #include <chrono>
 #include <cstdint>
 #include <mutex>
@@ -26,6 +25,7 @@ public:
         const std::chrono::system_clock::time_point &stamp) = 0;
   // NOTE: 因为涉及到给targetstate注入armors逻辑，需要是虚函数
   virtual std::pair<TargetState, TrackState> getTargetTrackState() const = 0;
+  virtual double get(const std::string &key) { return 0; };
 
   static std::vector<ArmorMatchResult>
   matchArmor(const std::vector<ArmorPositionYaw> &armors,
@@ -44,7 +44,7 @@ public:
   std::pair<TargetState, TrackState> getTargetTrackState() const override;
 
   // for debug
-  std::array<double, 3> getRadiusARadiusBDZ() const;
+  double get(const std::string &key) override;
 
 private:
   std::pair<RobotTargetState, TrackState::State>

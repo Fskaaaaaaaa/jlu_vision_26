@@ -7,9 +7,7 @@
 #include <Eigen/Core>
 #include <gtsam/geometry/Rot2.h>
 
-#include <deque>
 #include <functional>
-#include <optional>
 #include <vector>
 
 namespace auto_aim {

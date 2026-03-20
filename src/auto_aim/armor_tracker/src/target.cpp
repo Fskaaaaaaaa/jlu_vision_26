@@ -1,4 +1,7 @@
 // Copyright (c) 2026 shuodedaoli. All Rights Reserved.
+// TODO 换马氏距离匹配armor，
+// 添加自适应噪声
+// 添加半径窗口平滑（不推荐，违背因子图初衷）
 #include "target.hpp"
 #include "configs.hpp"
 #include "factors.hpp"
@@ -88,9 +91,6 @@ std::vector<std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>>
 auto_aim::RobotTarget::matchArmorsUnique(
     const RobotTargetState &state,
     const std::vector<ArmorPositionYaw> &obs_armors) const {
-  // auto armors_for_association = RobotTarget::getArmorsFromTargetState(
-  //     state, config_.default_radius, config_.default_radius,
-  //     config_.default_dz);
   auto armors_for_association = RobotTarget::getArmorsFromTargetState(state);
   std::vector<MatchCandidate> candidates;
   for (std::size_t obs_i = 0; obs_i < obs_armors.size(); ++obs_i) {
@@ -205,10 +205,15 @@ auto_aim::TrackState::State auto_aim::RobotTarget::track(
   return track_state_.state;
 }
 
-std::array<double, 3> auto_aim::RobotTarget::getRadiusARadiusBDZ() const {
+double auto_aim::RobotTarget::get(const std::string &key) {
   std::scoped_lock lk{state_mtx_};
-  return std::array{target_state_.radius_a, target_state_.radius_b,
-                    target_state_.dz};
+  if (key == "ra")
+    return target_state_.radius_a;
+  if (key == "rb")
+    return target_state_.radius_b;
+  if (key == "dz")
+    return target_state_.dz;
+  return 0;
 }
 
 using namespace gtsam::symbol_shorthand;
