@@ -65,6 +65,9 @@ struct PlannerConfig {
   bool rk45_traj;      // 是否使用解析解
   bool iterative_traj; // 是否考虑子弹飞行时敌人的运动
   bool no_predict;
+  bool enable_aim_center; // 理论上不需要，电控没调好yaw时启用
+  double aim_center_vyaw_thres_high;
+  double aim_center_vyaw_thres_low;
   int shoot_offset; // 预判几个MPC帧，在iterative_fly_time时应当为0
   double yaw_offset;
   double pitch_offset;
@@ -87,7 +90,7 @@ struct TrackerConfigs {
   bool plot_info;
   bool always_on_task;
   bool show_image;
-  bool erase_no_key_frame;
+  bool erase_if_not_key_frame;
   double tf_query_tolerance_ms;
   std::string camera_name;
   std::string camera_frame_id; // 这两个用在tf上

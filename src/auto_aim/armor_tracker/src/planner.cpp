@@ -6,8 +6,10 @@
 
 #include "quill/LogMacros.h"
 #include "types.hpp"
+#include "types/ArmorType.hpp"
 
 #include <chrono>
+#include <cmath>
 #include <optional>
 #include <stdexcept>
 #include <utility>
@@ -63,7 +65,7 @@ auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
 msgs::AimCommand auto_aim::Planner::plan(
     const TargetState &target_state,
     const std::chrono::system_clock::time_point &target_stamp,
-    double bullet_speed_mps) {
+    const msgs::GimbalInfo &gimbal_info) {
   const double dt_image_to_now_sec =
       config_.no_predict
           ? 0.0
@@ -71,7 +73,25 @@ msgs::AimCommand auto_aim::Planner::plan(
                 std::chrono::system_clock::now() - target_stamp +
                 std::chrono::milliseconds{config_.predict_offset_ms})
                 .count();
-  return plan(target_state, dt_image_to_now_sec, bullet_speed_mps);
+  return shouldAimCenter(target_state)
+             ? aimCenter(target_state, dt_image_to_now_sec,
+                         gimbal_info.bullet_speed)
+             : plan(target_state, dt_image_to_now_sec,
+                    gimbal_info.bullet_speed);
+}
+
+bool auto_aim::Planner::shouldAimCenter(const TargetState &target_state) {
+  if (!config_.enable_aim_center)
+    return false;
+  static bool last_output{false};
+  static types::ArmorType last_target_type{target_state.type};
+  if (last_target_type != target_state.type) {
+    last_output = false;
+    last_target_type = target_state.type;
+  }
+  auto thresh = (last_output == true) ? config_.aim_center_vyaw_thres_low
+                                      : config_.aim_center_vyaw_thres_high;
+  return (last_output = target_state.center_vyaw > thresh);
 }
 
 std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>
@@ -89,6 +109,7 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
     bullet_speed_mps = config_.default_bullet_speed;
   }
 
+  // 构建参考轨迹
   AimTrajectoryReference reference;
   try {
     reference = buildTrajectoryReference(target_state, dt_image_to_now_sec,
@@ -98,6 +119,7 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
     return {.control = false};
   }
 
+  // 依据参考轨迹优化云台轨迹
   Eigen::VectorXd initial_state(2);
   initial_state << reference.state_reference(0, 0),
       reference.state_reference(1, 0);
@@ -140,6 +162,33 @@ msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
                      pitch_solver_->work->x(0, config_.trajectory_half_horizon +
                                                    config_.shoot_offset)) <
       config_.fire_thresh;
+  cmd.bullet_id = bullet_id_++;
+  return cmd;
+}
+
+msgs::AimCommand auto_aim::Planner::aimCenter(const TargetState &target_state,
+                                              double dt_image_to_now_sec,
+                                              double bullet_speed_mps) {
+  auto aim_opt = trajectory_solver_.resolveTarget(
+      target_state, bullet_speed_mps, dt_image_to_now_sec, config_.rk45_yaw0,
+      config_.iterative_yaw0);
+  if (!aim_opt.has_value())
+    return {.control = false};
+  auto aim = aim_opt.value().yaw_pitch_fly_time;
+  msgs::AimCommand cmd;
+  cmd.control = true;
+  cmd.target_yaw = tools::limitRadian(aim.yaw + config_.yaw_offset);
+  cmd.target_pitch = aim.pitch + config_.pitch_offset;
+  cmd.yaw = tools::limitRadian(std::atan2(target_state.center_position.y(),
+                                          target_state.center_position.x()) +
+                               config_.yaw_offset);
+  cmd.yaw_vel = 0;
+  cmd.yaw_acc = 0;
+  cmd.pitch = aim.pitch + config_.pitch_offset;
+  cmd.pitch_vel = 0;
+  cmd.pitch_acc = 0;
+  cmd.fire = true;
+  // XXX:resolveTarget方法在打轮子时是会返回nullopt的，进到这里的都是能开火的，但最好还是检查一下
   cmd.bullet_id = bullet_id_++;
   return cmd;
 }
@@ -197,7 +246,6 @@ auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
   auto previous_solution = previous_solution_optional.has_value()
                                ? previous_solution_optional->yaw_pitch_fly_time
                                : center_solution.yaw_pitch_fly_time;
-
   target_state_for_current_frame =
       target_state_for_current_frame.predict(config_.dt_sec);
   auto current_solution_optional = solveAimWithMethodFallback(
@@ -230,7 +278,6 @@ auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
           "[Planner]: use trajectory hold fallback at frame {} when aim fails.",
           frame_index);
     }
-
     const double yaw_velocity =
         tools::limitRadian(next_solution.yaw - previous_solution.yaw) /
         (2 * config_.dt_sec);
@@ -242,7 +289,6 @@ auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
     previous_solution = current_solution;
     current_solution = next_solution;
   }
-
   if (reference.fallback_sample_count > 0) {
     LOG_TRACE_L1(logger_, "[Planner]: fallback solve used {}/{} samples.",
                  reference.fallback_sample_count, trajectory_horizon_ + 2);

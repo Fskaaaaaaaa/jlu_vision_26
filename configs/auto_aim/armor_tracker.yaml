@@ -2,7 +2,7 @@ log_level: Debug
 plot_info: true
 always_on_task: true
 show_image: true
-erase_no_key_frame: true
+erase_if_not_key_frame: true
 tf_query_tolerance_ms: 200.0
 camera_name: camera0
 camera_frame_id: camera
@@ -61,6 +61,9 @@ planner_conf:
   iterative_yaw0: true
   rk45_traj: false
   iterative_traj: false
+  enable_aim_center: false
+  aim_center_vyaw_thres_low: 6.0
+  aim_center_vyaw_thres_high: 8.0
   shoot_offset: 0
   yaw_offset: 0.0
   pitch_offset: 0.0

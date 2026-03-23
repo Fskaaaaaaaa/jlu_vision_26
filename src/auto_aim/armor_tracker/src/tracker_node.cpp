@@ -84,9 +84,6 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       if (!on_task || !targets_.contains(aiming_target_.load())) { // 无锁定状态
         aimcommand_pub_.loan().and_then(
             [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
-              sample.getUserHeader().frame_id = {
-                  iox::TruncateToCapacity, configs_.odom_frame_id.c_str()};
-              sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
               sample->control = false;
               sample.publish();
             });
@@ -99,9 +96,6 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       if (track_state.state == TrackState::State::LOST) {
         aimcommand_pub_.loan().and_then(
             [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
-              sample.getUserHeader().frame_id = {
-                  iox::TruncateToCapacity, configs_.odom_frame_id.c_str()};
-              sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
               sample->control = false;
               sample.publish();
             });
@@ -109,10 +103,9 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
         continue; // 锁定的敌人已经丢失
       }
-      auto [roll, pitch, yaw, pitch_vel, yaw_vel, bullet_speed] =
-          gimbal_listener_.getLatestInfo();
+      auto gimbal_info = gimbal_listener_.getLatestInfo();
       auto cmd = planner_.plan(target_state, track_state.stamp_last_update,
-                               bullet_speed);
+                               gimbal_info);
       if (!cmd.control) {
         LOG_WARNING(logger_, "Aimcommand not control!");
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
@@ -139,10 +132,11 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                 sample.publish();
               })
           .or_else([this](auto) {
-            LOG_WARNING(logger_, "fail to publish aimcommand!");
+            LOG_WARNING(logger_, "Fail to publish AimCommand!");
           });
       // plot瞄准信息
       if (configs_.plot_info) {
+        auto [roll, pitch, yaw, pitch_vel, yaw_vel, bullet_speed] = gimbal_info;
         plotter_.plot("fire", cmd.fire);
         plotter_.plot("target_yaw", cmd.target_yaw);
         plotter_.plot("target_pitch", cmd.target_pitch);
@@ -238,7 +232,7 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   // 将坐标变换到odom系并抹除变换失败的装甲板
   std::erase_if(armors, [&](types::Armor &armor) {
     // 过滤掉非同一帧的装甲板
-    if (self->configs_.erase_no_key_frame && !armor.key_frame)
+    if (self->configs_.erase_if_not_key_frame && !armor.key_frame)
       return true;
     if (armor.stamp != image_stamp)
       return true;

@@ -2,6 +2,7 @@
 
 #include "configs.hpp"
 #include "msgs/AimCommand.hpp"
+#include "msgs/GimbalInfo.hpp"
 #include "trajectory.hpp"
 #include "types.hpp"
 
@@ -21,7 +22,7 @@ public:
   msgs::AimCommand
   plan(const TargetState &target_state,
        const std::chrono::system_clock::time_point &target_stamp,
-       double bullet_speed_mps);
+       const msgs::GimbalInfo &gimbal_info);
   std::pair<ArmorPositionYaw, ArmorIndex>
   selectAimingArmor(const TargetState &target_state) const;
 
@@ -29,8 +30,12 @@ public:
   std::atomic<double> aim0_predict_time_;
 
 private:
+  bool shouldAimCenter(const TargetState &target_state);
   msgs::AimCommand plan(const TargetState &target_state,
                         double dt_image_to_now_sec, double bullet_speed_mps);
+  msgs::AimCommand aimCenter(const TargetState &target_state,
+                             double dt_image_to_now_sec,
+                             double bullet_speed_mps);
   std::optional<TargetAimSolution> solveAimWithMethodFallback(
       const TargetState &target_state, double dt_image_to_now_sec,
       double bullet_speed_mps, bool use_rk45, bool iterative_fly_time,

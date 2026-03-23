@@ -39,8 +39,10 @@ bool isArmorFrontFacing(const auto_aim::TargetState &target_state,
       odom_x_m - armor.position.x(),
       odom_y_m - armor.position.y(),
   };
-  if (center_to_armor_vector_m.norm() <= std::numeric_limits<double>::epsilon() ||
-      armor_to_shooter_vector_m.norm() <= std::numeric_limits<double>::epsilon()) {
+  if (center_to_armor_vector_m.norm() <=
+          std::numeric_limits<double>::epsilon() ||
+      armor_to_shooter_vector_m.norm() <=
+          std::numeric_limits<double>::epsilon()) {
     return false;
   }
   const double front_facing_score = center_to_armor_vector_m.normalized().dot(
@@ -50,8 +52,8 @@ bool isArmorFrontFacing(const auto_aim::TargetState &target_state,
 
 std::vector<ArmorAimCandidate>
 collectArmorAimCandidates(const auto_aim::TargetState &target_state,
-                         double odom_x_m, double odom_y_m,
-                         double front_facing_min_dot_product) {
+                          double odom_x_m, double odom_y_m,
+                          double front_facing_min_dot_product) {
   const auto armors = target_state.armors();
   std::vector<ArmorAimCandidate> candidates;
   candidates.reserve(armors.size());
@@ -60,8 +62,8 @@ collectArmorAimCandidates(const auto_aim::TargetState &target_state,
     candidates.emplace_back(ArmorAimCandidate{
         .armor = armor,
         .index = static_cast<auto_aim::ArmorIndex>(index),
-        .distance_to_gimbal_m =
-            std::hypot(armor.position.x() - odom_x_m, armor.position.y() - odom_y_m),
+        .distance_to_gimbal_m = std::hypot(armor.position.x() - odom_x_m,
+                                           armor.position.y() - odom_y_m),
         .is_front_facing =
             isArmorFrontFacing(target_state, armor, odom_x_m, odom_y_m,
                                front_facing_min_dot_product),
@@ -77,10 +79,10 @@ void sortCandidatesByDistance(std::vector<ArmorAimCandidate> &candidates) {
             });
 }
 
-void prioritizePreferredCandidate(std::vector<ArmorAimCandidate> &candidates,
-                                  std::optional<auto_aim::ArmorIndex>
-                                      preferred_armor_index,
-                                  double switch_distance_hysteresis_m) {
+void prioritizePreferredCandidate(
+    std::vector<ArmorAimCandidate> &candidates,
+    std::optional<auto_aim::ArmorIndex> preferred_armor_index,
+    double switch_distance_hysteresis_m) {
   if (candidates.empty() || !preferred_armor_index.has_value()) {
     return;
   }
@@ -146,7 +148,7 @@ auto_aim::Trajectory::selectArmorForAiming(
     }
     sortCandidatesByDistance(candidate_group);
     prioritizePreferredCandidate(candidate_group, preferred_armor_index,
-                                config_.armor_switch_distance_hysteresis_m);
+                                 config_.armor_switch_distance_hysteresis_m);
     return candidate_group.front();
   };
 
@@ -157,7 +159,8 @@ auto_aim::Trajectory::selectArmorForAiming(
                [](const ArmorAimCandidate &candidate) {
                  return candidate.is_front_facing;
                });
-  if (auto front_facing_best = pickBestCandidate(std::move(front_facing_candidates));
+  if (auto front_facing_best =
+          pickBestCandidate(std::move(front_facing_candidates));
       front_facing_best.has_value()) {
     return {front_facing_best->armor, front_facing_best->index};
   }
@@ -174,38 +177,33 @@ double auto_aim::Trajectory::evaluateImpactPositionError(
       use_rk45
           ? tools::ballistic::rk45::getState3DByT(
                 solver_.getBarrelStateFromPitch(pitch_rad, bullet_speed_mps),
-                yaw_rad, fly_time_sec,
-                config_.ballistic_conf.time_step, config_.ballistic_conf.k,
-                config_.ballistic_conf.g)
+                yaw_rad, fly_time_sec, config_.ballistic_conf.time_step,
+                config_.ballistic_conf.k, config_.ballistic_conf.g)
           : tools::ballistic::parabola::getState3DByT(
                 {0, 0, pitch_rad, bullet_speed_mps}, yaw_rad, fly_time_sec,
                 config_.ballistic_conf.g);
   return (bullet_position.position - armor_position_m).norm();
 }
 
-std::optional<auto_aim::TargetAimSolution>
-auto_aim::Trajectory::resolveTarget(const TargetState &state,
-                                    double bullet_speed_mps,
-                                    double delay_time_image_to_now_sec,
-                                    bool use_rk45, bool iterative_fly_time,
-                                    std::optional<ArmorIndex>
-                                        preferred_armor_index) {
-  auto solveFirstSolvableArmorAim =
+std::optional<auto_aim::TargetAimSolution> auto_aim::Trajectory::resolveTarget(
+    const TargetState &state, double bullet_speed_mps,
+    double delay_time_image_to_now_sec, bool use_rk45, bool iterative_fly_time,
+    std::optional<ArmorIndex> preferred_armor_index) {
+  auto solve_first_solvable_armor_aim =
       [&](const TargetState &predicted_state,
           std::optional<ArmorIndex> preferred_index)
       -> std::optional<SolvedArmorAim> {
     auto candidates = collectArmorAimCandidates(
-        predicted_state, 0.0, 0.0,
-        config_.armor_front_facing_min_dot_product);
-
-    auto trySolveCandidates = [&](std::vector<ArmorAimCandidate> candidate_group)
+        predicted_state, 0.0, 0.0, config_.armor_front_facing_min_dot_product);
+    auto try_solve_candidates =
+        [&](std::vector<ArmorAimCandidate> candidate_group)
         -> std::optional<SolvedArmorAim> {
       if (candidate_group.empty()) {
         return std::nullopt;
       }
       sortCandidatesByDistance(candidate_group);
       prioritizePreferredCandidate(candidate_group, preferred_index,
-                                  config_.armor_switch_distance_hysteresis_m);
+                                   config_.armor_switch_distance_hysteresis_m);
       for (const auto &candidate : candidate_group) {
         auto solved = solveYawPitchForArmorPosition(
             bullet_speed_mps, candidate.armor.position, use_rk45, 0.0, 0.0);
@@ -219,7 +217,6 @@ auto_aim::Trajectory::resolveTarget(const TargetState &state,
       }
       return std::nullopt;
     };
-
     std::vector<ArmorAimCandidate> front_facing_candidates;
     front_facing_candidates.reserve(candidates.size());
     std::copy_if(candidates.begin(), candidates.end(),
@@ -228,19 +225,18 @@ auto_aim::Trajectory::resolveTarget(const TargetState &state,
                    return candidate.is_front_facing;
                  });
     if (auto solved_front_facing =
-            trySolveCandidates(std::move(front_facing_candidates));
+            try_solve_candidates(std::move(front_facing_candidates));
         solved_front_facing.has_value()) {
       return solved_front_facing;
     }
-    return trySolveCandidates(std::move(candidates));
+    return try_solve_candidates(std::move(candidates));
   };
 
   auto predicted_target_state = state.predict(delay_time_image_to_now_sec);
-  auto solved_aim =
-      solveFirstSolvableArmorAim(predicted_target_state, preferred_armor_index);
-  if (!solved_aim.has_value()) {
+  auto solved_aim = solve_first_solvable_armor_aim(predicted_target_state,
+                                                   preferred_armor_index);
+  if (!solved_aim.has_value())
     return std::nullopt;
-  }
   if (preferred_armor_index.has_value() &&
       preferred_armor_index.value() != solved_aim->candidate.index) {
     LOG_TRACE_L2(logger_, "[Trajectory]: aim armor switch {} -> {}.",
@@ -270,8 +266,8 @@ auto_aim::Trajectory::resolveTarget(const TargetState &state,
     const auto current_solution = solved_aim->yaw_pitch_fly_time;
     predicted_target_state =
         state.predict(delay_time_image_to_now_sec + current_solution.fly_time);
-    auto next_solved_aim =
-        solveFirstSolvableArmorAim(predicted_target_state, solved_aim->candidate.index);
+    auto next_solved_aim = solve_first_solvable_armor_aim(
+        predicted_target_state, solved_aim->candidate.index);
     if (!next_solved_aim.has_value()) {
       LOG_WARNING(logger_,
                   "[Trajectory]: Fail to solve YawPitchFlyTime in {} "
