@@ -187,8 +187,7 @@ msgs::AimCommand auto_aim::Planner::aimCenter(const TargetState &target_state,
   cmd.pitch = aim.pitch + config_.pitch_offset;
   cmd.pitch_vel = 0;
   cmd.pitch_acc = 0;
-  cmd.fire = true;
-  // XXX:resolveTarget方法在打轮子时是会返回nullopt的，进到这里的都是能开火的，但最好还是检查一下
+  cmd.fire = (std::abs(cmd.yaw - cmd.target_yaw) < config_.fire_thresh);
   cmd.bullet_id = bullet_id_++;
   return cmd;
 }
