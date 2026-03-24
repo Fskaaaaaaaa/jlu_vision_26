@@ -73,11 +73,17 @@ msgs::AimCommand auto_aim::Planner::plan(
                 std::chrono::system_clock::now() - target_stamp +
                 std::chrono::milliseconds{config_.predict_offset_ms})
                 .count();
-  return shouldAimCenter(target_state)
-             ? aimCenter(target_state, dt_image_to_now_sec,
-                         gimbal_info.bullet_speed)
-             : plan(target_state, dt_image_to_now_sec,
-                    gimbal_info.bullet_speed);
+  auto cmd =
+      shouldAimCenter(target_state)
+          ? aimCenter(target_state, dt_image_to_now_sec,
+                      gimbal_info.bullet_speed)
+          : aimMPC(target_state, dt_image_to_now_sec, gimbal_info.bullet_speed);
+  if (config_.consider_gimbal_response && cmd.control) {
+    cmd.fire = (std::hypot(cmd.target_yaw - gimbal_info.yaw,
+                           cmd.target_pitch - gimbal_info.pitch) <
+                config_.fire_thresh);
+  }
+  return cmd;
 }
 
 bool auto_aim::Planner::shouldAimCenter(const TargetState &target_state) {
@@ -99,9 +105,9 @@ auto_aim::Planner::selectAimingArmor(const TargetState &target_state) const {
   return trajectory_solver_.selectArmorForAiming(target_state);
 }
 
-msgs::AimCommand auto_aim::Planner::plan(const TargetState &target_state,
-                                         double dt_image_to_now_sec,
-                                         double bullet_speed_mps) {
+msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
+                                           double dt_image_to_now_sec,
+                                           double bullet_speed_mps) {
   if (bullet_speed_mps < config_.min_bullet_speed ||
       bullet_speed_mps > config_.max_bullet_speed) {
     LOG_DEBUG(logger_, "[Planner]: Abnormal bullet speed {}, use default {}.",

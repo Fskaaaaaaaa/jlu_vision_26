@@ -38,6 +38,7 @@ void hardware::GimbalInfoListener::onSampleReceivedCallback(
             .pitch_vel = sample->pitch_vel,
             .yaw_vel = sample->yaw_vel,
             .bullet_speed = sample->bullet_speed,
+            .bullet_id = sample->bullet_id,
         });
       })) {
   }

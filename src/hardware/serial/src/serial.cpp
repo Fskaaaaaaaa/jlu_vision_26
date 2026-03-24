@@ -1,11 +1,9 @@
 #include "serial.hpp"
-#include "Eigen/src/Geometry/Transform.h"
 #include "basic/time_tools.hpp"
 #include "configs.hpp"
 #include "crc.hpp"
 #include "math/angle_tools.hpp"
 #include "msgs/AimCommand.hpp"
-#include "msgs/BulletId.hpp"
 #include "msgs/EnemyColor.hpp"
 #include "msgs/GimbalInfo.hpp"
 #include "msgs/Header.hpp"
@@ -41,9 +39,6 @@ hardware::Serial::Serial(quill::Logger *logger, const SerialConfigs &configs)
       enemy_color_pub_(types::IceoryxServiceDescription{
           configs_.iceoryx_conf.enemy_color_topic}
                            .description),
-      bullet_id_pub_(types::IceoryxServiceDescription{
-          configs_.iceoryx_conf.bullet_id_topic}
-                         .description),
       aim_cmd_sub_(types::IceoryxServiceDescription{
           configs_.iceoryx_conf.aim_command_topic}
                        .description),
@@ -175,17 +170,9 @@ void hardware::Serial::receiveThread() {
             sample->yaw = packet.yaw;
             sample->yaw_vel = packet.yaw_vel;
             sample->roll = packet.roll;
-            sample.publish();
-            LOG_DEBUG(logger_, "publish gimbal_info.");
-          });
-      this->bullet_id_pub_.loan().and_then(
-          [&](iox::popo::Sample<msgs::BulletId, msgs::Header> &sample) {
-            sample.getUserHeader().stamp_ns = now;
-            sample.getUserHeader().frame_id = frame_id;
             sample->bullet_id = packet.bullet_id;
             sample.publish();
-            LOG_DEBUG(logger_, "publish bullet_id: {}",
-                      static_cast<uint32_t>(packet.bullet_id));
+            LOG_DEBUG(logger_, "publish gimbal_info.");
           });
       Eigen::Isometry3d T{Eigen::Isometry3d::Identity()};
       T.rotate(tools::rpyToQuaterniond(

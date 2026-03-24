@@ -2,7 +2,6 @@
 #pragma once
 #include "configs.hpp"
 #include "msgs/AimCommand.hpp"
-#include "msgs/BulletId.hpp"
 #include "msgs/EnemyColor.hpp"
 #include "msgs/GimbalInfo.hpp"
 #include "msgs/Header.hpp"
@@ -38,7 +37,6 @@ private:
   iox::popo::Publisher<msgs::TaskMode, msgs::Header> task_mode_pub_;
   iox::popo::Publisher<msgs::GimbalInfo, msgs::Header> gimbal_info_pub_;
   iox::popo::Publisher<msgs::EnemyColor, msgs::Header> enemy_color_pub_;
-  iox::popo::Publisher<msgs::BulletId, msgs::Header> bullet_id_pub_;
   iox::popo::Subscriber<msgs::AimCommand, msgs::Header> aim_cmd_sub_;
   iox::popo::Listener aim_cmd_listener_;
   tf::DynamicTransformPublisher tf_pub_;

@@ -9,5 +9,6 @@ struct GimbalInfo {
   float pitch_vel;
   float yaw_vel;
   float bullet_speed;
+  int bullet_id;
 };
 } // namespace msgs

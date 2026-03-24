@@ -31,8 +31,8 @@ public:
 
 private:
   bool shouldAimCenter(const TargetState &target_state);
-  msgs::AimCommand plan(const TargetState &target_state,
-                        double dt_image_to_now_sec, double bullet_speed_mps);
+  msgs::AimCommand aimMPC(const TargetState &target_state,
+                          double dt_image_to_now_sec, double bullet_speed_mps);
   msgs::AimCommand aimCenter(const TargetState &target_state,
                              double dt_image_to_now_sec,
                              double bullet_speed_mps);

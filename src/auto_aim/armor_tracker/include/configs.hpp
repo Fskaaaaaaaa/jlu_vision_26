@@ -65,7 +65,8 @@ struct PlannerConfig {
   bool rk45_traj;      // 是否使用解析解
   bool iterative_traj; // 是否考虑子弹飞行时敌人的运动
   bool no_predict;
-  bool enable_aim_center; // 理论上不需要，电控没调好yaw时启用
+  bool enable_aim_center;        // 理论上不需要，电控没调好yaw时启用
+  bool consider_gimbal_response; // 用响应曲线(而不是规划曲线)做火控
   double aim_center_vyaw_thres_high;
   double aim_center_vyaw_thres_low;
   int shoot_offset; // 预判几个MPC帧，在iterative_fly_time时应当为0

@@ -15,7 +15,7 @@ struct ReceivePacket {
   float pitch_vel;
   float yaw;
   float yaw_vel;
-  uint32_t bullet_id; // 打出子弹时刻返回的子弹ID（目前没用上）
+  uint32_t bullet_id; // 打出子弹时刻返回的子弹ID
   uint16_t checksum = 0;
 } __attribute__((packed));
 

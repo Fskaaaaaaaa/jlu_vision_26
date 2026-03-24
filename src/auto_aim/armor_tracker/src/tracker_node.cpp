@@ -136,7 +136,11 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
           });
       // plot瞄准信息
       if (configs_.plot_info) {
-        auto [roll, pitch, yaw, pitch_vel, yaw_vel, bullet_speed] = gimbal_info;
+        auto [roll, pitch, yaw, pitch_vel, yaw_vel, bullet_speed,
+              receive_bullet_id] = gimbal_info;
+        static auto last_receive_bullet_id{receive_bullet_id};
+        plotter_.plot("fired", receive_bullet_id != last_receive_bullet_id);
+        last_receive_bullet_id = receive_bullet_id;
         plotter_.plot("fire", cmd.fire);
         plotter_.plot("target_yaw", cmd.target_yaw);
         plotter_.plot("target_pitch", cmd.target_pitch);
