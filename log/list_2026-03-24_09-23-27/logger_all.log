@@ -1,0 +1,1061 @@
+[0.055s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'list', '-p', '--base-paths', '/home/yuelin/Documents/GitHub/hyaku_shiki']
+[0.055s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='list', build_base='build', ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['/home/yuelin/Documents/GitHub/hyaku_shiki'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], topological_order=False, names_only=False, paths_only=True, topological_graph=False, topological_graph_dot=False, topological_graph_density=False, topological_graph_legend=False, topological_graph_dot_cluster=False, topological_graph_dot_include_skipped=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0x76a44880c200>, verb_extension=<colcon_package_information.verb.list.ListVerb object at 0x76a44880c140>, main=<bound method ListVerb.main of <colcon_package_information.verb.list.ListVerb object at 0x76a44880c140>>, mixin_verb=('list',))
+[0.075s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.075s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.075s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.075s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.075s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.075s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/yuelin/Documents/GitHub/hyaku_shiki'
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extensions ['ignore', 'ignore_ament_install']
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extension 'ignore'
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extension 'ignore_ament_install'
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extensions ['colcon_pkg']
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extension 'colcon_pkg'
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extensions ['colcon_meta']
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extension 'colcon_meta'
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extensions ['ros']
+[0.075s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extension 'ros'
+[0.088s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extensions ['cmake', 'python']
+[0.088s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extension 'cmake'
+[0.088s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extension 'python'
+[0.088s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extensions ['python_setup_py']
+[0.088s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki) by extension 'python_setup_py'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extensions ['ignore', 'ignore_ament_install']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extension 'ignore'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extension 'ignore_ament_install'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extensions ['colcon_pkg']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extension 'colcon_pkg'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extensions ['colcon_meta']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extension 'colcon_meta'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extensions ['ros']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extension 'ros'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extensions ['cmake', 'python']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extension 'cmake'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extension 'python'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extensions ['python_setup_py']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/assets) by extension 'python_setup_py'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extensions ['ignore', 'ignore_ament_install']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extension 'ignore'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extension 'ignore_ament_install'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extensions ['colcon_pkg']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extension 'colcon_pkg'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extensions ['colcon_meta']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extension 'colcon_meta'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extensions ['ros']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extension 'ros'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extensions ['cmake', 'python']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extension 'cmake'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extension 'python'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extensions ['python_setup_py']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build) by extension 'python_setup_py'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extensions ['ignore', 'ignore_ament_install']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extension 'ignore'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extension 'ignore_ament_install'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extensions ['colcon_pkg']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extension 'colcon_pkg'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extensions ['colcon_meta']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extension 'colcon_meta'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extensions ['ros']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extension 'ros'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extensions ['cmake', 'python']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extension 'cmake'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extension 'python'
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extensions ['python_setup_py']
+[0.089s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux) by extension 'python_setup_py'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extensions ['ignore', 'ignore_ament_install']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extension 'ignore'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extension 'ignore_ament_install'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extensions ['colcon_pkg']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extension 'colcon_pkg'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extensions ['colcon_meta']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extension 'colcon_meta'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extensions ['ros']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extension 'ros'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extensions ['cmake', 'python']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extension 'cmake'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extension 'python'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extensions ['python_setup_py']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64) by extension 'python_setup_py'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extensions ['ignore', 'ignore_ament_install']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extension 'ignore'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extension 'ignore_ament_install'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extensions ['colcon_pkg']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extension 'colcon_pkg'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extensions ['colcon_meta']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extension 'colcon_meta'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extensions ['ros']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extension 'ros'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extensions ['cmake', 'python']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extension 'cmake'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extension 'python'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extensions ['python_setup_py']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/build/linux/x86_64/release) by extension 'python_setup_py'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extensions ['ignore', 'ignore_ament_install']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extension 'ignore'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extension 'ignore_ament_install'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extensions ['colcon_pkg']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extension 'colcon_pkg'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extensions ['colcon_meta']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extension 'colcon_meta'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extensions ['ros']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extension 'ros'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extensions ['cmake', 'python']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extension 'cmake'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extension 'python'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extensions ['python_setup_py']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs) by extension 'python_setup_py'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extensions ['ignore', 'ignore_ament_install']
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extension 'ignore'
+[0.090s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extension 'ignore_ament_install'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extensions ['colcon_pkg']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extension 'colcon_pkg'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extensions ['colcon_meta']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extension 'colcon_meta'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extensions ['ros']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extension 'ros'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extensions ['cmake', 'python']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extension 'cmake'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extension 'python'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extensions ['python_setup_py']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/auto_aim) by extension 'python_setup_py'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extensions ['ignore', 'ignore_ament_install']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extension 'ignore'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extension 'ignore_ament_install'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extensions ['colcon_pkg']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extension 'colcon_pkg'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extensions ['colcon_meta']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extension 'colcon_meta'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extensions ['ros']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extension 'ros'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extensions ['cmake', 'python']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extension 'cmake'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extension 'python'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extensions ['python_setup_py']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/hardware) by extension 'python_setup_py'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extensions ['ignore', 'ignore_ament_install']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extension 'ignore'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extension 'ignore_ament_install'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extensions ['colcon_pkg']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extension 'colcon_pkg'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extensions ['colcon_meta']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extension 'colcon_meta'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extensions ['ros']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extension 'ros'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extensions ['cmake', 'python']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extension 'cmake'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extension 'python'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extensions ['python_setup_py']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/odom_coord) by extension 'python_setup_py'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extensions ['ignore', 'ignore_ament_install']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extension 'ignore'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extension 'ignore_ament_install'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extensions ['colcon_pkg']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extension 'colcon_pkg'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extensions ['colcon_meta']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extension 'colcon_meta'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extensions ['ros']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extension 'ros'
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extensions ['cmake', 'python']
+[0.091s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extension 'cmake'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extension 'python'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extensions ['python_setup_py']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/startup) by extension 'python_setup_py'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extensions ['ignore', 'ignore_ament_install']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extension 'ignore'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extension 'ignore_ament_install'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extensions ['colcon_pkg']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extension 'colcon_pkg'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extensions ['colcon_meta']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extension 'colcon_meta'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extensions ['ros']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extension 'ros'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extensions ['cmake', 'python']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extension 'cmake'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extension 'python'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extensions ['python_setup_py']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/configs/status_feedback) by extension 'python_setup_py'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extensions ['ignore', 'ignore_ament_install']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extension 'ignore'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extension 'ignore_ament_install'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extensions ['colcon_pkg']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extension 'colcon_pkg'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extensions ['colcon_meta']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extension 'colcon_meta'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extensions ['ros']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extension 'ros'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extensions ['cmake', 'python']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extension 'cmake'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extension 'python'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extensions ['python_setup_py']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/doc) by extension 'python_setup_py'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/log) by extensions ['ignore', 'ignore_ament_install']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/log) by extension 'ignore'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/log) ignored
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extensions ['ignore', 'ignore_ament_install']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extension 'ignore'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extension 'ignore_ament_install'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extensions ['colcon_pkg']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extension 'colcon_pkg'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extensions ['colcon_meta']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extension 'colcon_meta'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extensions ['ros']
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extension 'ros'
+[0.092s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extensions ['cmake', 'python']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extension 'cmake'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extension 'python'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extensions ['python_setup_py']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src) by extension 'python_setup_py'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extensions ['ignore', 'ignore_ament_install']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extension 'ignore'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extension 'ignore_ament_install'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extensions ['colcon_pkg']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extension 'colcon_pkg'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extensions ['colcon_meta']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extension 'colcon_meta'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extensions ['ros']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extension 'ros'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extensions ['cmake', 'python']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extension 'cmake'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extension 'python'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extensions ['python_setup_py']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim) by extension 'python_setup_py'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extensions ['ignore', 'ignore_ament_install']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extension 'ignore'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extension 'ignore_ament_install'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extensions ['colcon_pkg']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extension 'colcon_pkg'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extensions ['colcon_meta']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extension 'colcon_meta'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extensions ['ros']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extension 'ros'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extensions ['cmake', 'python']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extension 'cmake'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extension 'python'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extensions ['python_setup_py']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector) by extension 'python_setup_py'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extensions ['ignore', 'ignore_ament_install']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extension 'ignore'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extension 'ignore_ament_install'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extensions ['colcon_pkg']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extension 'colcon_pkg'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extensions ['colcon_meta']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extension 'colcon_meta'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extensions ['ros']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extension 'ros'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extensions ['cmake', 'python']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extension 'cmake'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extension 'python'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extensions ['python_setup_py']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/include) by extension 'python_setup_py'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extensions ['ignore', 'ignore_ament_install']
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extension 'ignore'
+[0.093s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extension 'ignore_ament_install'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extensions ['colcon_pkg']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extension 'colcon_pkg'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extensions ['colcon_meta']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extension 'colcon_meta'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extensions ['ros']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extension 'ros'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extensions ['cmake', 'python']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extension 'cmake'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extension 'python'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extensions ['python_setup_py']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_detector/src) by extension 'python_setup_py'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extensions ['ignore', 'ignore_ament_install']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extension 'ignore'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extension 'ignore_ament_install'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extensions ['colcon_pkg']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extension 'colcon_pkg'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extensions ['colcon_meta']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extension 'colcon_meta'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extensions ['ros']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extension 'ros'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extensions ['cmake', 'python']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extension 'cmake'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extension 'python'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extensions ['python_setup_py']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker) by extension 'python_setup_py'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extensions ['ignore', 'ignore_ament_install']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extension 'ignore'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extension 'ignore_ament_install'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extensions ['colcon_pkg']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extension 'colcon_pkg'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extensions ['colcon_meta']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extension 'colcon_meta'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extensions ['ros']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extension 'ros'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extensions ['cmake', 'python']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extension 'cmake'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extension 'python'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extensions ['python_setup_py']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/include) by extension 'python_setup_py'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extensions ['ignore', 'ignore_ament_install']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extension 'ignore'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extension 'ignore_ament_install'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extensions ['colcon_pkg']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extension 'colcon_pkg'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extensions ['colcon_meta']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extension 'colcon_meta'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extensions ['ros']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extension 'ros'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extensions ['cmake', 'python']
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extension 'cmake'
+[0.094s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extension 'python'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extensions ['python_setup_py']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/armor_tracker/src) by extension 'python_setup_py'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extensions ['ignore', 'ignore_ament_install']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extension 'ignore'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extension 'ignore_ament_install'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extensions ['colcon_pkg']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extension 'colcon_pkg'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extensions ['colcon_meta']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extension 'colcon_meta'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extensions ['ros']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extension 'ros'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extensions ['cmake', 'python']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extension 'cmake'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extension 'python'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extensions ['python_setup_py']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher) by extension 'python_setup_py'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extensions ['ignore', 'ignore_ament_install']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extension 'ignore'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extension 'ignore_ament_install'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extensions ['colcon_pkg']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extension 'colcon_pkg'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extensions ['colcon_meta']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extension 'colcon_meta'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extensions ['ros']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extension 'ros'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extensions ['cmake', 'python']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extension 'cmake'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extension 'python'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extensions ['python_setup_py']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/include) by extension 'python_setup_py'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extensions ['ignore', 'ignore_ament_install']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extension 'ignore'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extension 'ignore_ament_install'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extensions ['colcon_pkg']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extension 'colcon_pkg'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extensions ['colcon_meta']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extension 'colcon_meta'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extensions ['ros']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extension 'ros'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extensions ['cmake', 'python']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extension 'cmake'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extension 'python'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extensions ['python_setup_py']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_aim/fake_armors_publisher/src) by extension 'python_setup_py'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extensions ['ignore', 'ignore_ament_install']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extension 'ignore'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extension 'ignore_ament_install'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extensions ['colcon_pkg']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extension 'colcon_pkg'
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extensions ['colcon_meta']
+[0.095s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extension 'colcon_meta'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extensions ['ros']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extension 'ros'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extensions ['cmake', 'python']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extension 'cmake'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extension 'python'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extensions ['python_setup_py']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_ballistic) by extension 'python_setup_py'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extensions ['ignore', 'ignore_ament_install']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extension 'ignore'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extension 'ignore_ament_install'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extensions ['colcon_pkg']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extension 'colcon_pkg'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extensions ['colcon_meta']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extension 'colcon_meta'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extensions ['ros']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extension 'ros'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extensions ['cmake', 'python']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extension 'cmake'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extension 'python'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extensions ['python_setup_py']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/auto_buff) by extension 'python_setup_py'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extensions ['ignore', 'ignore_ament_install']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extension 'ignore'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extension 'ignore_ament_install'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extensions ['colcon_pkg']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extension 'colcon_pkg'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extensions ['colcon_meta']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extension 'colcon_meta'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extensions ['ros']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extension 'ros'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extensions ['cmake', 'python']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extension 'cmake'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extension 'python'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extensions ['python_setup_py']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs) by extension 'python_setup_py'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extensions ['ignore', 'ignore_ament_install']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extension 'ignore'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extension 'ignore_ament_install'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extensions ['colcon_pkg']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extension 'colcon_pkg'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extensions ['colcon_meta']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extension 'colcon_meta'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extensions ['ros']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extension 'ros'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extensions ['cmake', 'python']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extension 'cmake'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extension 'python'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extensions ['python_setup_py']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/confs) by extension 'python_setup_py'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extensions ['ignore', 'ignore_ament_install']
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extension 'ignore'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extension 'ignore_ament_install'
+[0.096s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extensions ['colcon_pkg']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extension 'colcon_pkg'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extensions ['colcon_meta']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extension 'colcon_meta'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extensions ['ros']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extension 'ros'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extensions ['cmake', 'python']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extension 'cmake'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extension 'python'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extensions ['python_setup_py']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/msgs) by extension 'python_setup_py'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extensions ['ignore', 'ignore_ament_install']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extension 'ignore'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extension 'ignore_ament_install'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extensions ['colcon_pkg']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extension 'colcon_pkg'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extensions ['colcon_meta']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extension 'colcon_meta'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extensions ['ros']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extension 'ros'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extensions ['cmake', 'python']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extension 'cmake'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extension 'python'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extensions ['python_setup_py']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/src) by extension 'python_setup_py'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extensions ['ignore', 'ignore_ament_install']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extension 'ignore'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extension 'ignore_ament_install'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extensions ['colcon_pkg']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extension 'colcon_pkg'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extensions ['colcon_meta']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extension 'colcon_meta'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extensions ['ros']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extension 'ros'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extensions ['cmake', 'python']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extension 'cmake'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extension 'python'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extensions ['python_setup_py']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/common_defs/types) by extension 'python_setup_py'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extensions ['ignore', 'ignore_ament_install']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extension 'ignore'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extension 'ignore_ament_install'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extensions ['colcon_pkg']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extension 'colcon_pkg'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extensions ['colcon_meta']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extension 'colcon_meta'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extensions ['ros']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extension 'ros'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extensions ['cmake', 'python']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extension 'cmake'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extension 'python'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extensions ['python_setup_py']
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware) by extension 'python_setup_py'
+[0.097s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extensions ['ignore', 'ignore_ament_install']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extension 'ignore'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extension 'ignore_ament_install'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extensions ['colcon_pkg']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extension 'colcon_pkg'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extensions ['colcon_meta']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extension 'colcon_meta'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extensions ['ros']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extension 'ros'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extensions ['cmake', 'python']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extension 'cmake'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extension 'python'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extensions ['python_setup_py']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera) by extension 'python_setup_py'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extensions ['ignore', 'ignore_ament_install']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extension 'ignore'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extension 'ignore_ament_install'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extensions ['colcon_pkg']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extension 'colcon_pkg'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extensions ['colcon_meta']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extension 'colcon_meta'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extensions ['ros']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extension 'ros'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extensions ['cmake', 'python']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extension 'cmake'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extension 'python'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extensions ['python_setup_py']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/include) by extension 'python_setup_py'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extensions ['ignore', 'ignore_ament_install']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extension 'ignore'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extension 'ignore_ament_install'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extensions ['colcon_pkg']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extension 'colcon_pkg'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extensions ['colcon_meta']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extension 'colcon_meta'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extensions ['ros']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extension 'ros'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extensions ['cmake', 'python']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extension 'cmake'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extension 'python'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extensions ['python_setup_py']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/camera/src) by extension 'python_setup_py'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extensions ['ignore', 'ignore_ament_install']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extension 'ignore'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extension 'ignore_ament_install'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extensions ['colcon_pkg']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extension 'colcon_pkg'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extensions ['colcon_meta']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extension 'colcon_meta'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extensions ['ros']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extension 'ros'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extensions ['cmake', 'python']
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extension 'cmake'
+[0.098s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extension 'python'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extensions ['python_setup_py']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu) by extension 'python_setup_py'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extensions ['ignore', 'ignore_ament_install']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extension 'ignore'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extension 'ignore_ament_install'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extensions ['colcon_pkg']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extension 'colcon_pkg'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extensions ['colcon_meta']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extension 'colcon_meta'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extensions ['ros']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extension 'ros'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extensions ['cmake', 'python']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extension 'cmake'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extension 'python'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extensions ['python_setup_py']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/include) by extension 'python_setup_py'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extensions ['ignore', 'ignore_ament_install']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extension 'ignore'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extension 'ignore_ament_install'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extensions ['colcon_pkg']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extension 'colcon_pkg'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extensions ['colcon_meta']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extension 'colcon_meta'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extensions ['ros']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extension 'ros'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extensions ['cmake', 'python']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extension 'cmake'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extension 'python'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extensions ['python_setup_py']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/imu/src) by extension 'python_setup_py'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extensions ['ignore', 'ignore_ament_install']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extension 'ignore'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extension 'ignore_ament_install'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extensions ['colcon_pkg']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extension 'colcon_pkg'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extensions ['colcon_meta']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extension 'colcon_meta'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extensions ['ros']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extension 'ros'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extensions ['cmake', 'python']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extension 'cmake'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extension 'python'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extensions ['python_setup_py']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial) by extension 'python_setup_py'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extensions ['ignore', 'ignore_ament_install']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extension 'ignore'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extension 'ignore_ament_install'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extensions ['colcon_pkg']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extension 'colcon_pkg'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extensions ['colcon_meta']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extension 'colcon_meta'
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extensions ['ros']
+[0.099s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extension 'ros'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extensions ['cmake', 'python']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extension 'cmake'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extension 'python'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extensions ['python_setup_py']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/include) by extension 'python_setup_py'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extensions ['ignore', 'ignore_ament_install']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extension 'ignore'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extension 'ignore_ament_install'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extensions ['colcon_pkg']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extension 'colcon_pkg'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extensions ['colcon_meta']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extension 'colcon_meta'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extensions ['ros']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extension 'ros'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extensions ['cmake', 'python']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extension 'cmake'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extension 'python'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extensions ['python_setup_py']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/hardware/serial/src) by extension 'python_setup_py'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extensions ['ignore', 'ignore_ament_install']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extension 'ignore'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extension 'ignore_ament_install'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extensions ['colcon_pkg']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extension 'colcon_pkg'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extensions ['colcon_meta']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extension 'colcon_meta'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extensions ['ros']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extension 'ros'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extensions ['cmake', 'python']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extension 'cmake'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extension 'python'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extensions ['python_setup_py']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord) by extension 'python_setup_py'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extensions ['ignore', 'ignore_ament_install']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extension 'ignore'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extension 'ignore_ament_install'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extensions ['colcon_pkg']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extension 'colcon_pkg'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extensions ['colcon_meta']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extension 'colcon_meta'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extensions ['ros']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extension 'ros'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extensions ['cmake', 'python']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extension 'cmake'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extension 'python'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extensions ['python_setup_py']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster) by extension 'python_setup_py'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extensions ['ignore', 'ignore_ament_install']
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extension 'ignore'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extension 'ignore_ament_install'
+[0.100s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extensions ['colcon_pkg']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extension 'colcon_pkg'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extensions ['colcon_meta']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extension 'colcon_meta'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extensions ['ros']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extension 'ros'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extensions ['cmake', 'python']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extension 'cmake'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extension 'python'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extensions ['python_setup_py']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/include) by extension 'python_setup_py'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extensions ['ignore', 'ignore_ament_install']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extension 'ignore'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extension 'ignore_ament_install'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extensions ['colcon_pkg']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extension 'colcon_pkg'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extensions ['colcon_meta']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extension 'colcon_meta'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extensions ['ros']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extension 'ros'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extensions ['cmake', 'python']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extension 'cmake'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extension 'python'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extensions ['python_setup_py']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/static_broadcaster/src) by extension 'python_setup_py'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extensions ['ignore', 'ignore_ament_install']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extension 'ignore'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extension 'ignore_ament_install'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extensions ['colcon_pkg']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extension 'colcon_pkg'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extensions ['colcon_meta']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extension 'colcon_meta'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extensions ['ros']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extension 'ros'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extensions ['cmake', 'python']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extension 'cmake'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extension 'python'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extensions ['python_setup_py']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator) by extension 'python_setup_py'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extensions ['ignore', 'ignore_ament_install']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extension 'ignore'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extension 'ignore_ament_install'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extensions ['colcon_pkg']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extension 'colcon_pkg'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extensions ['colcon_meta']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extension 'colcon_meta'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extensions ['ros']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extension 'ros'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extensions ['cmake', 'python']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extension 'cmake'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extension 'python'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extensions ['python_setup_py']
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/include) by extension 'python_setup_py'
+[0.101s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extensions ['ignore', 'ignore_ament_install']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extension 'ignore'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extension 'ignore_ament_install'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extensions ['colcon_pkg']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extension 'colcon_pkg'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extensions ['colcon_meta']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extension 'colcon_meta'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extensions ['ros']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extension 'ros'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extensions ['cmake', 'python']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extension 'cmake'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extension 'python'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extensions ['python_setup_py']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/odom_coord/transform_aggregator/src) by extension 'python_setup_py'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extensions ['ignore', 'ignore_ament_install']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extension 'ignore'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extension 'ignore_ament_install'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extensions ['colcon_pkg']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extension 'colcon_pkg'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extensions ['colcon_meta']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extension 'colcon_meta'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extensions ['ros']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extension 'ros'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extensions ['cmake', 'python']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extension 'cmake'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extension 'python'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extensions ['python_setup_py']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback) by extension 'python_setup_py'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extensions ['ignore', 'ignore_ament_install']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extension 'ignore'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extension 'ignore_ament_install'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extensions ['colcon_pkg']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extension 'colcon_pkg'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extensions ['colcon_meta']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extension 'colcon_meta'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extensions ['ros']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extension 'ros'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extensions ['cmake', 'python']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extension 'cmake'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extension 'python'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extensions ['python_setup_py']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization) by extension 'python_setup_py'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extensions ['ignore', 'ignore_ament_install']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extension 'ignore'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extension 'ignore_ament_install'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extensions ['colcon_pkg']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extension 'colcon_pkg'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extensions ['colcon_meta']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extension 'colcon_meta'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extensions ['ros']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extension 'ros'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extensions ['cmake', 'python']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extension 'cmake'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extension 'python'
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extensions ['python_setup_py']
+[0.102s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/include) by extension 'python_setup_py'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extensions ['ignore', 'ignore_ament_install']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extension 'ignore'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extension 'ignore_ament_install'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extensions ['colcon_pkg']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extension 'colcon_pkg'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extensions ['colcon_meta']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extension 'colcon_meta'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extensions ['ros']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extension 'ros'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extensions ['cmake', 'python']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extension 'cmake'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extension 'python'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extensions ['python_setup_py']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/status_feedback/visualization/src) by extension 'python_setup_py'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extensions ['ignore', 'ignore_ament_install']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extension 'ignore'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extension 'ignore_ament_install'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extensions ['colcon_pkg']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extension 'colcon_pkg'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extensions ['colcon_meta']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extension 'colcon_meta'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extensions ['ros']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extension 'ros'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extensions ['cmake', 'python']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extension 'cmake'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extension 'python'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extensions ['python_setup_py']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party) by extension 'python_setup_py'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extensions ['ignore', 'ignore_ament_install']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extension 'ignore'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extension 'ignore_ament_install'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extensions ['colcon_pkg']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extension 'colcon_pkg'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extensions ['colcon_meta']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extension 'colcon_meta'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extensions ['ros']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extension 'ros'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extensions ['cmake', 'python']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extension 'cmake'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extension 'python'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extensions ['python_setup_py']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf) by extension 'python_setup_py'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extensions ['ignore', 'ignore_ament_install']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extension 'ignore'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extension 'ignore_ament_install'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extensions ['colcon_pkg']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extension 'colcon_pkg'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extensions ['colcon_meta']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extension 'colcon_meta'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extensions ['ros']
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extension 'ros'
+[0.103s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extensions ['cmake', 'python']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extension 'cmake'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extension 'python'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extensions ['python_setup_py']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/fast_tf/fast_tf) by extension 'python_setup_py'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extensions ['ignore', 'ignore_ament_install']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extension 'ignore'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extension 'ignore_ament_install'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extensions ['colcon_pkg']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extension 'colcon_pkg'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extensions ['colcon_meta']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extension 'colcon_meta'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extensions ['ros']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extension 'ros'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extensions ['cmake', 'python']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extension 'cmake'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extension 'python'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extensions ['python_setup_py']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk) by extension 'python_setup_py'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extensions ['ignore', 'ignore_ament_install']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extension 'ignore'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extension 'ignore_ament_install'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extensions ['colcon_pkg']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extension 'colcon_pkg'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extensions ['colcon_meta']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extension 'colcon_meta'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extensions ['ros']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extension 'ros'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extensions ['cmake', 'python']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extension 'cmake'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extension 'python'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extensions ['python_setup_py']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/include) by extension 'python_setup_py'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extensions ['ignore', 'ignore_ament_install']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extension 'ignore'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extension 'ignore_ament_install'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extensions ['colcon_pkg']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extension 'colcon_pkg'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extensions ['colcon_meta']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extension 'colcon_meta'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extensions ['ros']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extension 'ros'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extensions ['cmake', 'python']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extension 'cmake'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extension 'python'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extensions ['python_setup_py']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib) by extension 'python_setup_py'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extensions ['ignore', 'ignore_ament_install']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extension 'ignore'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extension 'ignore_ament_install'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extensions ['colcon_pkg']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extension 'colcon_pkg'
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extensions ['colcon_meta']
+[0.104s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extension 'colcon_meta'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extensions ['ros']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extension 'ros'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extensions ['cmake', 'python']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extension 'cmake'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extension 'python'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extensions ['python_setup_py']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/galaxy_camera_sdk/lib/amd64) by extension 'python_setup_py'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extensions ['ignore', 'ignore_ament_install']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extension 'ignore'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extension 'ignore_ament_install'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extensions ['colcon_pkg']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extension 'colcon_pkg'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extensions ['colcon_meta']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extension 'colcon_meta'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extensions ['ros']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extension 'ros'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extensions ['cmake', 'python']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extension 'cmake'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extension 'python'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extensions ['python_setup_py']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk) by extension 'python_setup_py'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extensions ['ignore', 'ignore_ament_install']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extension 'ignore'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extension 'ignore_ament_install'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extensions ['colcon_pkg']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extension 'colcon_pkg'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extensions ['colcon_meta']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extension 'colcon_meta'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extensions ['ros']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extension 'ros'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extensions ['cmake', 'python']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extension 'cmake'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extension 'python'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extensions ['python_setup_py']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/include) by extension 'python_setup_py'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extensions ['ignore', 'ignore_ament_install']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extension 'ignore'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extension 'ignore_ament_install'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extensions ['colcon_pkg']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extension 'colcon_pkg'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extensions ['colcon_meta']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extension 'colcon_meta'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extensions ['ros']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extension 'ros'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extensions ['cmake', 'python']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extension 'cmake'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extension 'python'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extensions ['python_setup_py']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib) by extension 'python_setup_py'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extensions ['ignore', 'ignore_ament_install']
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extension 'ignore'
+[0.105s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extension 'ignore_ament_install'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extensions ['colcon_pkg']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extension 'colcon_pkg'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extensions ['colcon_meta']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extension 'colcon_meta'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extensions ['ros']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extension 'ros'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extensions ['cmake', 'python']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extension 'cmake'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extension 'python'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extensions ['python_setup_py']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/amd64) by extension 'python_setup_py'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extensions ['ignore', 'ignore_ament_install']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extension 'ignore'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extension 'ignore_ament_install'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extensions ['colcon_pkg']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extension 'colcon_pkg'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extensions ['colcon_meta']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extension 'colcon_meta'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extensions ['ros']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extension 'ros'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extensions ['cmake', 'python']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extension 'cmake'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extension 'python'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extensions ['python_setup_py']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/hik_camera_sdk/lib/arm64) by extension 'python_setup_py'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extensions ['ignore', 'ignore_ament_install']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extension 'ignore'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extension 'ignore_ament_install'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extensions ['colcon_pkg']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extension 'colcon_pkg'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extensions ['colcon_meta']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extension 'colcon_meta'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extensions ['ros']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extension 'ros'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extensions ['cmake', 'python']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extension 'cmake'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extension 'python'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extensions ['python_setup_py']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d) by extension 'python_setup_py'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extensions ['ignore', 'ignore_ament_install']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extension 'ignore'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extension 'ignore_ament_install'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extensions ['colcon_pkg']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extension 'colcon_pkg'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extensions ['colcon_meta']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extension 'colcon_meta'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extensions ['ros']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extension 'ros'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extensions ['cmake', 'python']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extension 'cmake'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extension 'python'
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extensions ['python_setup_py']
+[0.106s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0) by extension 'python_setup_py'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extensions ['ignore', 'ignore_ament_install']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extension 'ignore'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extension 'ignore_ament_install'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extensions ['colcon_pkg']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extension 'colcon_pkg'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extensions ['colcon_meta']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extension 'colcon_meta'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extensions ['ros']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extension 'ros'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extensions ['cmake', 'python']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extension 'cmake'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extension 'python'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extensions ['python_setup_py']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/lib) by extension 'python_setup_py'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extensions ['ignore', 'ignore_ament_install']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extension 'ignore'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extension 'ignore_ament_install'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extensions ['colcon_pkg']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extension 'colcon_pkg'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extensions ['colcon_meta']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extension 'colcon_meta'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extensions ['ros']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extension 'ros'
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extensions ['cmake', 'python']
+[0.107s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extension 'cmake'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc) by extension 'python'
+[0.108s] DEBUG:colcon.colcon_core.package_identification:Package '/home/yuelin/Documents/GitHub/hyaku_shiki/src/third_party/tinympc' with type 'cmake' and name 'tinympc'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extensions ['ignore', 'ignore_ament_install']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extension 'ignore'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extension 'ignore_ament_install'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extensions ['colcon_pkg']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extension 'colcon_pkg'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extensions ['colcon_meta']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extension 'colcon_meta'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extensions ['ros']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extension 'ros'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extensions ['cmake', 'python']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extension 'cmake'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extension 'python'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extensions ['python_setup_py']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools) by extension 'python_setup_py'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extensions ['ignore', 'ignore_ament_install']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extension 'ignore'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extension 'ignore_ament_install'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extensions ['colcon_pkg']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extension 'colcon_pkg'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extensions ['colcon_meta']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extension 'colcon_meta'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extensions ['ros']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extension 'ros'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extensions ['cmake', 'python']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extension 'cmake'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extension 'python'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extensions ['python_setup_py']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/basic) by extension 'python_setup_py'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extensions ['ignore', 'ignore_ament_install']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extension 'ignore'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extension 'ignore_ament_install'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extensions ['colcon_pkg']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extension 'colcon_pkg'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extensions ['colcon_meta']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extension 'colcon_meta'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extensions ['ros']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extension 'ros'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extensions ['cmake', 'python']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extension 'cmake'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extension 'python'
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extensions ['python_setup_py']
+[0.108s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/hardware) by extension 'python_setup_py'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extensions ['ignore', 'ignore_ament_install']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extension 'ignore'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extension 'ignore_ament_install'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extensions ['colcon_pkg']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extension 'colcon_pkg'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extensions ['colcon_meta']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extension 'colcon_meta'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extensions ['ros']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extension 'ros'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extensions ['cmake', 'python']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extension 'cmake'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extension 'python'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extensions ['python_setup_py']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/math) by extension 'python_setup_py'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extensions ['ignore', 'ignore_ament_install']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extension 'ignore'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extension 'ignore_ament_install'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extensions ['colcon_pkg']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extension 'colcon_pkg'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extensions ['colcon_meta']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extension 'colcon_meta'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extensions ['ros']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extension 'ros'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extensions ['cmake', 'python']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extension 'cmake'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extension 'python'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extensions ['python_setup_py']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/src) by extension 'python_setup_py'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extensions ['ignore', 'ignore_ament_install']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extension 'ignore'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extension 'ignore_ament_install'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extensions ['colcon_pkg']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extension 'colcon_pkg'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extensions ['colcon_meta']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extension 'colcon_meta'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extensions ['ros']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extension 'ros'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extensions ['cmake', 'python']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extension 'cmake'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extension 'python'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extensions ['python_setup_py']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/src/tools/transform) by extension 'python_setup_py'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extensions ['ignore', 'ignore_ament_install']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extension 'ignore'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extension 'ignore_ament_install'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extensions ['colcon_pkg']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extension 'colcon_pkg'
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extensions ['colcon_meta']
+[0.109s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extension 'colcon_meta'
+[0.110s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extensions ['ros']
+[0.110s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extension 'ros'
+[0.110s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extensions ['cmake', 'python']
+[0.110s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extension 'cmake'
+[0.110s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extension 'python'
+[0.110s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extensions ['python_setup_py']
+[0.110s] Level 1:colcon.colcon_core.package_identification:_identify(/home/yuelin/Documents/GitHub/hyaku_shiki/startup) by extension 'python_setup_py'
+[0.110s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults

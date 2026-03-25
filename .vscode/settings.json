@@ -1,0 +1,14 @@
+{
+  "python.autoComplete.extraPaths": [
+    "/home/yuelin/colcon/install/status_interfaces/lib/python3.12/site-packages",
+    "/home/yuelin/colcon/install/python_topic/lib/python3.12/site-packages",
+    "/opt/ros/jazzy/lib/python3.12/site-packages",
+    "/home/yuelin/miniconda3/envs/DL/lib/python3.12/site-packages"
+  ],
+  "python.analysis.extraPaths": [
+    "/home/yuelin/colcon/install/status_interfaces/lib/python3.12/site-packages",
+    "/home/yuelin/colcon/install/python_topic/lib/python3.12/site-packages",
+    "/opt/ros/jazzy/lib/python3.12/site-packages",
+    "/home/yuelin/miniconda3/envs/DL/lib/python3.12/site-packages"
+  ]
+}
