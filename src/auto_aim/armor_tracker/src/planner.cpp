@@ -74,9 +74,14 @@ msgs::AimCommand auto_aim::Planner::plan(
                 std::chrono::system_clock::now() - target_stamp +
                 std::chrono::milliseconds{config_.predict_offset_ms})
                 .count();
+  // XXX
+  // 当切换目标时清空历史轨迹缓存
+  // 不太合理，不适用于团战反复切换目标或一个目标反复丢失重置的情况
+  // 但最多也就影响0.5s，先这样试一下
   if (config_.use_history_traj_cache)
     updateHistoryTrajectory(gimbal_info.yaw, gimbal_info.yaw_vel,
-                            gimbal_info.pitch, gimbal_info.pitch_vel);
+                            gimbal_info.pitch, gimbal_info.pitch_vel,
+                            target_state.type);
   auto cmd =
       shouldAimCenter(target_state)
           ? aimCenter(target_state, dt_image_to_now_sec,
@@ -226,8 +231,13 @@ auto_aim::Planner::solveAim(const TargetState &target_state,
 }
 
 void auto_aim::Planner::updateHistoryTrajectory(double yaw, double yaw_vel,
-                                                double pitch,
-                                                double pitch_vel) {
+                                                double pitch, double pitch_vel,
+                                                types::ArmorType type) {
+  static auto last_type{type};
+  if (last_type != type) {
+    history_traj_cache_.clear();
+    last_type = type;
+  }
   history_traj_cache_.push_back({yaw, yaw_vel, pitch, pitch_vel});
   if (history_traj_cache_.size() > config_.trajectory_half_horizon)
     history_traj_cache_.pop_front();

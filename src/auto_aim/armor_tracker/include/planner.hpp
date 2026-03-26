@@ -8,6 +8,7 @@
 
 #include "quill/Logger.h"
 #include "tiny_api.hpp"
+#include "types/ArmorType.hpp"
 
 #include <array>
 #include <atomic>
@@ -33,7 +34,7 @@ public:
 
 private:
   void updateHistoryTrajectory(double yaw, double yaw_vel, double pitch,
-                               double pitch_vel);
+                               double pitch_vel, types::ArmorType type);
   bool shouldAimCenter(const TargetState &target_state);
   msgs::AimCommand aimMPC(const TargetState &target_state,
                           double dt_image_to_now_sec, double bullet_speed_mps);

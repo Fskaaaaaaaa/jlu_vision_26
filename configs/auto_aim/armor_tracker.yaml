@@ -63,6 +63,7 @@ planner_conf:
   iterative_traj: false
   enable_aim_center: false
   consider_gimbal_response: true
+  use_history_traj_cache: true
   aim_center_vyaw_thres_low: 6.0
   aim_center_vyaw_thres_high: 8.0
   aim_center_distance_high: 3.0
