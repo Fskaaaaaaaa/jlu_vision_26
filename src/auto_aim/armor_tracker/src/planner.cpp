@@ -1,12 +1,13 @@
 #include "planner.hpp"
 #include "configs.hpp"
 #include "math/angle_tools.hpp"
+#include "math/threshold_tools.hpp"
 #include "msgs/AimCommand.hpp"
 #include "trajectory.hpp"
-
-#include "quill/LogMacros.h"
 #include "types.hpp"
 #include "types/ArmorType.hpp"
+
+#include "quill/LogMacros.h"
 
 #include <chrono>
 #include <cmath>
@@ -73,6 +74,9 @@ msgs::AimCommand auto_aim::Planner::plan(
                 std::chrono::system_clock::now() - target_stamp +
                 std::chrono::milliseconds{config_.predict_offset_ms})
                 .count();
+  if (config_.use_history_traj_cache)
+    updateHistoryTrajectory(gimbal_info.yaw, gimbal_info.yaw_vel,
+                            gimbal_info.pitch, gimbal_info.pitch_vel);
   auto cmd =
       shouldAimCenter(target_state)
           ? aimCenter(target_state, dt_image_to_now_sec,
@@ -89,15 +93,19 @@ msgs::AimCommand auto_aim::Planner::plan(
 bool auto_aim::Planner::shouldAimCenter(const TargetState &target_state) {
   if (!config_.enable_aim_center)
     return false;
-  static bool last_output{false};
   static types::ArmorType last_target_type{target_state.type};
+  bool reset{false};
   if (last_target_type != target_state.type) {
-    last_output = false;
     last_target_type = target_state.type;
+    reset = true;
   }
-  auto thresh = (last_output == true) ? config_.aim_center_vyaw_thres_low
-                                      : config_.aim_center_vyaw_thres_high;
-  return (last_output = target_state.center_vyaw > thresh);
+  static tools::HysteresisComparator comp_vyaw{
+      config_.aim_center_vyaw_thres_high, config_.aim_center_vyaw_thres_low,
+      false};
+  static tools::HysteresisComparator comp_distance{
+      config_.aim_center_distance_high, config_.aim_center_distance_low, true};
+  return comp_vyaw(target_state.center_vyaw, reset) &&
+         comp_distance(target_state.center_position.norm(), reset);
 }
 
 std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>
@@ -118,7 +126,7 @@ msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
   // 构建参考轨迹
   AimTrajectoryReference reference;
   try {
-    reference = buildTrajectoryReference(target_state, dt_image_to_now_sec,
+    reference = buildReferenceTrajectory(target_state, dt_image_to_now_sec,
                                          bullet_speed_mps);
   } catch (const std::exception &e) {
     LOG_WARNING(logger_, "{}, bullet_speed: {}.", e.what(), bullet_speed_mps);
@@ -199,10 +207,10 @@ msgs::AimCommand auto_aim::Planner::aimCenter(const TargetState &target_state,
 }
 
 std::optional<auto_aim::TargetAimSolution>
-auto_aim::Planner::solveAimWithMethodFallback(
-    const TargetState &target_state, double dt_image_to_now_sec,
-    double bullet_speed_mps, bool use_rk45, bool iterative_fly_time,
-    std::optional<ArmorIndex> &preferred_armor_index) {
+auto_aim::Planner::solveAim(const TargetState &target_state,
+                            double dt_image_to_now_sec, double bullet_speed_mps,
+                            bool use_rk45, bool iterative_fly_time,
+                            std::optional<ArmorIndex> &preferred_armor_index) {
   auto solution = trajectory_solver_.resolveTarget(
       target_state, bullet_speed_mps, dt_image_to_now_sec, use_rk45,
       iterative_fly_time, preferred_armor_index);
@@ -217,45 +225,51 @@ auto_aim::Planner::solveAimWithMethodFallback(
   return solution;
 }
 
+void auto_aim::Planner::updateHistoryTrajectory(double yaw, double yaw_vel,
+                                                double pitch,
+                                                double pitch_vel) {
+  history_traj_cache_.push_back({yaw, yaw_vel, pitch, pitch_vel});
+  if (history_traj_cache_.size() > config_.trajectory_half_horizon)
+    history_traj_cache_.pop_front();
+}
+
 auto_aim::AimTrajectoryReference
-auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
+auto_aim::Planner::buildReferenceTrajectory(const TargetState &target_state,
                                             double dt_image_to_now_sec,
                                             double bullet_speed_mps) {
   std::optional<ArmorIndex> preferred_armor_index;
-
-  auto center_solution_optional = solveAimWithMethodFallback(
+  // 注意这个是中心时间(瞄准时刻)的aim(不是指瞄中心)
+  auto center_time_aim_opt = solveAim(
       target_state, dt_image_to_now_sec, bullet_speed_mps, config_.rk45_yaw0,
       config_.iterative_yaw0, preferred_armor_index);
-  if (!center_solution_optional.has_value()) {
+  if (!center_time_aim_opt.has_value())
     throw std::runtime_error("Unsolvable bullet trajectory!");
-  }
-
-  const auto center_solution = center_solution_optional.value();
+  const auto center_aim = center_time_aim_opt.value();
   AimTrajectoryReference reference;
-  reference.center_reference_yaw_rad = center_solution.yaw_pitch_fly_time.yaw;
+  reference.center_reference_yaw_rad = center_aim.yaw_pitch_fly_time.yaw;
   reference.state_reference = Eigen::MatrixXd(4, trajectory_horizon_);
-  aim0_predict_time_.store(center_solution.yaw_pitch_fly_time.fly_time +
+  aim0_predict_time_.store(center_aim.yaw_pitch_fly_time.fly_time +
                            dt_image_to_now_sec);
 
-  TargetState target_state_for_current_frame = target_state.predict(
+  // 将目标反向推算到轨迹起始时刻的状态
+  auto target_state_d = target_state.predict(
       -config_.dt_sec * (config_.trajectory_half_horizon + 1));
-  auto previous_solution_optional = solveAimWithMethodFallback(
-      target_state_for_current_frame, dt_image_to_now_sec, bullet_speed_mps,
-      config_.rk45_traj, config_.iterative_traj, preferred_armor_index);
-  if (!previous_solution_optional.has_value()) {
+  auto previous_aim_opt = solveAim(
+      target_state_d, dt_image_to_now_sec, bullet_speed_mps, config_.rk45_traj,
+      config_.iterative_traj, preferred_armor_index);
+  if (!previous_aim_opt.has_value()) {
     ++reference.fallback_sample_count;
     LOG_TRACE_L1(
         logger_,
         "[Planner]: use center-aim fallback for first trajectory sample.");
   }
-  auto previous_solution = previous_solution_optional.has_value()
-                               ? previous_solution_optional->yaw_pitch_fly_time
-                               : center_solution.yaw_pitch_fly_time;
-  target_state_for_current_frame =
-      target_state_for_current_frame.predict(config_.dt_sec);
-  auto current_solution_optional = solveAimWithMethodFallback(
-      target_state_for_current_frame, dt_image_to_now_sec, bullet_speed_mps,
-      config_.rk45_traj, config_.iterative_traj, preferred_armor_index);
+  auto previous_solution = previous_aim_opt.has_value()
+                               ? previous_aim_opt->yaw_pitch_fly_time
+                               : center_aim.yaw_pitch_fly_time;
+  target_state_d = target_state_d.predict(config_.dt_sec);
+  auto current_solution_optional = solveAim(
+      target_state_d, dt_image_to_now_sec, bullet_speed_mps, config_.rk45_traj,
+      config_.iterative_traj, preferred_armor_index);
   if (!current_solution_optional.has_value()) {
     ++reference.fallback_sample_count;
     LOG_TRACE_L1(
@@ -267,33 +281,54 @@ auto_aim::Planner::buildTrajectoryReference(const TargetState &target_state,
                               ? current_solution_optional->yaw_pitch_fly_time
                               : previous_solution;
 
+  auto use_history_cache =
+      config_.use_history_traj_cache &&
+      (history_traj_cache_.size() == config_.trajectory_half_horizon);
+
+  // 从-half到half构建整条轨迹
   for (int frame_index = 0; frame_index < trajectory_horizon_; ++frame_index) {
-    target_state_for_current_frame =
-        target_state_for_current_frame.predict(config_.dt_sec);
-    auto next_solution_optional = solveAimWithMethodFallback(
-        target_state_for_current_frame, dt_image_to_now_sec, bullet_speed_mps,
-        config_.rk45_traj, config_.iterative_traj, preferred_armor_index);
-    auto next_solution = next_solution_optional.has_value()
-                             ? next_solution_optional->yaw_pitch_fly_time
-                             : current_solution;
-    if (!next_solution_optional.has_value()) {
-      ++reference.fallback_sample_count;
-      LOG_TRACE_L1(
-          logger_,
-          "[Planner]: use trajectory hold fallback at frame {} when aim fails.",
-          frame_index);
+    target_state_d = target_state_d.predict(config_.dt_sec);
+    YawPitchFlyTime next_solution;
+    double yaw_vel, pitch_vel;
+    if (use_history_cache && frame_index < config_.trajectory_half_horizon) {
+      auto [yaw_cache, yaw_vel_cache, pitch_cache, pitch_vel_cache] =
+          history_traj_cache_.at(frame_index);
+      next_solution.yaw = yaw_cache;
+      next_solution.pitch = pitch_cache;
+      yaw_vel = yaw_vel_cache;
+      pitch_vel = pitch_vel_cache;
+      LOG_TRACE_L1(logger_,
+                   "[Planner]: use_history_cache, yaw{}, yaw_vel{}, pitch{}, "
+                   "pitch_vel{}, frame_index{}",
+                   yaw_cache, yaw_vel_cache, pitch_cache, pitch_vel_cache,
+                   frame_index);
+    } else {
+      auto next_solution_opt = solveAim(
+          target_state_d, dt_image_to_now_sec, bullet_speed_mps,
+          config_.rk45_traj, config_.iterative_traj, preferred_armor_index);
+      next_solution = next_solution_opt.has_value()
+                          ? next_solution_opt->yaw_pitch_fly_time
+                          : current_solution;
+      if (!next_solution_opt.has_value()) {
+        ++reference.fallback_sample_count;
+        LOG_TRACE_L1(logger_,
+                     "[Planner]: use trajectory hold fallback at frame {} when "
+                     "aim fails.",
+                     frame_index);
+      }
+      yaw_vel = tools::limitRadian(next_solution.yaw - previous_solution.yaw) /
+                (2 * config_.dt_sec);
+      pitch_vel = (next_solution.pitch - previous_solution.pitch) /
+                  (2 * config_.dt_sec);
     }
-    const double yaw_velocity =
-        tools::limitRadian(next_solution.yaw - previous_solution.yaw) /
-        (2 * config_.dt_sec);
-    const double pitch_velocity =
-        (next_solution.pitch - previous_solution.pitch) / (2 * config_.dt_sec);
+    // 将当前帧保存到轨迹中
     reference.state_reference.col(frame_index) << tools::limitRadian(
         current_solution.yaw - reference.center_reference_yaw_rad),
-        yaw_velocity, current_solution.pitch, pitch_velocity;
+        yaw_vel, current_solution.pitch, pitch_vel;
     previous_solution = current_solution;
     current_solution = next_solution;
   }
+
   if (reference.fallback_sample_count > 0) {
     LOG_TRACE_L1(logger_, "[Planner]: fallback solve used {}/{} samples.",
                  reference.fallback_sample_count, trajectory_horizon_ + 2);

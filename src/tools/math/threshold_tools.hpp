@@ -24,4 +24,28 @@ public:
   }
   double sigma_;
 };
+
+class HysteresisComparator {
+public:
+  HysteresisComparator(double thres_high, double thres_low,
+                       bool reverse_trigger)
+      : thres_high(thres_high), thres_low(thres_low),
+        reverse_trigger(reverse_trigger) {}
+  bool operator()(double input, bool reset = false) {
+    if (reset)
+      last_output = false;
+    double thresh;
+    if (reverse_trigger)
+      thresh = (last_output == true) ? thres_high : thres_low;
+    else
+      thresh = (last_output == true) ? thres_low : thres_high;
+    return reverse_trigger ? (last_output = input < thresh)
+                           : (last_output = input > thresh);
+  }
+  double thres_high;
+  double thres_low;
+  bool reverse_trigger;
+  bool last_output;
+};
+
 } // namespace tools

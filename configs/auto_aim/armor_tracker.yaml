@@ -65,6 +65,8 @@ planner_conf:
   consider_gimbal_response: true
   aim_center_vyaw_thres_low: 6.0
   aim_center_vyaw_thres_high: 8.0
+  aim_center_distance_high: 3.0
+  aim_center_distance_low: 2.0
   shoot_offset: 0
   yaw_offset: 0.0
   pitch_offset: 0.0

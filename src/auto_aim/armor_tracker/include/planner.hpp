@@ -9,8 +9,10 @@
 #include "quill/Logger.h"
 #include "tiny_api.hpp"
 
+#include <array>
 #include <atomic>
 #include <chrono>
+#include <deque>
 #include <optional>
 
 namespace auto_aim {
@@ -30,24 +32,27 @@ public:
   std::atomic<double> aim0_predict_time_;
 
 private:
+  void updateHistoryTrajectory(double yaw, double yaw_vel, double pitch,
+                               double pitch_vel);
   bool shouldAimCenter(const TargetState &target_state);
   msgs::AimCommand aimMPC(const TargetState &target_state,
                           double dt_image_to_now_sec, double bullet_speed_mps);
   msgs::AimCommand aimCenter(const TargetState &target_state,
                              double dt_image_to_now_sec,
                              double bullet_speed_mps);
-  std::optional<TargetAimSolution> solveAimWithMethodFallback(
-      const TargetState &target_state, double dt_image_to_now_sec,
-      double bullet_speed_mps, bool use_rk45, bool iterative_fly_time,
-      std::optional<ArmorIndex> &preferred_armor_index);
+  std::optional<TargetAimSolution>
+  solveAim(const TargetState &target_state, double dt_image_to_now_sec,
+           double bullet_speed_mps, bool use_rk45, bool iterative_fly_time,
+           std::optional<ArmorIndex> &preferred_armor_index);
   AimTrajectoryReference
-  buildTrajectoryReference(const TargetState &target_state,
+  buildReferenceTrajectory(const TargetState &target_state,
                            double dt_image_to_now_sec, double bullet_speed_mps);
   quill::Logger *logger_;
   PlannerConfig config_;
   int trajectory_horizon_;
   unsigned int bullet_id_;
   Trajectory trajectory_solver_;
+  std::deque<std::array<double, 4>> history_traj_cache_;
 
   TinySolver *yaw_solver_;
   TinySolver *pitch_solver_;

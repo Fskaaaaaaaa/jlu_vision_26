@@ -293,7 +293,10 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
     self->plotter_.plot(armor_name + "Y", xyz.y());
     self->plotter_.plot(armor_name + "Z", xyz.z());
   }
-  const auto &target_ptr = self->targets_.at(self->aiming_target_.load());
+  auto aiming_target = self->aiming_target_.load();
+  if (!self->targets_.contains(aiming_target))
+    return;
+  const auto &target_ptr = self->targets_.at(aiming_target);
   auto state = target_ptr->getTargetTrackState().first;
   auto type_name = rfl::enum_to_string(state.type);
   self->plotter_.plot(type_name + "x", state.center_position.x());
