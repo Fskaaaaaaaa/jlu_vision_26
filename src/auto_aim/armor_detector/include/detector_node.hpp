@@ -7,6 +7,7 @@
 #include "detector.hpp"
 #include "hardware/camera_params_changer.hpp"
 // #include "hardware/image_listener.hpp"
+#include "hardware/enemy_color_listener.hpp"
 #include "hardware/image_poller.hpp"
 #include "hardware/task_mode_listener.hpp"
 #include "lightbar_corrector.hpp"
@@ -49,10 +50,10 @@ private:
 
   quill::Logger *logger_;
   DetectorConfigs configs_;
-  types::EnemyColor self_color_;
 
   hardware::CameraParamsChanger cam_params_changer_;
   std::unique_ptr<hardware::TaskModeListener> task_mode_listener_;
+  hardware::EnemyColorListener enemy_color_listener_;
   std::unique_ptr<hardware::ImagePoller<msgs::Image1440x1080_8UC3>>
       image_poller_;
 

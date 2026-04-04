@@ -51,7 +51,7 @@ pca_conf:
   search_start_ratio: 0.4
   search_end_ratio: 0.6
 pnp_conf:
-  use_generic_mode: true
+  use_generic_mode: false
   project_error_ratio_thres: 3.0
   roll_thres_degree: 15.0
   frame_axes_length: 0.1

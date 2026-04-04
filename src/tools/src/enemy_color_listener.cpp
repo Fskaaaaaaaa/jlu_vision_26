@@ -1,13 +1,11 @@
 #include "hardware/enemy_color_listener.hpp"
 #include "msgs/EnemyColor.hpp"
-#include "rfl/enums.hpp"
 #include "types/EnemyColor.hpp"
 #include "types/IceoryxServiceDescription.hpp"
 
 #include "quill/LogMacros.h"
+
 #include <atomic>
-#include <chrono>
-#include <thread>
 
 hardware::EnemyColorListener::EnemyColorListener(
     quill::Logger *logger, types::EnemyColor default_color, double time_out_sec,
@@ -15,7 +13,7 @@ hardware::EnemyColorListener::EnemyColorListener(
     : logger_(logger),
       enemy_color_sub_(
           types::IceoryxServiceDescription{description}.description),
-      color_(default_color), color_ok_(false), time_out_sec_(time_out_sec) {
+      enemy_color_(default_color), time_out_sec_(time_out_sec) {
   listener_
       .attachEvent(enemy_color_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
                    iox::popo::createNotificationCallback(
@@ -32,31 +30,17 @@ void hardware::EnemyColorListener::onSampleReceivedCallback(
   while (subscriber->take().and_then(
       [subscriber, self](const iox::popo::Sample<const msgs::EnemyColor,
                                                  const msgs::Header> &sample) {
-        self->color_.store(static_cast<types::EnemyColor>(sample->color));
-        self->color_ok_.store(true);
+        auto color_update = static_cast<types::EnemyColor>(sample->color);
+        if (color_update != self->enemy_color_.load())
+          LOG_DEBUG(self->logger_, "Enemy color changed! Current color: {}.",
+                    (color_update == types::EnemyColor::Red) ? "Red" : "Blue");
+        self->enemy_color_.store(color_update);
       })) {
   }
 }
 
 types::EnemyColor hardware::EnemyColorListener::getEnemyColor() const {
-  auto start = std::chrono::system_clock::now();
-  auto timeout = [start, this]() {
-    auto now = std::chrono::system_clock::now();
-    double dt =
-        std::chrono::duration_cast<std::chrono::duration<double>>(now - start)
-            .count();
-    return dt >= time_out_sec_;
-  };
-  do {
-    if (timeout()) {
-      LOG_WARNING(logger_,
-                  "Waiting enemy_color time out! Use default_color {}.",
-                  rfl::enum_to_string(color_.load()));
-      break;
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds{50});
-  } while (!color_ok_.load());
-  return color_.load();
+  return enemy_color_.load();
 }
 
 types::EnemyColor hardware::EnemyColorListener::getSelfColor() const {

@@ -42,6 +42,7 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
                                      const DetectorConfigs &configs)
     : logger_(logger), configs_(configs),
       cam_params_changer_(logger_, configs_.camera_name),
+      enemy_color_listener_(logger_, configs_.default_enemy_color),
       armor_pub_(
           types::IceoryxServiceDescription{configs_.armors_topic}.description) {
   LOG_INFO(logger_, "armor detector node start!");
@@ -72,10 +73,6 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
         std::make_unique<LightCornerCorrector>(logger_, configs_.pca_conf);
     LOG_INFO(logger_, "use PCA corrector.");
   }
-  // 初始化敌方颜色
-  self_color_ =
-      hardware::EnemyColorListener{logger_, configs_.default_enemy_color, 2}
-          .getSelfColor();
   // 获取相机内外参并初始化pnp和ba
   auto camera_info =
       hardware::CameraInfoListener{logger_, configs_.camera_name}.get();
@@ -182,7 +179,8 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
   cv::cvtColor(bgr_image, gray_img, cv::COLOR_BGR2GRAY);
   // HACK: 用eraseif遍历处理装甲板
   std::erase_if(armors, [&](Armor &armor) -> bool {
-    if (armor.color == self_color_)
+    // 动态更新敌方颜色
+    if (armor.color == enemy_color_listener_.getSelfColor())
       return true; // 删除友军
     armor.frame_id = frame_id;
     armor.stamp = stamp;

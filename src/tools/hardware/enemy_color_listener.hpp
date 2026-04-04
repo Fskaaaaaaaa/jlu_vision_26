@@ -1,14 +1,15 @@
 #pragma once
 
 #include "confs/IceoryxServiceDescription.hpp"
-#include "iceoryx_posh/popo/listener.hpp"
-#include "iceoryx_posh/popo/subscriber.hpp"
 #include "msgs/EnemyColor.hpp"
 #include "msgs/Header.hpp"
-#include "quill/Logger.h"
 #include "types/EnemyColor.hpp"
+
+#include "iceoryx_posh/popo/listener.hpp"
+#include "iceoryx_posh/popo/subscriber.hpp"
+#include "quill/Logger.h"
+
 #include <atomic>
-#include <thread>
 
 namespace hardware {
 
@@ -30,8 +31,7 @@ private:
       EnemyColorListener *self);
   quill::Logger *logger_;
   iox::popo::Subscriber<msgs::EnemyColor, msgs::Header> enemy_color_sub_;
-  std::atomic<types::EnemyColor> color_;
-  std::atomic<bool> color_ok_;
+  std::atomic<types::EnemyColor> enemy_color_;
   iox::popo::Listener listener_;
   double time_out_sec_;
 };
