@@ -43,8 +43,13 @@ public:
   resolvePitchFlyTime(double target_distance_m, double target_height_m,
                       double muzzle_velocity_mps,
                       Method method = Method::parabola) const;
-  BallisticState2D
-  getBarrelStateFromPitch(double pitch_rad, double muzzle_velocity_mps) const;
+  BallisticState2D getBarrelStateFromPitch(double pitch_rad,
+                                           double muzzle_velocity_mps) const;
+  static std::optional<PitchFlytime>
+  resolveParabola(double target_distance_m, double target_height_m,
+                  double muzzle_velocity_mps, double g,
+                  double gimbal_pitch_min_degree,
+                  double gimbal_pitch_max_degree);
 
 private:
   struct PitchResidual {
@@ -56,15 +61,16 @@ private:
   PitchResidual evaluatePitchByRk45(double pitch_rad, double target_distance_m,
                                     double target_height_m,
                                     double muzzle_velocity_mps) const;
-  std::optional<PitchFlytime> solvePitchByHybridMethod(
-      double pitch_left_rad, double pitch_right_rad, double target_distance_m,
-      double target_height_m, double muzzle_velocity_mps) const;
   std::optional<PitchFlytime>
-  resolveRk45(double target_distance_m, double target_height_m,
-              double muzzle_velocity_mps) const;
-  std::optional<PitchFlytime>
-  resolveParabola(double target_distance_m, double target_height_m,
-                  double muzzle_velocity_mps) const;
+  solvePitchByHybridMethod(double pitch_left_rad, double pitch_right_rad,
+                           double target_distance_m, double target_height_m,
+                           double muzzle_velocity_mps) const;
+  std::optional<PitchFlytime> resolveRk45(double target_distance_m,
+                                          double target_height_m,
+                                          double muzzle_velocity_mps) const;
+  std::optional<PitchFlytime> resolveParabola(double target_distance_m,
+                                              double target_height_m,
+                                              double muzzle_velocity_mps) const;
   quill::Logger *logger_;
   BallisticConfig config_;
 };

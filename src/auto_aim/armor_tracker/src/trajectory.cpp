@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+// XXX: 狗操的codex在我的代码里四处拉屎
 namespace {
 
 struct ArmorAimCandidate {
@@ -45,7 +46,7 @@ bool isArmorFrontFacing(const auto_aim::TargetState &target_state,
           std::numeric_limits<double>::epsilon()) {
     return false;
   }
-  const double front_facing_score = center_to_armor_vector_m.normalized().dot(
+  auto front_facing_score = center_to_armor_vector_m.normalized().dot(
       armor_to_shooter_vector_m.normalized());
   return front_facing_score > min_dot_product;
 }
@@ -112,11 +113,11 @@ std::optional<auto_aim::YawPitchFlyTime>
 auto_aim::Trajectory::solveYawPitchForArmorPosition(
     double bullet_speed_mps, const Eigen::Vector3d &armor_position_m,
     bool use_rk45, double odom_x_m, double odom_y_m) {
-  const double target_x_m = armor_position_m.x() - odom_x_m;
-  const double target_y_m = armor_position_m.y() - odom_y_m;
-  const double target_distance_m = std::hypot(target_x_m, target_y_m);
-  const double target_height_m = armor_position_m.z();
-  const double target_yaw_rad = std::atan2(target_y_m, target_x_m);
+  auto target_x_m = armor_position_m.x() - odom_x_m;
+  auto target_y_m = armor_position_m.y() - odom_y_m;
+  auto target_distance_m = std::hypot(target_x_m, target_y_m);
+  auto target_height_m = armor_position_m.z();
+  auto target_yaw_rad = std::atan2(target_y_m, target_x_m);
   auto pitch_and_fly_time = solver_.resolvePitchFlyTime(
       target_distance_m, target_height_m, bullet_speed_mps,
       use_rk45 ? tools::ballistic::Method::rk45
@@ -189,6 +190,7 @@ std::optional<auto_aim::TargetAimSolution> auto_aim::Trajectory::resolveTarget(
     const TargetState &state, double bullet_speed_mps,
     double delay_time_image_to_now_sec, bool use_rk45, bool iterative_fly_time,
     std::optional<ArmorIndex> preferred_armor_index) {
+  // XXX:  狗屎代码
   auto solve_first_solvable_armor_aim =
       [&](const TargetState &predicted_state,
           std::optional<ArmorIndex> preferred_index)
@@ -207,9 +209,8 @@ std::optional<auto_aim::TargetAimSolution> auto_aim::Trajectory::resolveTarget(
       for (const auto &candidate : candidate_group) {
         auto solved = solveYawPitchForArmorPosition(
             bullet_speed_mps, candidate.armor.position, use_rk45, 0.0, 0.0);
-        if (!solved.has_value()) {
+        if (!solved.has_value())
           continue;
-        }
         return SolvedArmorAim{
             .candidate = candidate,
             .yaw_pitch_fly_time = solved.value(),
@@ -219,11 +220,11 @@ std::optional<auto_aim::TargetAimSolution> auto_aim::Trajectory::resolveTarget(
     };
     std::vector<ArmorAimCandidate> front_facing_candidates;
     front_facing_candidates.reserve(candidates.size());
-    std::copy_if(candidates.begin(), candidates.end(),
-                 std::back_inserter(front_facing_candidates),
-                 [](const ArmorAimCandidate &candidate) {
-                   return candidate.is_front_facing;
-                 });
+    std::ranges::copy_if(candidates,
+                         std::back_inserter(front_facing_candidates),
+                         [](const ArmorAimCandidate &candidate) {
+                           return candidate.is_front_facing;
+                         });
     if (auto solved_front_facing =
             try_solve_candidates(std::move(front_facing_candidates));
         solved_front_facing.has_value()) {

@@ -36,8 +36,8 @@ tools::ballistic::BallisticTrajectorySolver::getBarrelStateFromPitch(
 
 std::optional<tools::ballistic::PitchFlytime>
 tools::ballistic::BallisticTrajectorySolver::resolvePitchFlyTime(
-    double target_distance_m, double target_height_m, double muzzle_velocity_mps,
-    Method method) const {
+    double target_distance_m, double target_height_m,
+    double muzzle_velocity_mps, Method method) const {
   if (method == Method::rk45)
     return resolveRk45(target_distance_m, target_height_m, muzzle_velocity_mps);
   if (method == Method::parabola)
@@ -68,7 +68,8 @@ tools::ballistic::BallisticTrajectorySolver::evaluatePitchByRk45(
         previous_state, integration_step_sec, config_.k, config_.g);
     elapsed_time_sec += integration_step_sec;
     if (current_state.distance >= target_distance_m) {
-      const double distance_delta = current_state.distance - previous_state.distance;
+      const double distance_delta =
+          current_state.distance - previous_state.distance;
       const double interpolation_ratio =
           distance_delta <= std::numeric_limits<double>::epsilon()
               ? 1.0
@@ -78,9 +79,8 @@ tools::ballistic::BallisticTrajectorySolver::evaluatePitchByRk45(
       const double impact_height_m =
           previous_state.height +
           interpolation_ratio * (current_state.height - previous_state.height);
-      const double impact_time_sec =
-          elapsed_time_sec - integration_step_sec +
-          interpolation_ratio * integration_step_sec;
+      const double impact_time_sec = elapsed_time_sec - integration_step_sec +
+                                     interpolation_ratio * integration_step_sec;
       return PitchResidual{
           .valid = true,
           .height_error_m = impact_height_m - target_height_m,
@@ -98,12 +98,10 @@ std::optional<tools::ballistic::PitchFlytime>
 tools::ballistic::BallisticTrajectorySolver::solvePitchByHybridMethod(
     double pitch_left_rad, double pitch_right_rad, double target_distance_m,
     double target_height_m, double muzzle_velocity_mps) const {
-  auto left_residual =
-      evaluatePitchByRk45(pitch_left_rad, target_distance_m, target_height_m,
-                          muzzle_velocity_mps);
-  auto right_residual =
-      evaluatePitchByRk45(pitch_right_rad, target_distance_m, target_height_m,
-                          muzzle_velocity_mps);
+  auto left_residual = evaluatePitchByRk45(
+      pitch_left_rad, target_distance_m, target_height_m, muzzle_velocity_mps);
+  auto right_residual = evaluatePitchByRk45(
+      pitch_right_rad, target_distance_m, target_height_m, muzzle_velocity_mps);
   if (!left_residual.valid || !right_residual.valid ||
       !hasDifferentSign(left_residual.height_error_m,
                         right_residual.height_error_m)) {
@@ -119,8 +117,8 @@ tools::ballistic::BallisticTrajectorySolver::solvePitchByHybridMethod(
                                     ? left_residual
                                     : right_residual;
 
-  for (int iteration_index = 0; iteration_index < config_.max_pitch_iterate_count;
-       ++iteration_index) {
+  for (int iteration_index = 0;
+       iteration_index < config_.max_pitch_iterate_count; ++iteration_index) {
     const double residual_denominator =
         right_residual.height_error_m - left_residual.height_error_m;
     double candidate_pitch_rad =
@@ -183,10 +181,10 @@ tools::ballistic::BallisticTrajectorySolver::resolveRk45(
   const double max_pitch_rad =
       tools::angle2Radian(config_.gimbal_pitch_max_degree);
 
-  auto left_residual = evaluatePitchByRk45(min_pitch_rad, target_distance_m,
-                                           target_height_m, muzzle_velocity_mps);
-  auto right_residual = evaluatePitchByRk45(max_pitch_rad, target_distance_m,
-                                            target_height_m, muzzle_velocity_mps);
+  auto left_residual = evaluatePitchByRk45(
+      min_pitch_rad, target_distance_m, target_height_m, muzzle_velocity_mps);
+  auto right_residual = evaluatePitchByRk45(
+      max_pitch_rad, target_distance_m, target_height_m, muzzle_velocity_mps);
   if (left_residual.valid && right_residual.valid &&
       hasDifferentSign(left_residual.height_error_m,
                        right_residual.height_error_m)) {
@@ -204,14 +202,14 @@ tools::ballistic::BallisticTrajectorySolver::resolveRk45(
   for (int sample_index = 1; sample_index <= kPitchBracketSampleCount;
        ++sample_index) {
     const double pitch_rad = min_pitch_rad + pitch_step_rad * sample_index;
-    auto residual =
-        evaluatePitchByRk45(pitch_rad, target_distance_m, target_height_m,
-                            muzzle_velocity_mps);
+    auto residual = evaluatePitchByRk45(pitch_rad, target_distance_m,
+                                        target_height_m, muzzle_velocity_mps);
     if (residual.valid && last_residual.valid &&
-        hasDifferentSign(last_residual.height_error_m, residual.height_error_m)) {
-      auto solved = solvePitchByHybridMethod(last_pitch_rad, pitch_rad,
-                                             target_distance_m, target_height_m,
-                                             muzzle_velocity_mps);
+        hasDifferentSign(last_residual.height_error_m,
+                         residual.height_error_m)) {
+      auto solved =
+          solvePitchByHybridMethod(last_pitch_rad, pitch_rad, target_distance_m,
+                                   target_height_m, muzzle_velocity_mps);
       if (solved.has_value())
         return solved;
     }
@@ -222,12 +220,13 @@ tools::ballistic::BallisticTrajectorySolver::resolveRk45(
   auto analytic_solution =
       resolveParabola(target_distance_m, target_height_m, muzzle_velocity_mps);
   if (analytic_solution.has_value()) {
-    auto rk45_at_analytic_pitch = evaluatePitchByRk45(
-        analytic_solution->pitch, target_distance_m, target_height_m,
-        muzzle_velocity_mps);
+    auto rk45_at_analytic_pitch =
+        evaluatePitchByRk45(analytic_solution->pitch, target_distance_m,
+                            target_height_m, muzzle_velocity_mps);
     if (rk45_at_analytic_pitch.valid) {
-      LOG_DEBUG(logger_,
-                "[BallisticTrajectorySolver]: RK45 fallback to parabola pitch.");
+      LOG_DEBUG(
+          logger_,
+          "[BallisticTrajectorySolver]: RK45 fallback to parabola pitch.");
       return PitchFlytime{
           .pitch = analytic_solution->pitch,
           .fly_time = rk45_at_analytic_pitch.fly_time_sec,
@@ -243,44 +242,29 @@ tools::ballistic::BallisticTrajectorySolver::resolveRk45(
 std::optional<tools::ballistic::PitchFlytime>
 tools::ballistic::BallisticTrajectorySolver::resolveParabola(
     double target_distance_m, double target_height_m,
-    double muzzle_velocity_mps) const {
+    double muzzle_velocity_mps, double g, double gimbal_pitch_min_degree,
+    double gimbal_pitch_max_degree) {
   if (target_distance_m <= 0.0 || muzzle_velocity_mps <= 0.0)
     return std::nullopt;
-
-  const double coefficient_a =
-      config_.g * target_distance_m * target_distance_m /
-      (2.0 * muzzle_velocity_mps * muzzle_velocity_mps);
-  if (std::abs(coefficient_a) <= std::numeric_limits<double>::epsilon())
-    return std::nullopt;
-  const double coefficient_b = -target_distance_m;
-  const double coefficient_c = coefficient_a + target_height_m;
-  const double delta =
-      coefficient_b * coefficient_b - 4.0 * coefficient_a * coefficient_c;
+  auto a = g * target_distance_m * target_distance_m /
+           (2.0 * muzzle_velocity_mps * muzzle_velocity_mps);
+  auto b = -target_distance_m;
+  auto c = a + target_height_m;
+  auto delta = b * b - 4.0 * a * c;
   if (delta < 0.0)
     return std::nullopt;
-
-  const double tan_pitch_solution_1 =
-      (-coefficient_b + std::sqrt(delta)) / (2.0 * coefficient_a);
-  const double tan_pitch_solution_2 =
-      (-coefficient_b - std::sqrt(delta)) / (2.0 * coefficient_a);
-  const double pitch_solution_1 = std::atan(tan_pitch_solution_1);
-  const double pitch_solution_2 = std::atan(tan_pitch_solution_2);
-
-  const double min_pitch_rad =
-      tools::angle2Radian(config_.gimbal_pitch_min_degree);
-  const double max_pitch_rad =
-      tools::angle2Radian(config_.gimbal_pitch_max_degree);
-
+  auto tan_pitch1 = (-b + std::sqrt(delta)) / (2.0 * a);
+  auto tan_pitch2 = (-b - std::sqrt(delta)) / (2.0 * a);
+  auto pitch1 = std::atan(tan_pitch1);
+  auto pitch2 = std::atan(tan_pitch2);
+  auto min_pitch_rad = tools::angle2Radian(gimbal_pitch_min_degree);
+  auto max_pitch_rad = tools::angle2Radian(gimbal_pitch_max_degree);
   std::optional<PitchFlytime> best_solution;
-  for (double pitch_rad : std::array{pitch_solution_1, pitch_solution_2}) {
+  for (auto pitch_rad : std::array{pitch1, pitch2}) {
     if (pitch_rad < min_pitch_rad || pitch_rad > max_pitch_rad)
       continue;
-    const double cos_pitch = std::cos(pitch_rad);
-    if (std::abs(cos_pitch) <= std::numeric_limits<double>::epsilon())
-      continue;
-    const double fly_time_sec = target_distance_m / (muzzle_velocity_mps * cos_pitch);
-    if (fly_time_sec <= 0.0)
-      continue;
+    auto cos_pitch = std::cos(pitch_rad);
+    auto fly_time_sec = target_distance_m / (muzzle_velocity_mps * cos_pitch);
     if (!best_solution.has_value() || fly_time_sec < best_solution->fly_time) {
       best_solution = PitchFlytime{
           .pitch = pitch_rad,
@@ -289,4 +273,13 @@ tools::ballistic::BallisticTrajectorySolver::resolveParabola(
     }
   }
   return best_solution;
+}
+
+std::optional<tools::ballistic::PitchFlytime>
+tools::ballistic::BallisticTrajectorySolver::resolveParabola(
+    double target_distance_m, double target_height_m,
+    double muzzle_velocity_mps) const {
+  return resolveParabola(
+      target_distance_m, target_height_m, muzzle_velocity_mps, config_.g,
+      config_.gimbal_pitch_min_degree, config_.gimbal_pitch_max_degree);
 }

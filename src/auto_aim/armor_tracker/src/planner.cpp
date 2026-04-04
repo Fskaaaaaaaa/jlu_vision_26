@@ -67,26 +67,16 @@ msgs::AimCommand auto_aim::Planner::plan(
     const TargetState &target_state,
     const std::chrono::system_clock::time_point &target_stamp,
     const msgs::GimbalInfo &gimbal_info) {
-  const double dt_image_to_now_sec =
-      config_.no_predict
-          ? 0.0
-          : std::chrono::duration_cast<std::chrono::duration<double>>(
-                std::chrono::system_clock::now() - target_stamp +
-                std::chrono::milliseconds{config_.predict_offset_ms})
-                .count();
-  // XXX
-  // 当切换目标时清空历史轨迹缓存
-  // 不太合理，不适用于团战反复切换目标或一个目标反复丢失重置的情况
-  // 但最多也就影响0.5s，先这样试一下
-  if (config_.use_history_traj_cache)
-    updateHistoryTrajectory(gimbal_info.yaw, gimbal_info.yaw_vel,
-                            gimbal_info.pitch, gimbal_info.pitch_vel,
-                            target_state.type);
+  // XXX: 太他妈狗屎了，不应该把拨盘响应延迟放到算法延迟中的
+  double dt_image_to_now_sec =
+      std::chrono::duration_cast<std::chrono::duration<double>>(
+          std::chrono::system_clock::now() - target_stamp +
+          std::chrono::milliseconds{config_.predict_offset_ms})
+          .count();
+  if (config_.no_predict)
+    dt_image_to_now_sec = 0;
   auto cmd =
-      shouldAimCenter(target_state)
-          ? aimCenter(target_state, dt_image_to_now_sec,
-                      gimbal_info.bullet_speed)
-          : aimMPC(target_state, dt_image_to_now_sec, gimbal_info.bullet_speed);
+      aimMPC(target_state, dt_image_to_now_sec, gimbal_info.bullet_speed);
   if (config_.consider_gimbal_response && cmd.control) {
     cmd.fire = (std::hypot(cmd.target_yaw - gimbal_info.yaw,
                            cmd.target_pitch - gimbal_info.pitch) <
@@ -105,12 +95,8 @@ bool auto_aim::Planner::shouldAimCenter(const TargetState &target_state) {
     reset = true;
   }
   static tools::HysteresisComparator comp_vyaw{
-      config_.aim_center_vyaw_thres_high, config_.aim_center_vyaw_thres_low,
-      false};
-  static tools::HysteresisComparator comp_distance{
-      config_.aim_center_distance_high, config_.aim_center_distance_low, true};
-  return comp_vyaw(target_state.center_vyaw, reset) &&
-         comp_distance(target_state.center_position.norm(), reset);
+      config_.aim_center_vyaw_thres_high, config_.aim_center_vyaw_thres_low};
+  return comp_vyaw(target_state.center_vyaw, reset);
 }
 
 std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>
@@ -128,7 +114,7 @@ msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
     bullet_speed_mps = config_.default_bullet_speed;
   }
 
-  // 构建参考轨迹
+  // 在不撞到加速度限制的情况下，参考轨迹中心点就是规划的瞄准角
   AimTrajectoryReference reference;
   try {
     reference = buildReferenceTrajectory(target_state, dt_image_to_now_sec,
@@ -230,19 +216,6 @@ auto_aim::Planner::solveAim(const TargetState &target_state,
   return solution;
 }
 
-void auto_aim::Planner::updateHistoryTrajectory(double yaw, double yaw_vel,
-                                                double pitch, double pitch_vel,
-                                                types::ArmorType type) {
-  static auto last_type{type};
-  if (last_type != type) {
-    history_traj_cache_.clear();
-    last_type = type;
-  }
-  history_traj_cache_.push_back({yaw, yaw_vel, pitch, pitch_vel});
-  if (history_traj_cache_.size() > config_.trajectory_half_horizon)
-    history_traj_cache_.pop_front();
-}
-
 auto_aim::AimTrajectoryReference
 auto_aim::Planner::buildReferenceTrajectory(const TargetState &target_state,
                                             double dt_image_to_now_sec,
@@ -291,46 +264,28 @@ auto_aim::Planner::buildReferenceTrajectory(const TargetState &target_state,
                               ? current_solution_optional->yaw_pitch_fly_time
                               : previous_solution;
 
-  auto use_history_cache =
-      config_.use_history_traj_cache &&
-      (history_traj_cache_.size() == config_.trajectory_half_horizon);
-
   // 从-half到half构建整条轨迹
   for (int frame_index = 0; frame_index < trajectory_horizon_; ++frame_index) {
     target_state_d = target_state_d.predict(config_.dt_sec);
     YawPitchFlyTime next_solution;
     double yaw_vel, pitch_vel;
-    if (use_history_cache && frame_index < config_.trajectory_half_horizon) {
-      auto [yaw_cache, yaw_vel_cache, pitch_cache, pitch_vel_cache] =
-          history_traj_cache_.at(frame_index);
-      next_solution.yaw = yaw_cache;
-      next_solution.pitch = pitch_cache;
-      yaw_vel = yaw_vel_cache;
-      pitch_vel = pitch_vel_cache;
+    auto next_solution_opt = solveAim(
+        target_state_d, dt_image_to_now_sec, bullet_speed_mps,
+        config_.rk45_traj, config_.iterative_traj, preferred_armor_index);
+    next_solution = next_solution_opt.has_value()
+                        ? next_solution_opt->yaw_pitch_fly_time
+                        : current_solution;
+    if (!next_solution_opt.has_value()) {
+      ++reference.fallback_sample_count;
       LOG_TRACE_L1(logger_,
-                   "[Planner]: use_history_cache, yaw{}, yaw_vel{}, pitch{}, "
-                   "pitch_vel{}, frame_index{}",
-                   yaw_cache, yaw_vel_cache, pitch_cache, pitch_vel_cache,
+                   "[Planner]: use trajectory hold fallback at frame {} when "
+                   "aim fails.",
                    frame_index);
-    } else {
-      auto next_solution_opt = solveAim(
-          target_state_d, dt_image_to_now_sec, bullet_speed_mps,
-          config_.rk45_traj, config_.iterative_traj, preferred_armor_index);
-      next_solution = next_solution_opt.has_value()
-                          ? next_solution_opt->yaw_pitch_fly_time
-                          : current_solution;
-      if (!next_solution_opt.has_value()) {
-        ++reference.fallback_sample_count;
-        LOG_TRACE_L1(logger_,
-                     "[Planner]: use trajectory hold fallback at frame {} when "
-                     "aim fails.",
-                     frame_index);
-      }
-      yaw_vel = tools::limitRadian(next_solution.yaw - previous_solution.yaw) /
-                (2 * config_.dt_sec);
-      pitch_vel = (next_solution.pitch - previous_solution.pitch) /
-                  (2 * config_.dt_sec);
     }
+    yaw_vel = tools::limitRadian(next_solution.yaw - previous_solution.yaw) /
+              (2 * config_.dt_sec);
+    pitch_vel =
+        (next_solution.pitch - previous_solution.pitch) / (2 * config_.dt_sec);
     // 将当前帧保存到轨迹中
     reference.state_reference.col(frame_index) << tools::limitRadian(
         current_solution.yaw - reference.center_reference_yaw_rad),
