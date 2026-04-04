@@ -33,6 +33,16 @@ enum class Method {
   parabola,
 };
 
+static std::optional<PitchFlytime>
+solveTrajectoryParabola(double target_distance_m, double target_height_m,
+                        double muzzle_velocity_mps, double g,
+                        double gimbal_pitch_min_degree,
+                        double gimbal_pitch_max_degree);
+
+static BallisticState2D getBarrelStateFromPitch(double pitch_rad,
+                                                double muzzle_velocity_mps,
+                                                double barrel_length);
+
 class BallisticTrajectorySolver {
 public:
   BallisticTrajectorySolver(quill::Logger *logger,
@@ -45,32 +55,18 @@ public:
                       Method method = Method::parabola) const;
   BallisticState2D getBarrelStateFromPitch(double pitch_rad,
                                            double muzzle_velocity_mps) const;
-  static std::optional<PitchFlytime>
-  resolveParabola(double target_distance_m, double target_height_m,
-                  double muzzle_velocity_mps, double g,
-                  double gimbal_pitch_min_degree,
-                  double gimbal_pitch_max_degree);
 
 private:
-  struct PitchResidual {
-    bool valid = false;
-    double height_error_m = 0.0;
-    double fly_time_sec = 0.0;
+  std::optional<PitchFlytime> solveParabola(double target_distance_m,
+                                            double target_height_m,
+                                            double muzzle_velocity_mps) const;
+  // TODO
+  std::optional<PitchFlytime> solveRk45(double target_distance_m,
+                                        double target_height_m,
+                                        double muzzle_velocity_mps) const {
+    return {};
   };
 
-  PitchResidual evaluatePitchByRk45(double pitch_rad, double target_distance_m,
-                                    double target_height_m,
-                                    double muzzle_velocity_mps) const;
-  std::optional<PitchFlytime>
-  solvePitchByHybridMethod(double pitch_left_rad, double pitch_right_rad,
-                           double target_distance_m, double target_height_m,
-                           double muzzle_velocity_mps) const;
-  std::optional<PitchFlytime> resolveRk45(double target_distance_m,
-                                          double target_height_m,
-                                          double muzzle_velocity_mps) const;
-  std::optional<PitchFlytime> resolveParabola(double target_distance_m,
-                                              double target_height_m,
-                                              double muzzle_velocity_mps) const;
   quill::Logger *logger_;
   BallisticConfig config_;
 };
