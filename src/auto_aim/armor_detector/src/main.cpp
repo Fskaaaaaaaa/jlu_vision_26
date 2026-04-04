@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
                             "configs/auto_aim/armor_detector.yaml"))(
       "l,log", "Path of log dir",
       cxxopts::value<std::string>()->default_value("logs/armor_detector"))(
-      "h,help", "Print usage.");
+      "h,help", "Print usage.")("d,debug", "Enable debug mode.");
   auto result = options.parse(argc, argv);
   if (result.count("help")) {
     std::cout << options.help() << std::endl;
@@ -46,6 +46,15 @@ int main(int argc, char *argv[]) {
     std::exit(EXIT_FAILURE);
   }
   auto_aim::DetectorConfigs configs = configs_opt.value();
+
+  if (!result.count("debug")) {
+    configs.show_detect_result = false;
+    configs.show_optimize_result = false;
+    configs.show_pnp_result = false;
+    configs.plot_pnp_result = false;
+    configs.all_is_three = false;
+    configs.step_by_step_debug = false;
+  }
 
   auto *logger = tools::initAndGetLogger(APP_NAME, configs.log_level, log_path);
   iox::runtime::PoshRuntime::initRuntime(APP_NAME);

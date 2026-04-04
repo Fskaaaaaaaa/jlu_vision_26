@@ -25,7 +25,7 @@ processes:
       static_tf_bc:
         condition: process_started
   tracker:
-    command: startup/armor_tracker_with_system_tbb.bash
+    command: startup/armor_tracker_with_system_tbb.bash -d
     depends_on:
       iox_roudi:
         condition: process_log_ready
@@ -33,8 +33,8 @@ processes:
         condition: process_started
       static_tf_bc:
         condition: process_started
-  plot_juggler:
-    command: ~/Applications/PlotJuggler-x86_64_97452b746c8c6b582d2297a9866b00a4.AppImage #-l configs/startup/spin.xml
-    depends_on:
-      tracker:
-        condition: process_started
+  # plot_juggler:
+  #   command: ~/Applications/PlotJuggler-x86_64_97452b746c8c6b582d2297a9866b00a4.AppImage #-l configs/startup/spin.xml
+  #   depends_on:
+  #     tracker:
+  #       condition: process_started

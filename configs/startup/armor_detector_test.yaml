@@ -25,7 +25,7 @@ processes:
       static_tf_bc:
         condition: process_started
   detector:
-    command: build/linux/x86_64/release/armor_detector
+    command: build/linux/x86_64/release/armor_detector -d
     depends_on:
       camera:
         condition: process_started

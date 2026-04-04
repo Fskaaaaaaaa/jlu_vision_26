@@ -1,4 +1,4 @@
-log_level: Debug
+log_level: Info
 plot_info: true
 always_on_task: true
 show_image: true
@@ -18,49 +18,50 @@ serial_topic:
   event: data
 robot_conf:
   max_match_distance_m: 1.0
-  max_match_yaw_diff_degree: 20.0
+  max_match_yaw_diff_degree: 45.0
   lost_threshold_sec: 0.5
   yaw_prior_noise: 9.0
   vyaw_prior_noise: 9.0
   translation_prior_noise:
-    x: 0.1
-    y: 0.1
-    z: 0.1
+    x: 0.05
+    y: 0.05
+    z: 0.05
   velocity_prior_noise:
     x: 0.5
     y: 0.5
     z: 0.5
 
-  yaw_factor_noise: 0.1
-  vyaw_factor_noise: 0.8
+  yaw_factor_noise: 6.0e-4
+  vyaw_factor_noise: 2.3e-3
   translation_factor_noise:
-    x: 0.05
-    y: 0.05
-    z: 0.05
+    x: 0.025
+    y: 0.025
+    z: 0.025
   velocity_factor_noise:
-    x: 0.05
-    y: 0.05
-    z: 0.05
-  radius_prior_noise: 0.00001
+    x: 0.04
+    y: 0.04
+    z: 0.04
+  radius_prior_noise: 0.001
   radius_min: 0.15
-  default_radius: 0.26
+  default_radius: 0.23
   radius_max: 0.5
-  dz_prior_noise: 0.1
+  dz_prior_noise: 0.05
   default_dz: 0.0
   armor_observation_noise:
-    tangential_error_m: 0.1
-    radial_error_m: 0.001
-    height_error_m: 0.05
-    yaw_error_rad: 0.02
+    tangential_error_m: 1.0e-5
+    radial_error_m: 6.0e-3
+    height_error_m: 1.25e-6
+    yaw_error_rad: 1.2e-3
 
 planner_conf:
-  dt_sec: 0.005
+  dt_sec: 0.01
   fail_polling_interval_sec: 0.1
-  trajectory_half_horizon: 100
-  rk45_yaw0: true
+  trajectory_half_horizon: 50
+  rk45_yaw0: false
   iterative_yaw0: true
   rk45_traj: false
   iterative_traj: false
+  no_predict: false
   enable_aim_center: false
   consider_gimbal_response: true
   use_history_traj_cache: true
@@ -71,7 +72,7 @@ planner_conf:
   shoot_offset: 0
   yaw_offset: 0.0
   pitch_offset: 0.0
-  predict_offset_ms: 150
+  predict_offset_ms: 73
   fire_thresh: 0.005
   max_yaw_acc: 50.0
   Q_yaw: [9e6, 0]

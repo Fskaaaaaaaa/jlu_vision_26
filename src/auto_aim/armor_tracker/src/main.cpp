@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
                             "configs/auto_aim/armor_tracker.yaml"))(
       "l,log", "Path of log dir",
       cxxopts::value<std::string>()->default_value("logs/armor_tracker"))(
-      "h,help", "Print usage.");
+      "h,help", "Print usage.")("d,debug", "Enable debug mode.");
   auto result = options.parse(argc, argv);
   if (result.count("help")) {
     std::cout << options.help() << std::endl;
@@ -46,6 +46,11 @@ int main(int argc, char *argv[]) {
     std::exit(EXIT_FAILURE);
   }
   auto_aim::TrackerConfigs configs = configs_opt.value();
+
+  if (!result.count("debug")) {
+    configs.show_image = false;
+    configs.plot_info = false;
+  }
 
   auto *logger = tools::initAndGetLogger(APP_NAME, configs.log_level, log_path);
   iox::runtime::PoshRuntime::initRuntime(APP_NAME);
