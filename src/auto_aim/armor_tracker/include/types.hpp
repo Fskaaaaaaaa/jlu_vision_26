@@ -108,11 +108,6 @@ struct YawPitchFlyTime {
   double fly_time;
 };
 
-struct TargetAimSolution {
-  YawPitchFlyTime yaw_pitch_fly_time;
-  ArmorIndex selected_armor_index;
-};
-
 struct AimTrajectoryReference {
   Eigen::MatrixXd state_reference;
   double center_reference_yaw_rad = 0.0;

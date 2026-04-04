@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Feng. All Rights Reserved.
 #include "math/ballistic_trajectory.hpp"
 #include "math/angle_tools.hpp"
+#include "quill/LogMacros.h"
 
 #include <array>
 #include <cmath>
@@ -76,7 +77,10 @@ std::optional<tools::ballistic::PitchFlytime>
 tools::ballistic::BallisticTrajectorySolver::solveParabola(
     double target_distance_m, double target_height_m,
     double muzzle_velocity_mps) const {
-  return ::tools::ballistic::solveTrajectoryParabola(
+  auto solution = ::tools::ballistic::solveTrajectoryParabola(
       target_distance_m, target_height_m, muzzle_velocity_mps, config_.g,
       config_.gimbal_pitch_min_degree, config_.gimbal_pitch_max_degree);
+  if (!solution.has_value())
+    LOG_WARNING(logger_, "[BallisticSolver]: Unsolvable trajectory!");
+  return solution;
 }

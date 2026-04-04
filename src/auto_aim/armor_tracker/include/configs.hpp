@@ -50,10 +50,9 @@ struct OutpostConfig {
 struct TrajectoryConfig {
   tools::ballistic::BallisticConfig ballistic_conf;
   int max_aim_iterate_count = 20;
-  int max_aim_switch_armor_count;
   double aim_ok_error_m = 0.005;
-  double armor_front_facing_min_dot_product = 0.0;
-  double armor_switch_distance_hysteresis_m = 0.03;
+  double armor_switch_facing_degree_diff_thres;
+  double flytime0_distance_offset; // 用于解算选板预判的飞行时间，一般为负数
 };
 
 struct PlannerConfig {
@@ -62,9 +61,8 @@ struct PlannerConfig {
   int trajectory_half_horizon;      // 生成的瞄准轨迹一半在过去，一半在未来
   bool rk45_yaw0;
   bool iterative_yaw0;
-  bool rk45_traj;      // 是否使用解析解
-  bool iterative_traj; // 是否考虑子弹飞行时敌人的运动
-  bool no_predict;
+  bool rk45_traj;                // 是否使用解析解
+  bool iterative_traj;           // 是否考虑子弹飞行时敌人的运动
   bool enable_aim_center;        // 理论上不需要，电控没调好yaw时启用
   bool consider_gimbal_response; // 用响应曲线(而不是规划曲线)做火控
   double aim_center_vyaw_thres_high;

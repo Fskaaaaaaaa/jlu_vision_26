@@ -43,16 +43,19 @@ static BallisticState2D getBarrelStateFromPitch(double pitch_rad,
                                                 double muzzle_velocity_mps,
                                                 double barrel_length);
 
+// NOTE: 这个类只负责二维弹道计算
 class BallisticTrajectorySolver {
 public:
   BallisticTrajectorySolver(quill::Logger *logger,
                             const BallisticConfig &config)
       : logger_(logger), config_(config) {};
 
+  // 这个方法失败时会打日志，注意不要重复了
   std::optional<PitchFlytime>
   resolvePitchFlyTime(double target_distance_m, double target_height_m,
                       double muzzle_velocity_mps,
                       Method method = Method::parabola) const;
+
   BallisticState2D getBarrelStateFromPitch(double pitch_rad,
                                            double muzzle_velocity_mps) const;
 

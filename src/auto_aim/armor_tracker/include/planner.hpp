@@ -23,22 +23,16 @@ public:
   plan(const TargetState &target_state,
        const std::chrono::system_clock::time_point &target_stamp,
        const msgs::GimbalInfo &gimbal_info);
-  std::pair<ArmorPositionYaw, ArmorIndex>
-  selectAimingArmor(const TargetState &target_state) const;
 
-  // for debug usage
-  std::atomic<double> aim0_predict_time_;
+  std::optional<std::pair<ArmorPositionYaw, ArmorIndex>>
+  getAimingArmorIndex(const TargetState &state) const;
 
 private:
-  msgs::AimCommand aimMPC(const TargetState &target_state,
-                          double dt_image_to_now_sec, double bullet_speed_mps);
-  std::optional<TargetAimSolution>
-  solveAim(const TargetState &target_state, double dt_image_to_now_sec,
-           double bullet_speed_mps, bool use_rk45, bool iterative_fly_time,
-           std::optional<ArmorIndex> &preferred_armor_index);
   AimTrajectoryReference
   buildReferenceTrajectory(const TargetState &target_state,
-                           double dt_image_to_now_sec, double bullet_speed_mps);
+                           double bullet_speed_mps);
+  msgs::AimCommand aimMPC(const TargetState &target_state,
+                          double bullet_speed_mps);
   [[deprecated]]
   bool shouldAimCenter(const TargetState &target_state);
   [[deprecated]]
@@ -50,6 +44,9 @@ private:
   int trajectory_horizon_;
   unsigned int bullet_id_;
   Trajectory trajectory_solver_;
+
+  // debug异步，用于还原现场
+  std::atomic<std::optional<double>> last_aim_basic_predict_time_;
 
   TinySolver *yaw_solver_;
   TinySolver *pitch_solver_;
