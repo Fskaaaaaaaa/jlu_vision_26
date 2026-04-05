@@ -198,7 +198,8 @@ void hardware::Serial::onAimCommandReceivedCallback(
         types::AimCommand cmd{
             .header = 0xA5,
             .control = sample->control,
-            .fire = sample->fire,
+            .fire_thres_yaw = sample->fire_thres_yaw,
+            .fire_thres_pitch = sample->fire_thres_pitch,
             .yaw = sample->yaw,
             .yaw_vel = sample->yaw_vel,
             .yaw_acc = sample->yaw_acc,

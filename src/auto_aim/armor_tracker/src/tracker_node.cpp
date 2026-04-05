@@ -119,7 +119,8 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                     iox::TruncateToCapacity, configs_.odom_frame_id.c_str()};
                 sample.getUserHeader().stamp_ns = tools::getTimeNowNanoSec();
                 sample->control = cmd.control;
-                sample->fire = cmd.fire;
+                sample->fire_thres_yaw = cmd.fire_thres_yaw;
+                sample->fire_thres_pitch = cmd.fire_thres_pitch;
                 sample->target_yaw = cmd.target_yaw;
                 sample->target_pitch = cmd.target_pitch;
                 sample->yaw = cmd.yaw;
@@ -141,7 +142,8 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
         static auto last_receive_bullet_id{receive_bullet_id};
         plotter_.plot("fired", receive_bullet_id != last_receive_bullet_id);
         last_receive_bullet_id = receive_bullet_id;
-        plotter_.plot("fire", cmd.fire);
+        plotter_.plot("fire_thres_yaw", cmd.fire_thres_yaw);
+        plotter_.plot("fire_thres_pitch", cmd.fire_thres_pitch);
         plotter_.plot("target_yaw", cmd.target_yaw);
         plotter_.plot("target_pitch", cmd.target_pitch);
         plotter_.plot("yaw", cmd.yaw);

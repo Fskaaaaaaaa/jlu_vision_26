@@ -1,5 +1,6 @@
 #include "planner.hpp"
 #include "configs.hpp"
+#include "fire_controller.hpp"
 #include "math/angle_tools.hpp"
 #include "math/threshold_tools.hpp"
 #include "msgs/AimCommand.hpp"
@@ -18,7 +19,9 @@
 
 auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
     : logger_(logger), config_(config),
-      trajectory_solver_(logger_, config_.trajectory_conf) {
+      trajectory_solver_(logger_, config_.trajectory_conf),
+      fire_controller_(logger_, config_.fire_ctrl_conf,
+                       config.trajectory_conf.ballistic_conf.g) {
   trajectory_horizon_ = config_.trajectory_half_horizon * 2;
   bullet_id_ = 0;
   {
@@ -88,6 +91,11 @@ msgs::AimCommand auto_aim::Planner::plan(
   auto cmd =
       aimMPC(target_state.predict(predict_time_cache_),
              gimbal_info.bullet_speed, fly_time_cache_, selected_index_cache_);
+  fire_controller_.calculateFireThres(
+      cmd, gimbal_info.bullet_speed, target_state.type,
+      target_state.predict(predict_time_cache_ + fly_time_cache_)
+          .armors()
+          .at(static_cast<int>(selected_index_cache_)));
   return cmd;
 }
 
@@ -162,16 +170,6 @@ msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
               config_.pitch_offset;
   cmd.pitch_vel = pitch_solver_->work->x(1, config_.trajectory_half_horizon);
   cmd.pitch_acc = pitch_solver_->work->u(0, config_.trajectory_half_horizon);
-  cmd.fire =
-      std::hypot(reference.state_reference(0, config_.trajectory_half_horizon +
-                                                  config_.shoot_offset) -
-                     yaw_solver_->work->x(0, config_.trajectory_half_horizon +
-                                                 config_.shoot_offset),
-                 reference.state_reference(2, config_.trajectory_half_horizon +
-                                                  config_.shoot_offset) -
-                     pitch_solver_->work->x(0, config_.trajectory_half_horizon +
-                                                   config_.shoot_offset)) <
-      config_.fire_thresh;
   cmd.bullet_id = bullet_id_++;
   return cmd;
 }
@@ -197,7 +195,6 @@ msgs::AimCommand auto_aim::Planner::aimCenter(const TargetState &target_state,
   cmd.pitch = aim.pitch + config_.pitch_offset;
   cmd.pitch_vel = 0;
   cmd.pitch_acc = 0;
-  cmd.fire = (std::abs(cmd.yaw - cmd.target_yaw) < config_.fire_thresh);
   cmd.bullet_id = bullet_id_++;
   return cmd;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "configs.hpp"
+#include "fire_controller.hpp"
 #include "msgs/AimCommand.hpp"
 #include "msgs/GimbalInfo.hpp"
 #include "trajectory.hpp"
@@ -45,6 +46,7 @@ private:
   int trajectory_horizon_;
   unsigned int bullet_id_;
   Trajectory trajectory_solver_;
+  FireController fire_controller_;
 
   // debug异步，用于还原现场
   // 调试线程只在有未过时的瞄准目标时访问，故无需opt语义

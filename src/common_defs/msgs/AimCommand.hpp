@@ -3,7 +3,8 @@
 namespace msgs {
 struct AimCommand {
   bool control;
-  bool fire;
+  float fire_thres_yaw;
+  float fire_thres_pitch;
   float target_yaw;
   float target_pitch;
   float yaw;

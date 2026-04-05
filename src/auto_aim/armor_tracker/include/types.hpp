@@ -117,4 +117,9 @@ struct AimTrajectoryReference {
   int fallback_sample_count = 0;
 };
 
+struct BallisticDispersion { // 散布
+  double horizontal;
+  double vertical;
+};
+
 } // namespace auto_aim

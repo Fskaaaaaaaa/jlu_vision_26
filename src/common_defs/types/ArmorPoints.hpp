@@ -11,11 +11,41 @@ namespace types {
 
 namespace points {
 
-constexpr double ARMOR_HEIGHT = 125e-3;      // m
-constexpr double LIGHTBAR_LENGTH = 56e-3;    // m
-constexpr double BIG_ARMOR_WIDTH = 230e-3;   // m
-constexpr double SMALL_ARMOR_WIDTH = 135e-3; // m
-constexpr double TINY_ARMOR_WIDTH = 129e-3;  // m
+[[deprecated]]
+constexpr double ARMOR_HEIGHT = 125e-3;       // m
+constexpr double BIG_ARMOR_HEIGHT = 127e-3;   // m
+constexpr double SMALL_ARMOR_HEIGHT = 125e-3; // m
+constexpr double TINY_ARMOR_HEIGHT = 100e-3;  // m
+constexpr double LIGHTBAR_LENGTH = 56e-3;     // m
+constexpr double BIG_ARMOR_WIDTH = 230e-3;    // m
+constexpr double SMALL_ARMOR_WIDTH = 135e-3;  // m
+constexpr double TINY_ARMOR_WIDTH = 129e-3;   // m
+
+inline double getArmorWidth(types::ArmorType type) {
+  switch (type) {
+  case types::ArmorType::Base:
+    return TINY_ARMOR_WIDTH;
+  case types::ArmorType::Outpost:
+    return TINY_ARMOR_WIDTH;
+  case types::ArmorType::One:
+    return BIG_ARMOR_WIDTH;
+  default:
+    return SMALL_ARMOR_WIDTH;
+  }
+}
+
+inline double getArmorHeight(types::ArmorType type) {
+  switch (type) {
+  case types::ArmorType::Base:
+    return TINY_ARMOR_HEIGHT;
+  case types::ArmorType::Outpost:
+    return TINY_ARMOR_HEIGHT;
+  case types::ArmorType::One:
+    return BIG_ARMOR_HEIGHT;
+  default:
+    return SMALL_ARMOR_HEIGHT;
+  }
+}
 
 // NOTE: 从左下角开始按顺时针顺序
 //  坐标：x 向前，y 向左，z 向上

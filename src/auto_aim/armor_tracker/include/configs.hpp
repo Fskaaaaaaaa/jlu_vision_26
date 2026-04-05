@@ -2,8 +2,8 @@
 
 #include "confs/Basic.hpp"
 #include "confs/IceoryxServiceDescription.hpp"
-
 #include "math/ballistic_trajectory.hpp"
+
 #include "quill/core/LogLevel.h"
 
 #include <array>
@@ -57,6 +57,13 @@ struct TrajectoryConfig {
   double flytime0_distance_offset;   // 用于解算选板预判的飞行时间，一般为负数
 };
 
+struct FireControllerConfig {
+  double norm_dispersion_yaw; // 两个方向上散布的标准差
+  double norm_dispersion_pitch;
+  double min_fire_thres_yaw;
+  double min_fire_thres_pitch;
+};
+
 struct PlannerConfig {
   double dt_sec;                    // MPC更新的间隔时间
   double fail_polling_interval_sec; // 非ontask时轮询task的时间间隔
@@ -75,7 +82,6 @@ struct PlannerConfig {
   double yaw_offset;
   double pitch_offset;
   int predict_offset_ms; // 补偿拨盘响应延迟
-  double fire_thresh;
   double max_yaw_acc;
   std::array<double, 2> Q_yaw;
   double R_yaw;
@@ -86,6 +92,7 @@ struct PlannerConfig {
   double default_bullet_speed;
   double min_bullet_speed;
   TrajectoryConfig trajectory_conf;
+  FireControllerConfig fire_ctrl_conf;
 };
 
 struct TrackerConfigs {

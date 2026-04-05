@@ -33,15 +33,15 @@ enum class Method {
   parabola,
 };
 
-static std::optional<PitchFlytime>
+std::optional<PitchFlytime>
 solveTrajectoryParabola(double target_distance_m, double target_height_m,
                         double muzzle_velocity_mps, double g,
-                        double gimbal_pitch_min_degree,
-                        double gimbal_pitch_max_degree);
+                        double gimbal_pitch_min_degree = -90,
+                        double gimbal_pitch_max_degree = 90);
 
-static BallisticState2D getBarrelStateFromPitch(double pitch_rad,
-                                                double muzzle_velocity_mps,
-                                                double barrel_length);
+BallisticState2D getBarrelStateFromPitch(double pitch_rad,
+                                         double muzzle_velocity_mps,
+                                         double barrel_length);
 
 // NOTE: 这个类只负责二维弹道计算
 class BallisticTrajectorySolver {
