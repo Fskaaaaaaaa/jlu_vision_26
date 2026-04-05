@@ -102,15 +102,18 @@ struct ArmorMatchResult {
   double yaw_diff; // rad
 };
 
-struct YawPitchFlyTime {
+struct YawPitchFlyTimeIndex {
   double yaw;
   double pitch;
   double fly_time;
+  ArmorIndex index;
 };
 
 struct AimTrajectoryReference {
   Eigen::MatrixXd state_reference;
-  double center_reference_yaw_rad = 0.0;
+  double center_yaw = 0.0;
+  double center_fly_time = 0;
+  ArmorIndex center_selected_index;
   int fallback_sample_count = 0;
 };
 

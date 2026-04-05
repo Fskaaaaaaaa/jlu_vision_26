@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <mutex>
 #include <optional>
 #include <stdexcept>
 #include <utility>
@@ -63,40 +64,30 @@ auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
 }
 
 // HACK: 应该设置图像和target的缓冲区来可视化瞄准时刻，但开销太大且我是懒狗
-std::optional<std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>>
+std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>
 auto_aim::Planner::getAimingArmorIndex(const TargetState &state) const {
-  auto basic_predict_time_opt = this->last_aim_basic_predict_time_.load();
-  if (!basic_predict_time_opt.has_value())
-    return std::nullopt;
-  auto index_flytime_opt = this->trajectory_solver_.getAimIndexFlyTime();
-  if (!index_flytime_opt.has_value())
-    return std::nullopt;
-  auto [index, flytime] = index_flytime_opt.value();
-  return {{state.predict(basic_predict_time_opt.value() + flytime)
-               .armors()
-               .at(static_cast<int>(index)),
-           index}};
+  std::scoped_lock lk{cache_mtx_};
+  return {state.predict(predict_time_cache_)
+              .armors()
+              .at(static_cast<int>(selected_index_cache_)),
+          selected_index_cache_};
 }
 
 msgs::AimCommand auto_aim::Planner::plan(
     const TargetState &target_state,
     const std::chrono::system_clock::time_point &target_stamp,
     const msgs::GimbalInfo &gimbal_info) {
+  std::scoped_lock lk{cache_mtx_};
   auto dt_image_to_now_sec =
       std::chrono::duration_cast<std::chrono::duration<double>>(
           std::chrono::system_clock::now() - target_stamp)
           .count();
-  auto predict_time =
+  predict_time_cache_ =
       dt_image_to_now_sec +
       std::chrono::milliseconds{config_.predict_offset_ms}.count();
   auto cmd =
-      aimMPC(target_state.predict(predict_time), gimbal_info.bullet_speed);
-  static auto last_target_type{target_state.type};
-  if (last_target_type != target_state.type) {
-    last_aim_basic_predict_time_.store(std::nullopt);
-    last_target_type = target_state.type;
-  } else
-    last_aim_basic_predict_time_.store(predict_time);
+      aimMPC(target_state.predict(predict_time_cache_),
+             gimbal_info.bullet_speed, fly_time_cache_, selected_index_cache_);
   return cmd;
 }
 
@@ -115,7 +106,9 @@ bool auto_aim::Planner::shouldAimCenter(const TargetState &target_state) {
 }
 
 msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
-                                           double bullet_speed_mps) {
+                                           double bullet_speed_mps,
+                                           double &fly_time,
+                                           ArmorIndex &selected_index) {
   if (bullet_speed_mps < config_.min_bullet_speed ||
       bullet_speed_mps > config_.max_bullet_speed) {
     LOG_DEBUG(logger_, "[Planner]: Abnormal bullet speed {}, use default {}.",
@@ -131,6 +124,10 @@ msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
     LOG_WARNING(logger_, "{}, bullet_speed: {}.", e.what(), bullet_speed_mps);
     return {.control = false};
   }
+
+  // 更新调试用缓存
+  fly_time = reference.center_fly_time;
+  selected_index = reference.center_selected_index;
 
   // 依据参考轨迹优化云台轨迹
   Eigen::VectorXd initial_state(2);
@@ -152,13 +149,13 @@ msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
   cmd.control = true;
   cmd.target_yaw = tools::limitRadian(
       reference.state_reference(0, config_.trajectory_half_horizon) +
-      reference.center_reference_yaw_rad + config_.yaw_offset);
+      reference.center_yaw + config_.yaw_offset);
   cmd.target_pitch =
       reference.state_reference(2, config_.trajectory_half_horizon) +
       config_.pitch_offset;
   cmd.yaw = tools::limitRadian(
       yaw_solver_->work->x(0, config_.trajectory_half_horizon) +
-      reference.center_reference_yaw_rad + config_.yaw_offset);
+      reference.center_yaw + config_.yaw_offset);
   cmd.yaw_vel = yaw_solver_->work->x(1, config_.trajectory_half_horizon);
   cmd.yaw_acc = yaw_solver_->work->u(0, config_.trajectory_half_horizon);
   cmd.pitch = pitch_solver_->work->x(0, config_.trajectory_half_horizon) +
@@ -215,10 +212,11 @@ auto_aim::Planner::buildReferenceTrajectory(const TargetState &target_state,
       config_.rk45_yaw0);
   if (!center_time_aim_opt.has_value())
     throw std::runtime_error("Unsolvable bullet trajectory!");
-  auto center_index_flytime = trajectory_solver_.getAimIndexFlyTime();
   auto center_aim = center_time_aim_opt.value();
   AimTrajectoryReference reference;
-  reference.center_reference_yaw_rad = center_aim.yaw;
+  reference.center_yaw = center_aim.yaw;
+  reference.center_fly_time = center_aim.fly_time;
+  reference.center_selected_index = center_aim.index;
   reference.state_reference = Eigen::MatrixXd(4, trajectory_horizon_);
 
   // 将目标反向推算到轨迹起始时刻的状态
@@ -253,7 +251,7 @@ auto_aim::Planner::buildReferenceTrajectory(const TargetState &target_state,
   // 从-half到half构建整条轨迹
   for (int frame_index = 0; frame_index < trajectory_horizon_; ++frame_index) {
     target_state_d = target_state_d.predict(config_.dt_sec);
-    YawPitchFlyTime next_solution;
+    YawPitchFlyTimeIndex next_solution;
     double yaw_vel, pitch_vel;
     auto next_solution_opt = trajectory_solver_.solveTarget(
         target_state_d, bullet_speed_mps, config_.rk45_traj,
@@ -272,8 +270,8 @@ auto_aim::Planner::buildReferenceTrajectory(const TargetState &target_state,
     pitch_vel =
         (next_solution.pitch - previous_solution.pitch) / (2 * config_.dt_sec);
     // 将当前帧保存到轨迹中
-    reference.state_reference.col(frame_index) << tools::limitRadian(
-        current_solution.yaw - reference.center_reference_yaw_rad),
+    reference.state_reference.col(frame_index)
+        << tools::limitRadian(current_solution.yaw - reference.center_yaw),
         yaw_vel, current_solution.pitch, pitch_vel;
     previous_solution = current_solution;
     current_solution = next_solution;
@@ -283,7 +281,5 @@ auto_aim::Planner::buildReferenceTrajectory(const TargetState &target_state,
                  reference.fallback_sample_count, trajectory_horizon_ + 2);
   }
   // HACK: 锁的颗粒度太粗了
-  trajectory_solver_.setAimIndexFlyTimeCache(center_index_flytime->first,
-                                             center_index_flytime->second);
   return reference;
 }

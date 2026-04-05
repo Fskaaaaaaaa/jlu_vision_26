@@ -52,7 +52,9 @@ struct TrajectoryConfig {
   int max_aim_iterate_count = 20;
   double aim_ok_error_m = 0.005;
   double armor_switch_facing_degree_diff_thres;
-  double flytime0_distance_offset; // 用于解算选板预判的飞行时间，一般为负数
+  // 保持当前选板的当前选板与最正对选板的面对角差的最大阈值
+  double iterative_max_facing_angle; // 迭代时允许的最大面对角（否则视为失败）
+  double flytime0_distance_offset;   // 用于解算选板预判的飞行时间，一般为负数
 };
 
 struct PlannerConfig {

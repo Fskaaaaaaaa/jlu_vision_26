@@ -10,9 +10,7 @@
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
-#include <mutex>
 #include <optional>
-#include <utility>
 #include <vector>
 
 auto_aim::Trajectory::Trajectory(quill::Logger *logger,
@@ -60,27 +58,11 @@ auto_aim::Trajectory::selectArmor(const TargetState &state) const {
   }
 }
 
-std::optional<std::pair<auto_aim::ArmorIndex, double>>
-auto_aim::Trajectory::getAimIndexFlyTime() const {
-  std::scoped_lock lk{aim_cache_mtx_};
-  if (!last_armor_index_.has_value())
-    return std::nullopt;
-  return {{last_armor_index_.value(), last_flytime_}};
-}
-
-void auto_aim::Trajectory::setAimIndexFlyTimeCache(ArmorIndex index,
-                                                   double fly_time) {
-  std::scoped_lock lk{aim_cache_mtx_};
-  last_armor_index_ = index;
-  last_flytime_ = fly_time;
-}
-
-std::optional<auto_aim::YawPitchFlyTime>
+std::optional<auto_aim::YawPitchFlyTimeIndex>
 auto_aim::Trajectory::solveTarget(const TargetState &target_state,
                                   double bullet_speed, bool iterative_fly_time,
                                   bool use_rk45) {
   // XXX: 绝大多数情况没有并发。有点开销但不多
-  std::scoped_lock lk{aim_cache_mtx_};
   static auto last_target_type{target_state.type};
   if (last_target_type != target_state.type)
     last_armor_index_ = std::nullopt;
@@ -101,22 +83,30 @@ auto_aim::Trajectory::solveTarget(const TargetState &target_state,
   auto solution =
       solveArmor(selected_index, pitch_flytime_opt->fly_time, target_state,
                  bullet_speed, iterative_fly_time, use_rk45);
-  if (solution.has_value())
-    last_flytime_ = solution->fly_time;
   return solution;
 }
 
-std::optional<auto_aim::YawPitchFlyTime> auto_aim::Trajectory::solveArmor(
+std::optional<auto_aim::YawPitchFlyTimeIndex> auto_aim::Trajectory::solveArmor(
     ArmorIndex armor_index, double fly_time, const TargetState &target_state,
     double bullet_speed, bool iterative_fly_time, bool use_rk45) const {
   auto method = use_rk45 ? tools::ballistic::Method::rk45
                          : tools::ballistic::Method::parabola;
   double error = DBL_MAX;
   int iterative_count{0};
-  YawPitchFlyTime result;
+  YawPitchFlyTimeIndex result;
   do {
+    if (++iterative_count > config_.max_aim_iterate_count) {
+      LOG_WARNING(logger_, "[Trajectory]: Reach max iterate number!");
+      return std::nullopt;
+    }
     auto armor = target_state.predict(fly_time).armors().at(
         static_cast<int>(armor_index));
+    if (auto facing_angle_abs = getArmorFacingAngleAbs(armor);
+        facing_angle_abs > config_.iterative_max_facing_angle) {
+      LOG_WARNING(logger_, "[Trajectory]: facing_angle_abs {}. Abandon!",
+                  facing_angle_abs);
+      return std::nullopt;
+    }
     auto result_opt = solver_.resolvePitchFlyTime(
         std::hypot(armor.position.x(), armor.position.y()), armor.position.z(),
         bullet_speed, method);
@@ -141,10 +131,7 @@ std::optional<auto_aim::YawPitchFlyTime> auto_aim::Trajectory::solveArmor(
     result.yaw = yaw;
     result.pitch = pitch;
     result.fly_time = fly_time;
-    if (++iterative_count > config_.max_aim_iterate_count) {
-      LOG_WARNING(logger_, "[Trajectory]: Reach max iterate number!");
-      break;
-    }
+    result.index = armor_index;
   } while (iterative_fly_time && error >= config_.aim_ok_error_m);
   return result;
 }

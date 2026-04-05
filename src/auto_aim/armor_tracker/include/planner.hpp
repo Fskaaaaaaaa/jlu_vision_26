@@ -9,9 +9,8 @@
 #include "quill/Logger.h"
 #include "tiny_api.hpp"
 
-#include <atomic>
 #include <chrono>
-#include <optional>
+#include <mutex>
 
 namespace auto_aim {
 
@@ -24,15 +23,17 @@ public:
        const std::chrono::system_clock::time_point &target_stamp,
        const msgs::GimbalInfo &gimbal_info);
 
-  std::optional<std::pair<ArmorPositionYaw, ArmorIndex>>
+  std::pair<ArmorPositionYaw, ArmorIndex>
   getAimingArmorIndex(const TargetState &state) const;
 
 private:
   AimTrajectoryReference
   buildReferenceTrajectory(const TargetState &target_state,
                            double bullet_speed_mps);
+  // HACK: 引用的出参用来传递迭代求解的飞行时间
   msgs::AimCommand aimMPC(const TargetState &target_state,
-                          double bullet_speed_mps);
+                          double bullet_speed_mps, double &fly_time,
+                          ArmorIndex &selected_index);
   [[deprecated]]
   bool shouldAimCenter(const TargetState &target_state);
   [[deprecated]]
@@ -46,7 +47,11 @@ private:
   Trajectory trajectory_solver_;
 
   // debug异步，用于还原现场
-  std::atomic<std::optional<double>> last_aim_basic_predict_time_;
+  // 调试线程只在有未过时的瞄准目标时访问，故无需opt语义
+  mutable std::mutex cache_mtx_;
+  double predict_time_cache_;
+  double fly_time_cache_;
+  ArmorIndex selected_index_cache_;
 
   TinySolver *yaw_solver_;
   TinySolver *pitch_solver_;
