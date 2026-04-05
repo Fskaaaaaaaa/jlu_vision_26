@@ -17,5 +17,5 @@ src/third_party/open3d/open3d-devel-linux-x86_64-cxx11-abi-0.19.0/
 # logs
 logs/
 log/
-.vscode/c_cpp_properties.json
+.vscode/
 compile_commands.json
