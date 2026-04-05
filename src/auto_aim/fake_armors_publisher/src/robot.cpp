@@ -123,6 +123,7 @@ void auto_aim::Robot::publishArmors() {
           sample->position = armor.position;
           sample->orientation = armor.orientation;
           sample->heart_beat = false;
+          sample->key_frame = true;
           sample.publish();
         })
         .or_else([&](auto) { LOG_ERROR(logger_, "loan shm failure!"); });

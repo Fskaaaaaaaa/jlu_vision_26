@@ -12,6 +12,7 @@
 
 #include <chrono>
 #include <mutex>
+#include <tuple>
 
 namespace auto_aim {
 
@@ -24,8 +25,8 @@ public:
        const std::chrono::system_clock::time_point &target_stamp,
        const msgs::GimbalInfo &gimbal_info);
 
-  std::pair<ArmorPositionYaw, ArmorIndex>
-  getAimingArmorIndex(const TargetState &state) const;
+  std::tuple<ArmorPositionYaw, ArmorIndex, double>
+  getAimingArmorIndexPredictTime(const TargetState &state) const;
 
 private:
   AimTrajectoryReference

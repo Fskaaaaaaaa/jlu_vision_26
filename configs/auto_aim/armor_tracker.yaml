@@ -9,8 +9,8 @@ camera_frame_id: camera
 odom_frame_id: odom
 armors_sub_topic:
   service: armors
-  # instance: fake_ap
-  instance: detector
+  instance: fake_ap
+  # instance: detector
   event: data
 serial_topic:
   service: aim_command
@@ -73,7 +73,6 @@ planner_conf:
   yaw_offset: 0.0
   pitch_offset: 0.0
   predict_offset_ms: 73
-  fire_thresh: 0.005
   max_yaw_acc: 50.0
   Q_yaw: [9e6, 0]
   R_yaw: 1
@@ -97,5 +96,12 @@ planner_conf:
     max_aim_iterate_count: 100
     max_aim_switch_armor_count: 10
     aim_ok_error_m: 0.02
-    armor_front_facing_min_dot_product: 0.0
-    armor_switch_distance_hysteresis_m: 0.03
+    armor_switch_facing_degree_diff_thres: 0.0
+    iterative_max_facing_angle: 75.0
+    flytime0_distance_offset: -0.3
+  fire_ctrl_conf:
+    norm_dispersion_yaw: 0.00002
+    norm_dispersion_pitch: 0.000002
+    min_fire_thres_yaw: 0.005
+    min_fire_thres_pitch: 0.005
+

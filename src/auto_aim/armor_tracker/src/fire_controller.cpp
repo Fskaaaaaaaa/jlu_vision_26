@@ -1,4 +1,5 @@
 #include "fire_controller.hpp"
+#include "math/angle_tools.hpp"
 #include "math/ballistic_trajectory.hpp"
 #include "msgs/AimCommand.hpp"
 #include "types.hpp"
@@ -78,11 +79,14 @@ void auto_aim::FireController::calculateFireThres(
   auto pitch_low =
       getTargetPitch(bullet_speed, distance,
                      armor.position.z() - half_height + dispersion.vertical);
-  // XXX: 这里应该再检查下
-  cmd.fire_thres_yaw = std::max(std::min(std::abs(yaw_high), std::abs(yaw_low)),
-                                config_.min_fire_thres_yaw);
-  cmd.fire_thres_pitch =
-      std::max(std::min(std::abs(pitch_high.value_or(cmd.target_pitch)),
-                        std::abs(pitch_low.value_or(cmd.target_pitch))),
-               config_.min_fire_thres_pitch);
+  cmd.fire_thres_yaw =
+      std::max(std::min(std::abs(tools::limitRadian(yaw_high - cmd.target_yaw)),
+                        std::abs(tools::limitRadian(yaw_low - cmd.target_yaw))),
+               config_.min_fire_thres_yaw);
+  cmd.fire_thres_pitch = std::max(
+      std::min(std::abs(tools::limitRadian(
+                   pitch_high.value_or(cmd.target_pitch) - cmd.target_pitch)),
+               std::abs(tools::limitRadian(
+                   pitch_low.value_or(cmd.target_pitch) - cmd.target_pitch))),
+      config_.min_fire_thres_pitch);
 }

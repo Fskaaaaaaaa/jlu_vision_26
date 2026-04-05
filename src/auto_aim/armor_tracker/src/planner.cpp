@@ -15,6 +15,7 @@
 #include <mutex>
 #include <optional>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
@@ -67,13 +68,17 @@ auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
 }
 
 // HACK: 应该设置图像和target的缓冲区来可视化瞄准时刻，但开销太大且我是懒狗
-std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>
-auto_aim::Planner::getAimingArmorIndex(const TargetState &state) const {
+std::tuple<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex, double>
+auto_aim::Planner::getAimingArmorIndexPredictTime(
+    const TargetState &state) const {
   std::scoped_lock lk{cache_mtx_};
-  return {state.predict(predict_time_cache_)
-              .armors()
-              .at(static_cast<int>(selected_index_cache_)),
-          selected_index_cache_};
+  return {
+      state.predict(predict_time_cache_)
+          .armors()
+          .at(static_cast<int>(selected_index_cache_)),
+      selected_index_cache_,
+      predict_time_cache_,
+  };
 }
 
 msgs::AimCommand auto_aim::Planner::plan(
@@ -87,7 +92,7 @@ msgs::AimCommand auto_aim::Planner::plan(
           .count();
   predict_time_cache_ =
       dt_image_to_now_sec +
-      std::chrono::milliseconds{config_.predict_offset_ms}.count();
+      std::chrono::milliseconds{config_.predict_offset_ms}.count() / 1000.0;
   auto cmd =
       aimMPC(target_state.predict(predict_time_cache_),
              gimbal_info.bullet_speed, fly_time_cache_, selected_index_cache_);

@@ -182,8 +182,10 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                   targets_.contains(aim_target)) {
                 auto [target_state, track_state] =
                     targets_.at(aim_target)->getTargetTrackState();
-                auto [aimed_armor, armor_index] =
-                    planner_.getAimingArmorIndex(target_state);
+                auto [aimed_armor, armor_index, predict_time] =
+                    planner_.getAimingArmorIndexPredictTime(target_state);
+                plotter_.plot("select_index", static_cast<int>(armor_index));
+                plotter_.plot("predict_time", predict_time);
                 const auto &target = targets_.at(aim_target);
                 // 绘制所有目标装甲板（红色）
                 drawTarget(*target, copy, stamp);
@@ -221,18 +223,6 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   auto image_stamp = armors.front().stamp; // 假设一次接收的armors来自同一帧
   std::erase_if(armors, [](const types::Armor &a) { return a.heart_beat; });
   LOG_TRACE_L1(self->logger_, "receive {} valid armors.", armors.size());
-  std::ranges::sort(
-      armors, [](const types::Armor &a, const types::Armor &b) -> bool {
-        return a.distance_to_image_center < b.distance_to_image_center;
-      });
-  // 选择光心最近装甲板作为打击目标
-  if (!armors.empty()) {
-    if (self->aiming_target_.load() != armors.front().type) {
-      self->aiming_target_.store(armors.front().type);
-      LOG_INFO(self->logger_, "Select target {}!",
-               rfl::enum_to_string(armors.front().type));
-    }
-  }
   // 将坐标变换到odom系并抹除变换失败的装甲板
   std::erase_if(armors, [&](types::Armor &armor) {
     // 过滤掉非同一帧的装甲板
@@ -264,6 +254,18 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
       return true;
     }
   });
+  std::ranges::sort(
+      armors, [](const types::Armor &a, const types::Armor &b) -> bool {
+        return a.distance_to_image_center < b.distance_to_image_center;
+      });
+  // 选择光心最近装甲板作为打击目标
+  if (!armors.empty()) {
+    if (self->aiming_target_.load() != armors.front().type) {
+      self->aiming_target_.store(armors.front().type);
+      LOG_INFO(self->logger_, "Select target {}!",
+               rfl::enum_to_string(armors.front().type));
+    }
+  }
   // NOTE:
   // 更新所有目标。track由图像时间戳驱动，图像到现在的时间补偿由planner完成
   bool all_targets_lost{true};
