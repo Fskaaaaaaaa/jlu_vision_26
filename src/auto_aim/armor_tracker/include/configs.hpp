@@ -58,10 +58,10 @@ struct TrajectoryConfig {
 };
 
 struct FireControllerConfig {
-  double norm_dispersion_yaw; // 两个方向上散布的标准差
-  double norm_dispersion_pitch;
-  double min_fire_thres_yaw;
-  double min_fire_thres_pitch;
+  double norm_dispersion_yaw_degree; // 两个方向上散布的标准差
+  double norm_dispersion_pitch_degree;
+  double min_fire_thres_yaw_degree;
+  double min_fire_thres_pitch_degree;
 };
 
 struct PlannerConfig {

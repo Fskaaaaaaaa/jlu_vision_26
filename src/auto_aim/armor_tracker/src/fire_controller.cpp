@@ -24,19 +24,21 @@ auto_aim::BallisticDispersion auto_aim::FireController::calculateDispersion(
   auto sin_a = std::sin(armor.yaw.theta());
   auto d = armor.position.x() * cos_a + armor.position.y() * sin_a;
   BallisticDispersion dispersion;
-  dispersion.horizontal = d / (cos_a * cos_a) * config_.norm_dispersion_yaw;
+  dispersion.horizontal =
+      d / (cos_a * cos_a) *
+      tools::angle2Radian(config_.norm_dispersion_yaw_degree);
   auto cos_pitch = std::cos(target_pitch);
   auto tan_pitch = std::tan(target_pitch);
   // XXX: 没有人类了
   dispersion.vertical =
       d / (cos_pitch * cos_pitch * cos_a) *
           (1 - (g_ * d * tan_pitch) / (bullet_speed * bullet_speed * cos_a)) *
-          config_.norm_dispersion_pitch -
+          tools::angle2Radian(config_.norm_dispersion_pitch_degree) -
       sin_a *
           ((d * tan_pitch) / (cos_a * cos_a) -
            (g_ * d * d) / (bullet_speed * bullet_speed * cos_pitch * cos_pitch *
                            cos_a * cos_a * cos_a)) *
-          config_.norm_dispersion_yaw;
+          tools::angle2Radian(config_.norm_dispersion_yaw_degree);
   return dispersion;
 }
 
@@ -61,8 +63,9 @@ void auto_aim::FireController::calculateFireThres(
                 "[FireController]: Dispersion greater than armor area! "
                 "(horizontal{}, vertical{})",
                 dispersion.horizontal, dispersion.vertical);
-    cmd.fire_thres_yaw = config_.min_fire_thres_yaw;
-    cmd.fire_thres_pitch = config_.min_fire_thres_pitch;
+    cmd.fire_thres_yaw = tools::angle2Radian(config_.min_fire_thres_yaw_degree);
+    cmd.fire_thres_pitch =
+        tools::angle2Radian(config_.min_fire_thres_pitch_degree);
     return;
   }
   auto distance = std::hypot(armor.position.x(), armor.position.y());
@@ -82,11 +85,11 @@ void auto_aim::FireController::calculateFireThres(
   cmd.fire_thres_yaw =
       std::max(std::min(std::abs(tools::limitRadian(yaw_high - cmd.target_yaw)),
                         std::abs(tools::limitRadian(yaw_low - cmd.target_yaw))),
-               config_.min_fire_thres_yaw);
+               tools::angle2Radian(config_.min_fire_thres_yaw_degree));
   cmd.fire_thres_pitch = std::max(
       std::min(std::abs(tools::limitRadian(
                    pitch_high.value_or(cmd.target_pitch) - cmd.target_pitch)),
                std::abs(tools::limitRadian(
                    pitch_low.value_or(cmd.target_pitch) - cmd.target_pitch))),
-      config_.min_fire_thres_pitch);
+      tools::angle2Radian(config_.min_fire_thres_pitch_degree));
 }

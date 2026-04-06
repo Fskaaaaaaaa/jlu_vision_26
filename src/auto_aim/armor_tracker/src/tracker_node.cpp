@@ -142,22 +142,24 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
         static auto last_receive_bullet_id{receive_bullet_id};
         plotter_.plot("fired", receive_bullet_id != last_receive_bullet_id);
         last_receive_bullet_id = receive_bullet_id;
-        plotter_.plot("fire_thres_yaw", cmd.fire_thres_yaw);
-        plotter_.plot("fire_thres_pitch", cmd.fire_thres_pitch);
-        plotter_.plot("target_yaw", cmd.target_yaw);
-        plotter_.plot("target_pitch", cmd.target_pitch);
-        plotter_.plot("yaw", cmd.yaw);
-        plotter_.plot("yaw_vel", cmd.yaw_vel);
-        plotter_.plot("yaw_acc", cmd.yaw_acc);
-        plotter_.plot("pitch", cmd.pitch);
-        plotter_.plot("pitch_vel", cmd.pitch_vel);
+        plotter_.plot("fire_thres_yaw",
+                      tools::radian2Angle(cmd.fire_thres_yaw));
+        plotter_.plot("fire_thres_pitch",
+                      tools::radian2Angle(cmd.fire_thres_pitch));
+        plotter_.plot("target_yaw", tools::radian2Angle(cmd.target_yaw));
+        plotter_.plot("target_pitch", tools::radian2Angle(cmd.target_pitch));
+        plotter_.plot("yaw", tools::radian2Angle(cmd.yaw));
+        plotter_.plot("yaw_vel", tools::radian2Angle(cmd.yaw_vel));
+        plotter_.plot("yaw_acc", tools::radian2Angle(cmd.yaw_acc));
+        plotter_.plot("pitch", tools::radian2Angle(cmd.pitch));
+        plotter_.plot("pitch_vel", tools::radian2Angle(cmd.pitch_vel));
         plotter_.plot("pitch_acc", cmd.pitch_acc);
         plotter_.plot("bullet_id", cmd.bullet_id);
-        plotter_.plot("gimbal_roll", roll);
-        plotter_.plot("gimbal_pitch", pitch);
-        plotter_.plot("gimbal_yaw", yaw);
-        plotter_.plot("gimbal_pitch_vel", pitch_vel);
-        plotter_.plot("gimbal_yaw_vel", yaw_vel);
+        plotter_.plot("gimbal_roll", tools::radian2Angle(roll));
+        plotter_.plot("gimbal_pitch", tools::radian2Angle(pitch));
+        plotter_.plot("gimbal_yaw", tools::radian2Angle(yaw));
+        plotter_.plot("gimbal_pitch_vel", tools::radian2Angle(pitch_vel));
+        plotter_.plot("gimbal_yaw_vel", tools::radian2Angle(yaw_vel));
         plotter_.plot("bullet_speed", bullet_speed);
       }
       std::this_thread::sleep_for(std::chrono::milliseconds{
@@ -259,6 +261,7 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
         return a.distance_to_image_center < b.distance_to_image_center;
       });
   // 选择光心最近装甲板作为打击目标
+  // XXX: 不合适，被操作手抱怨打团战时对敌人“雨露均沾”了QAQ
   if (!armors.empty()) {
     if (self->aiming_target_.load() != armors.front().type) {
       self->aiming_target_.store(armors.front().type);
@@ -267,7 +270,7 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
     }
   }
   // NOTE:
-  // 更新所有目标。track由图像时间戳驱动，图像到现在的时间补偿由planner完成
+  // 更新所有目标。track由图像时间戳驱动，图像到发射瞬间的补偿由planner完成
   bool all_targets_lost{true};
   for (auto &[type, target] : self->targets_) {
     auto track_state = target->track(armors, image_stamp);
@@ -288,9 +291,9 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
                       self->configs_.odom_frame_id;
     auto rpy = armor.getRpy();
     auto xyz = armor.position;
-    self->plotter_.plot(armor_name + "Roll", rpy(0));
-    self->plotter_.plot(armor_name + "Pitch", rpy(1));
-    self->plotter_.plot(armor_name + "Yaw", rpy(2));
+    self->plotter_.plot(armor_name + "Roll", tools::radian2Angle(rpy(0)));
+    self->plotter_.plot(armor_name + "Pitch", tools::radian2Angle(rpy(1)));
+    self->plotter_.plot(armor_name + "Yaw", tools::radian2Angle(rpy(2)));
     self->plotter_.plot(armor_name + "X", xyz.x());
     self->plotter_.plot(armor_name + "Y", xyz.y());
     self->plotter_.plot(armor_name + "Z", xyz.z());
@@ -307,8 +310,9 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   self->plotter_.plot(type_name + "vx", state.center_velocity.x());
   self->plotter_.plot(type_name + "vy", state.center_velocity.y());
   self->plotter_.plot(type_name + "vz", state.center_velocity.z());
-  self->plotter_.plot(type_name + "yaw", state.center_yaw);
-  self->plotter_.plot(type_name + "vyaw", state.center_vyaw);
+  self->plotter_.plot(type_name + "yaw", tools::radian2Angle(state.center_yaw));
+  self->plotter_.plot(type_name + "vyaw",
+                      tools::radian2Angle(state.center_vyaw));
   if (state.type == types::ArmorType::Outpost) {
     // TODO
   } else if (state.type != types::ArmorType::Base) {

@@ -1,5 +1,4 @@
 #include "hikrobot.hpp"
-#include "basic/time_tools.hpp"
 #include "confs/CameraParams.hpp"
 
 #include "MvCameraControl.h"
@@ -196,7 +195,10 @@ bool hardware::HikRobot::readImage(
   bool success{false};
   const auto &frame_info = raw.stFrameInfo;
 
-  stamp = tools::nanoSecToChronoPoint(frame_info.nHostTimeStamp * 1000000ull);
+  // stamp = tools::nanoSecToChronoPoint(frame_info.nHostTimeStamp *
+  // 1000000ull);
+  // XXX: 硬件时间戳似乎两帧才更新一次，有点怪
+  stamp = std::chrono::system_clock::now();
 
   auto pixel_type = frame_info.enPixelType;
   const static std::unordered_map<MvGvspPixelType, cv::ColorConversionCodes>
