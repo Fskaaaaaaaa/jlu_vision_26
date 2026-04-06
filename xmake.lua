@@ -47,6 +47,7 @@ add_requires("cxxopts")
 add_requires("quill")
 add_requires("nameof")
 add_requires("ftxui")
+add_requires("nlohmann_json")
 -- add_requires("boost") 这个应该用不到
 add_requires("ceres", { system = true })
 -- ceres是openvins的依赖，拟合大符应该也能用到
