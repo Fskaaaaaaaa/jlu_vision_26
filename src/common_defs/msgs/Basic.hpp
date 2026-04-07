@@ -1,6 +1,5 @@
 #pragma once
 
-#include "confs/Basic.hpp"
 namespace msgs {
 struct Point2d {
   double x;

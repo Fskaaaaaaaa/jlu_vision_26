@@ -1,5 +1,6 @@
 // Copyright (c) 2026 Fenghr. All Rights Reserved.
 #include "factors.hpp"
+#include "math/angle_tools.hpp"
 #include "math/sigmoid_functions.hpp"
 #include "types.hpp"
 
@@ -82,7 +83,7 @@ auto_aim::VyawFactor::evaluateError(const double &w_pre, const double &w_cur,
   return error;
 }
 
-auto_aim::ArmorRadiusCenterZFactor::ArmorRadiusCenterZFactor(
+auto_aim::ArmorRACenterZFactor::ArmorRACenterZFactor(
     const gtsam::SharedNoiseModel &model, gtsam::Key rad_a, gtsam::Key rot_cur,
     gtsam::Key x_cur, const Eigen::Vector3d &obs_armor_position,
     double obs_armor_yaw, ArmorIndex armor_index, double radius_min,
@@ -92,7 +93,7 @@ auto_aim::ArmorRadiusCenterZFactor::ArmorRadiusCenterZFactor(
       obs_armor_yaw_(gtsam::Rot2::fromAngle(obs_armor_yaw)),
       armor_index_(armor_index), min_(radius_min), max_(radius_max) {}
 
-gtsam::Vector auto_aim::ArmorRadiusCenterZFactor::evaluateError(
+gtsam::Vector auto_aim::ArmorRACenterZFactor::evaluateError(
     const double &ra, const gtsam::Rot2 &rotation, const gtsam::Point3 &center,
     gtsam::OptionalMatrixType H1, gtsam::OptionalMatrixType H2,
     gtsam::OptionalMatrixType H3) const {
@@ -126,7 +127,7 @@ gtsam::Vector auto_aim::ArmorRadiusCenterZFactor::evaluateError(
   return error;
 }
 
-auto_aim::ArmorRadiusDZFactor::ArmorRadiusDZFactor(
+auto_aim::ArmorRBDZFactor::ArmorRBDZFactor(
     const gtsam::SharedNoiseModel &model, gtsam::Key rad_b, gtsam::Key dz,
     gtsam::Key rot_cur, gtsam::Key x_cur,
     const Eigen::Vector3d &obs_armor_position, double obs_armor_yaw,
@@ -136,7 +137,7 @@ auto_aim::ArmorRadiusDZFactor::ArmorRadiusDZFactor(
       obs_armor_yaw_(gtsam::Rot2::fromAngle(obs_armor_yaw)),
       armor_index_(armor_index), min_(radius_min), max_(radius_max) {}
 
-gtsam::Vector auto_aim::ArmorRadiusDZFactor::evaluateError(
+gtsam::Vector auto_aim::ArmorRBDZFactor::evaluateError(
     const double &rb, const double &dz, const gtsam::Rot2 &rotation,
     const gtsam::Point3 &center, gtsam::OptionalMatrixType H1,
     gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
@@ -166,6 +167,98 @@ gtsam::Vector auto_aim::ArmorRadiusDZFactor::evaluateError(
   if (H3) {
     (*H3) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, 1.0).finished();
   }
+  if (H4) {
+    (*H4) = (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0,
+             0.0, 0.0, 0.0)
+                .finished();
+  }
+  return error;
+}
+
+auto_aim::ArmorRadiusCenterZFactor::ArmorRadiusCenterZFactor(
+    const gtsam::SharedNoiseModel &model, gtsam::Key armor_pose_key,
+    gtsam::Key radius_key, gtsam::Key center_yaw_key,
+    gtsam::Key center_point_key, const Eigen::Isometry3d &T_camera_to_odom,
+    ArmorIndex armor_index, double radius_min, double radius_max)
+    : Base(model, armor_pose_key, radius_key, center_yaw_key, center_point_key),
+      T_camera_to_odom_(T_camera_to_odom), armor_index_(armor_index),
+      radius_min_(radius_min), radius_max_(radius_max) {}
+
+gtsam::Vector auto_aim::ArmorRadiusCenterZFactor::evaluateError(
+    const gtsam::Pose3 &armor_pose_camera, const double &radius,
+    const gtsam::Rot2 &center_yaw, const gtsam::Point3 &center_point,
+    gtsam::OptionalMatrixType H1, gtsam::OptionalMatrixType H2,
+    gtsam::OptionalMatrixType H3, gtsam::OptionalMatrixType H4) const {
+  Eigen::Isometry3d pose{Eigen::Isometry3d::Identity()};
+  pose.pretranslate(armor_pose_camera.translation());
+  pose.rotate(armor_pose_camera.rotation().matrix());
+  Eigen::Isometry3d armor_pose_odom = T_camera_to_odom_ * pose;
+  auto armor_yaw = gtsam::Rot2::fromAngle(
+      tools::rotationMatrixToRPY(armor_pose_odom.rotation().matrix()).z());
+  Eigen::Vector3d armor_position = armor_pose_odom.translation();
+  auto radius_b = tools::logisticFunction(radius, radius_min_, radius_max_);
+  auto nx = std::cos(armor_yaw.theta());
+  auto ny = std::sin(armor_yaw.theta());
+  auto tx = -ny;
+  auto ty = nx;
+  auto dx = center_point.x() - armor_position.x();
+  auto dy = center_point.y() - armor_position.y();
+  auto tangential_err = tx * dx + ty * dy;
+  auto radial_err = nx * dx + ny * dy - radius_b;
+  auto z_err = center_point.z() - armor_position.z();
+  auto pred_armor_yaw = gtsam::Rot2::fromAngle(
+      center_yaw.theta() + getArmorBetweenYawFromIndex(armor_index_));
+  auto yaw_err = armor_yaw.localCoordinates(pred_armor_yaw).x();
+  gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
+  // XXX: 待验证，先用数值求导
+  // if (H1) {
+  //   Eigen::Matrix3d R_co = T_camera_to_odom_.rotation().matrix();
+  //   Eigen::Matrix3d R_c = armor_pose_camera.rotation().matrix();
+  //   Eigen::Vector3d t_c = armor_pose_camera.translation();
+  //   Eigen::Matrix3d R_o = R_co * R_c;
+  //   // --- J_p ---
+  //   Eigen::Matrix<double, 4, 3> J_p;
+  //   J_p << -tx, -ty, 0.0, -nx, -ny, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0;
+  //   // --- J_rot ---
+  //   auto radial_proj = nx * dx + ny * dy;
+  //   Eigen::Matrix<double, 4, 1> d_e_d_psi;
+  //   d_e_d_psi << -radial_proj, tangential_err, 0.0, -1.0;
+  //   Eigen::Vector3d rpy = tools::rotationMatrixToRPY(R_o);
+  //   double roll = rpy(0), pitch = rpy(1);
+  //   Eigen::RowVector3d d_psi_d_omega;
+  //   d_psi_d_omega << 0.0, std::sin(roll) / std::cos(pitch),
+  //       std::cos(roll) / std::cos(pitch);
+  //   Eigen::Matrix<double, 4, 3> J_rot = d_e_d_psi * d_psi_d_omega;
+  //   // --- skew(t_c) ---
+  //   Eigen::Matrix3d t_c_hat;
+  //   t_c_hat << 0.0, -t_c.z(), t_c.y(), t_c.z(), 0.0, -t_c.x(), -t_c.y(),
+  //       t_c.x(), 0.0;
+  //   Eigen::Matrix<double, 4, 6> H1_mat;
+  //   H1_mat.leftCols<3>() = J_p * R_co;
+  //   H1_mat.rightCols<3>() = J_p * (-R_co * t_c_hat) // 位移耦合项
+  //                           + J_rot * R_o;          // 旋转链式
+  //   (*H1) = H1_mat;
+  // }
+  if (H1) {
+    auto error_func = [this, &radius, &center_yaw, &center_point](
+                          const gtsam::Pose3 &pose) -> gtsam::Vector {
+      return this->evaluateError(pose, radius, center_yaw, center_point,
+                                 nullptr, nullptr, nullptr, nullptr);
+    };
+    (*H1) = numericalDerivative11<gtsam::Vector, gtsam::Pose3>(
+        error_func, armor_pose_camera, 1e-6);
+  }
+  if (H2) {
+    double d_radius_d_radius =
+        tools::logisticDerivative(radius_b, radius_min_, radius_max_);
+    (*H2) =
+        (gtsam::Matrix(4, 1) << 0.0, -d_radius_d_radius, 0.0, 0.0).finished();
+  }
+
+  if (H3) {
+    (*H3) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, -1.0).finished();
+  }
+
   if (H4) {
     (*H4) = (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0,
              0.0, 0.0, 0.0)

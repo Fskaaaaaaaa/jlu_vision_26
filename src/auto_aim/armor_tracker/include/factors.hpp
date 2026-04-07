@@ -6,7 +6,9 @@
 #include <gtsam/base/Vector.h>
 #include <gtsam/base/numericalDerivative.h>
 #include <gtsam/base/types.h>
+#include <gtsam/geometry/Point2.h>
 #include <gtsam/geometry/Point3.h>
+#include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Rot2.h>
 #include <gtsam/linear/NoiseModel.h>
 #include <gtsam/nonlinear/NoiseModelFactorN.h>
@@ -32,6 +34,10 @@ namespace auto_aim {
 //                                 \__R(k)
 //          B(0)--ArmorFactorRbDz--X(k)
 //          Z(0)__|             \__R(k)
+// PNPFGO中，连接链路应该是：-四个关键点->重投影因子-pose3d->装甲板观测因子-Point3Rot2->运动约束因子
+// 但是这样是否意味着Point3和Rot2的先验无法传递给Pose3？
+// 不，应该直接让观测因子连接四个角点，根据Point3、Rot2和pnp得到的roll和pitch得到三维点，再转换到相机系进行投影
+// 这样连接四个像素观测的因子返回的误差向量就应该是四个角点的重投影误差了
 
 class TranslationFactor
     : public gtsam::NoiseModelFactorN<gtsam::Point3, gtsam::Vector3,
@@ -96,17 +102,16 @@ public:
                               gtsam::OptionalMatrixType H2) const override;
 };
 
-class ArmorRadiusCenterZFactor
+class [[deprecated]] ArmorRACenterZFactor
     : public gtsam::NoiseModelFactorN<double, gtsam::Rot2, gtsam::Point3> {
   using Base = gtsam::NoiseModelFactorN<double, gtsam::Rot2, gtsam::Point3>;
 
 public:
-  ArmorRadiusCenterZFactor(const gtsam::SharedNoiseModel &model,
-                           gtsam::Key rad_a, gtsam::Key rot_cur,
-                           gtsam::Key x_cur,
-                           const Eigen::Vector3d &obs_armor_position,
-                           double obs_armor_yaw, ArmorIndex armor_index,
-                           double radius_min, double radius_max);
+  ArmorRACenterZFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_a,
+                       gtsam::Key rot_cur, gtsam::Key x_cur,
+                       const Eigen::Vector3d &obs_armor_position,
+                       double obs_armor_yaw, ArmorIndex armor_index,
+                       double radius_min, double radius_max);
 
   gtsam::Vector evaluateError(const double &ra, const gtsam::Rot2 &rotation,
                               const gtsam::Point3 &center,
@@ -120,18 +125,18 @@ private:
   ArmorIndex armor_index_;
   double min_, max_;
 };
-class ArmorRadiusDZFactor
+class [[deprecated]] ArmorRBDZFactor
     : public gtsam::NoiseModelFactorN<double, double, gtsam::Rot2,
                                       gtsam::Point3> {
   using Base =
       gtsam::NoiseModelFactorN<double, double, gtsam::Rot2, gtsam::Vector3>;
 
 public:
-  ArmorRadiusDZFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_b,
-                      gtsam::Key dz, gtsam::Key rot_cur, gtsam::Key x_cur,
-                      const Eigen::Vector3d &obs_armor_position,
-                      double obs_armor_yaw, ArmorIndex armor_index,
-                      double radius_min, double radius_max);
+  ArmorRBDZFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_b,
+                  gtsam::Key dz, gtsam::Key rot_cur, gtsam::Key x_cur,
+                  const Eigen::Vector3d &obs_armor_position,
+                  double obs_armor_yaw, ArmorIndex armor_index,
+                  double radius_min, double radius_max);
 
   gtsam::Vector
   evaluateError(const double &rb, const double &dz, const gtsam::Rot2 &rotation,
@@ -146,5 +151,32 @@ private:
   double min_, max_;
 };
 
-class OutpostFactor {};
+class ArmorRadiusCenterZFactor
+    : public gtsam::NoiseModelFactorN<gtsam::Pose3, double, gtsam::Rot2,
+                                      gtsam::Point3> {
+  using Base = gtsam::NoiseModelFactorN<gtsam::Pose3, double, gtsam::Rot2,
+                                        gtsam::Point3>;
+
+public:
+  ArmorRadiusCenterZFactor(const gtsam::SharedNoiseModel &model,
+                           gtsam::Key armor_pose_key, gtsam::Key radius_key,
+                           gtsam::Key center_yaw_key,
+                           gtsam::Key center_point_key,
+                           const Eigen::Isometry3d &T_camera_to_odom,
+                           ArmorIndex armor_index, double radius_min,
+                           double radius_max);
+
+  gtsam::Vector
+  evaluateError(const gtsam::Pose3 &armor_pose_camera, const double &radius,
+                const gtsam::Rot2 &center_yaw,
+                const gtsam::Point3 &center_point, gtsam::OptionalMatrixType H1,
+                gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
+                gtsam::OptionalMatrixType H4) const override;
+
+private:
+  Eigen::Isometry3d T_camera_to_odom_;
+  ArmorIndex armor_index_;
+  double radius_min_, radius_max_;
+};
+
 } // namespace auto_aim

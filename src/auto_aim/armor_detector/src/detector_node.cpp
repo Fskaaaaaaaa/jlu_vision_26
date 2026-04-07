@@ -261,6 +261,7 @@ void auto_aim::DetectorNode::publishArmors(const std::vector<Armor> &armors) {
           sample->armor_color = static_cast<int>(armor.color);
           sample->armor_type = static_cast<int>(armor.type);
           sample->distance_to_image_center = armor.distance_to_image_center;
+
           sample->position.x = armor.position.x();
           sample->position.y = armor.position.y();
           sample->position.z = armor.position.z();
@@ -268,6 +269,16 @@ void auto_aim::DetectorNode::publishArmors(const std::vector<Armor> &armors) {
           sample->orientation.x = armor.orientation.x();
           sample->orientation.y = armor.orientation.y();
           sample->orientation.z = armor.orientation.z();
+
+          sample->left_light.top.x = armor.left_light.top.x;
+          sample->left_light.top.y = armor.left_light.top.y;
+          sample->left_light.bottom.x = armor.left_light.bottom.x;
+          sample->left_light.bottom.y = armor.left_light.bottom.y;
+          sample->right_light.top.x = armor.right_light.top.x;
+          sample->right_light.top.y = armor.right_light.top.y;
+          sample->right_light.bottom.x = armor.right_light.bottom.x;
+          sample->right_light.bottom.y = armor.right_light.bottom.y;
+
           sample->confidence = armor.confidence;
           sample->key_frame = armor.key_frame;
           sample->heart_beat = false;
