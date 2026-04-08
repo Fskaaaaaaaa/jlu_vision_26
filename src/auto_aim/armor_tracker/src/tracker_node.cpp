@@ -56,18 +56,26 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       aiming_target_(types::ArmorType::Negative),
       planner_(logger_, configs_.planner_conf) {
   LOG_INFO(logger_, "start tracker node!");
-  tf_listener_.init();
-  for (auto type : std::array{
+  // 添加目标
+  for (auto target_type : std::array{
            types::ArmorType::One, types::ArmorType::Two,
            types::ArmorType::Three, types::ArmorType::Four,
            types::ArmorType::Sentry,
            // types::ArmorType::Outpost,
            // types::ArmorType::Base,
        }) {
-    targets_.emplace(type, std::make_unique<RobotTarget>(
-                               logger_, configs_.robot_conf, type));
-    LOG_INFO(logger_, "add target {}.", rfl::enum_to_string(type));
+    targets_.emplace(target_type,
+                     std::make_unique<RobotTarget>(logger_, configs_.robot_conf,
+                                                   target_type));
+    LOG_INFO(logger_, "add target {}.", rfl::enum_to_string(target_type));
   }
+  // 初始化畸变内参和坐标变换
+  tf_listener_.init();
+  auto camera_info =
+      hardware::CameraInfoListener{logger_, configs_.camera_name}.get();
+  this->camera_matrix_ = camera_info.camera_matrix.clone();
+  this->distortion_coefficients_ = camera_info.distortion_coefficients.clone();
+  // 开始订阅装甲板
   armors_listener_
       .attachEvent(armors_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
                    iox::popo::createNotificationCallback(
@@ -76,6 +84,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
         LOG_CRITICAL(logger_, "unable to attach armors_sub");
         std::exit(EXIT_FAILURE);
       });
+  // 启动云台规划线程
   this->plan_thread_ = std::jthread{[this]() {
     LOG_INFO(logger_, "plan_thread start!");
     while (!iox::hasTerminationRequested()) {
@@ -167,12 +176,8 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
     }
     LOG_INFO(logger_, "plan_thread stop!");
   }};
-  if (configs_.show_image) {
-    auto camera_info =
-        hardware::CameraInfoListener{logger_, configs_.camera_name}.get();
-    this->camera_matrix_ = camera_info.camera_matrix.clone();
-    this->distortion_coefficients_ =
-        camera_info.distortion_coefficients.clone();
+  // 启动可视化线程
+  if (configs_.show_image)
     this->image_poller_ =
         std::make_unique<hardware::ImagePoller<msgs::Image1440x1080_8UC3>>(
             logger_, configs_.camera_name,
@@ -186,6 +191,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                     targets_.at(aim_target)->getTargetTrackState();
                 auto [aimed_armor, armor_index, predict_time] =
                     planner_.getAimingArmorIndexPredictTime(target_state);
+                // HACK: 不应该放到这里
                 plotter_.plot("select_index", static_cast<int>(armor_index));
                 plotter_.plot("predict_time", predict_time);
                 const auto &target = targets_.at(aim_target);
@@ -198,7 +204,6 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
               cv::imshow("tracker", copy);
               cv::waitKey(1);
             });
-  }
   LOG_INFO(logger_, "Tracker node initialization complete!");
 }
 

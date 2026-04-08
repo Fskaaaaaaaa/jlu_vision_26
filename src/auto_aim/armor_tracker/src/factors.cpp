@@ -3,8 +3,12 @@
 #include "math/angle_tools.hpp"
 #include "math/sigmoid_functions.hpp"
 #include "types.hpp"
+#include "types/ArmorPoints.hpp"
 
 #include <gtsam/base/Vector.h>
+#include <gtsam/base/types.h>
+#include <gtsam/geometry/Cal3DS2.h>
+#include <gtsam/geometry/PinholeCamera.h>
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Rot2.h>
 #include <numbers>
@@ -210,43 +214,36 @@ gtsam::Vector auto_aim::ArmorRadiusCenterZFactor::evaluateError(
       center_yaw.theta() + getArmorBetweenYawFromIndex(armor_index_));
   auto yaw_err = armor_yaw.localCoordinates(pred_armor_yaw).x();
   gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
-  // XXX: 待验证，先用数值求导
-  // if (H1) {
-  //   Eigen::Matrix3d R_co = T_camera_to_odom_.rotation().matrix();
-  //   Eigen::Matrix3d R_c = armor_pose_camera.rotation().matrix();
-  //   Eigen::Vector3d t_c = armor_pose_camera.translation();
-  //   Eigen::Matrix3d R_o = R_co * R_c;
-  //   // --- J_p ---
-  //   Eigen::Matrix<double, 4, 3> J_p;
-  //   J_p << -tx, -ty, 0.0, -nx, -ny, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0;
-  //   // --- J_rot ---
-  //   auto radial_proj = nx * dx + ny * dy;
-  //   Eigen::Matrix<double, 4, 1> d_e_d_psi;
-  //   d_e_d_psi << -radial_proj, tangential_err, 0.0, -1.0;
-  //   Eigen::Vector3d rpy = tools::rotationMatrixToRPY(R_o);
-  //   double roll = rpy(0), pitch = rpy(1);
-  //   Eigen::RowVector3d d_psi_d_omega;
-  //   d_psi_d_omega << 0.0, std::sin(roll) / std::cos(pitch),
-  //       std::cos(roll) / std::cos(pitch);
-  //   Eigen::Matrix<double, 4, 3> J_rot = d_e_d_psi * d_psi_d_omega;
-  //   // --- skew(t_c) ---
-  //   Eigen::Matrix3d t_c_hat;
-  //   t_c_hat << 0.0, -t_c.z(), t_c.y(), t_c.z(), 0.0, -t_c.x(), -t_c.y(),
-  //       t_c.x(), 0.0;
-  //   Eigen::Matrix<double, 4, 6> H1_mat;
-  //   H1_mat.leftCols<3>() = J_p * R_co;
-  //   H1_mat.rightCols<3>() = J_p * (-R_co * t_c_hat) // 位移耦合项
-  //                           + J_rot * R_o;          // 旋转链式
-  //   (*H1) = H1_mat;
-  // }
   if (H1) {
-    auto error_func = [this, &radius, &center_yaw, &center_point](
-                          const gtsam::Pose3 &pose) -> gtsam::Vector {
-      return this->evaluateError(pose, radius, center_yaw, center_point,
-                                 nullptr, nullptr, nullptr, nullptr);
-    };
-    (*H1) = numericalDerivative11<gtsam::Vector, gtsam::Pose3>(
-        error_func, armor_pose_camera, 1e-6);
+    // auto error_func = [this, &radius, &center_yaw, &center_point](
+    //                       const gtsam::Pose3 &pose) -> gtsam::Vector {
+    //   return this->evaluateError(pose, radius, center_yaw, center_point,
+    //                              nullptr, nullptr, nullptr, nullptr);
+    // };
+    // (*H1) = numericalDerivative11<gtsam::Vector, gtsam::Pose3>(
+    //     error_func, armor_pose_camera, 1e-6);
+    Eigen::Matrix<double, 4, 3> J_p;
+    J_p << -tx, -ty, 0.0, -nx, -ny, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0;
+    auto radial_proj = nx * dx + ny * dy;
+    Eigen::Matrix<double, 4, 1> d_e_d_psi;
+    d_e_d_psi << -radial_proj, tangential_err, 0.0, -1.0;
+    Eigen::Vector3d rpy =
+        tools::rotationMatrixToRPY(armor_pose_odom.rotation().matrix());
+    auto roll = rpy.x();
+    auto pitch = rpy.y();
+    auto cos_pitch = std::cos(pitch);
+    Eigen::Matrix<double, 1, 3> d_psi_d_omega;
+    // Pose3 的局部扰动使用右乘重traction，旋转分量是 body-frame omega
+    d_psi_d_omega << 0.0, std::sin(roll) / cos_pitch,
+        std::cos(roll) / cos_pitch;
+    Eigen::Matrix<double, 4, 3> J_rot = d_e_d_psi * d_psi_d_omega;
+    Eigen::Matrix<double, 4, 3> J_trans =
+        J_p * armor_pose_odom.rotation().matrix();
+    Eigen::Matrix<double, 4, 6> H1_mat;
+    // 注意gtsam的pose3旋转扰动在前，平移扰动在后
+    H1_mat.leftCols<3>() = J_rot;
+    H1_mat.rightCols<3>() = J_trans;
+    (*H1) = H1_mat;
   }
   if (H2) {
     double d_radius_d_radius =
@@ -254,15 +251,145 @@ gtsam::Vector auto_aim::ArmorRadiusCenterZFactor::evaluateError(
     (*H2) =
         (gtsam::Matrix(4, 1) << 0.0, -d_radius_d_radius, 0.0, 0.0).finished();
   }
-
   if (H3) {
     (*H3) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, -1.0).finished();
   }
-
   if (H4) {
     (*H4) = (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0,
              0.0, 0.0, 0.0)
                 .finished();
   }
   return error;
+}
+
+auto_aim::ArmorRadiusDZFactor::ArmorRadiusDZFactor(
+    const gtsam::SharedNoiseModel &model, gtsam::Key armor_pose_key,
+    gtsam::Key radius_key, gtsam::Key dz_key, gtsam::Key center_yaw_key,
+    gtsam::Key center_point_key, const Eigen::Isometry3d &T_camera_to_odom,
+    ArmorIndex armor_index, double radius_min, double radius_max)
+    : Base(model, armor_pose_key, radius_key, dz_key, center_yaw_key,
+           center_point_key),
+      T_camera_to_odom_(T_camera_to_odom), armor_index_(armor_index),
+      radius_min_(radius_min), radius_max_(radius_max) {}
+
+gtsam::Vector auto_aim::ArmorRadiusDZFactor::evaluateError(
+    const gtsam::Pose3 &armor_pose_camera, const double &radius,
+    const double &dz, const gtsam::Rot2 &center_yaw,
+    const gtsam::Point3 &center_point, gtsam::OptionalMatrixType H1,
+    gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
+    gtsam::OptionalMatrixType H4, gtsam::OptionalMatrixType H5) const {
+  Eigen::Isometry3d pose{Eigen::Isometry3d::Identity()};
+  pose.pretranslate(armor_pose_camera.translation());
+  pose.rotate(armor_pose_camera.rotation().matrix());
+  Eigen::Isometry3d armor_pose_odom = T_camera_to_odom_ * pose;
+  auto armor_yaw = gtsam::Rot2::fromAngle(
+      tools::rotationMatrixToRPY(armor_pose_odom.rotation().matrix()).z());
+  Eigen::Vector3d armor_position = armor_pose_odom.translation();
+  auto radius_b = tools::logisticFunction(radius, radius_min_, radius_max_);
+  auto nx = std::cos(armor_yaw.theta());
+  auto ny = std::sin(armor_yaw.theta());
+  auto tx = -ny;
+  auto ty = nx;
+  auto dx = center_point.x() - armor_position.x();
+  auto dy = center_point.y() - armor_position.y();
+  auto tangential_err = tx * dx + ty * dy;
+  auto radial_err = nx * dx + ny * dy - radius_b;
+  auto z_err = center_point.z() + dz - armor_position.z();
+  auto pred_armor_yaw = gtsam::Rot2::fromAngle(
+      center_yaw.theta() + getArmorBetweenYawFromIndex(armor_index_));
+  auto yaw_err = armor_yaw.localCoordinates(pred_armor_yaw).x();
+  gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
+  if (H1) {
+    // auto error_func = [this, &radius, &center_yaw, &center_point](
+    //                       const gtsam::Pose3 &pose) -> gtsam::Vector {
+    //   return this->evaluateError(pose, radius, center_yaw, center_point,
+    //                              nullptr, nullptr, nullptr, nullptr);
+    // };
+    // (*H1) = numericalDerivative11<gtsam::Vector, gtsam::Pose3>(
+    //     error_func, armor_pose_camera, 1e-6);
+    Eigen::Matrix<double, 4, 3> J_p;
+    J_p << -tx, -ty, 0.0, -nx, -ny, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0;
+    auto radial_proj = nx * dx + ny * dy;
+    Eigen::Matrix<double, 4, 1> d_e_d_psi;
+    d_e_d_psi << -radial_proj, tangential_err, 0.0, -1.0;
+    Eigen::Vector3d rpy =
+        tools::rotationMatrixToRPY(armor_pose_odom.rotation().matrix());
+    auto roll = rpy.x();
+    auto pitch = rpy.y();
+    auto cos_pitch = std::cos(pitch);
+    Eigen::Matrix<double, 1, 3> d_psi_d_omega;
+    // Pose3 的局部扰动使用右乘重traction，旋转分量是 body-frame omega
+    d_psi_d_omega << 0.0, std::sin(roll) / cos_pitch,
+        std::cos(roll) / cos_pitch;
+    Eigen::Matrix<double, 4, 3> J_rot = d_e_d_psi * d_psi_d_omega;
+    Eigen::Matrix<double, 4, 3> J_trans =
+        J_p * armor_pose_odom.rotation().matrix();
+    Eigen::Matrix<double, 4, 6> H1_mat;
+    // 注意gtsam的pose3旋转扰动在前，平移扰动在后
+    H1_mat.leftCols<3>() = J_rot;
+    H1_mat.rightCols<3>() = J_trans;
+    (*H1) = H1_mat;
+  }
+  if (H2) {
+    auto d_radius_d_rb =
+        tools::logisticDerivative(radius_b, radius_min_, radius_max_);
+    (*H2) = (gtsam::Matrix(4, 1) << 0.0, -d_radius_d_rb, 0.0, 0.0).finished();
+  }
+  if (H3) {
+    (*H3) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 1.0, 0.0).finished();
+  }
+  if (H4) {
+    (*H4) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, 1.0).finished();
+  }
+  if (H5) {
+    (*H5) = (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0,
+             0.0, 0.0, 0.0)
+                .finished();
+  }
+  return error;
+}
+
+auto_aim::ArmorReprojFactor::ArmorReprojFactor(
+    const gtsam::SharedNoiseModel &model, gtsam::Key armor_pose_key,
+    const cv::Mat &camera_matrix, const cv::Mat &distortion_coefficients,
+    types::ArmorType type, types::ArmorPointPosition point_position,
+    Eigen::Vector2d px_point)
+    : Base(model, armor_pose_key), px_point_(px_point) {
+  auto point_cv = types::points::getArmorPointsCV(type).at(
+      static_cast<int>(point_position));
+  armor_point_ = gtsam::Point3{point_cv.x, point_cv.y, point_cv.z};
+  double fx = camera_matrix.at<double>(0, 0);
+  double fy = camera_matrix.at<double>(1, 1);
+  double s = camera_matrix.at<double>(0, 1);
+  double u0 = camera_matrix.at<double>(0, 2);
+  double v0 = camera_matrix.at<double>(1, 2);
+  double k1 = distortion_coefficients.at<double>(0, 0);
+  double k2 = distortion_coefficients.at<double>(0, 1);
+  double p1 = distortion_coefficients.at<double>(0, 2);
+  double p2 = distortion_coefficients.at<double>(0, 3);
+  calib_ = gtsam::Cal3DS2(fx, fy, s, u0, v0, k1, k2, p1, p2);
+}
+
+// NOTE: 这里就需要订阅回调里保留armor相机系的位姿，查询变换后仅传入因子中
+gtsam::Vector auto_aim::ArmorReprojFactor::evaluateError(
+    const gtsam::Pose3 &armor_pose_camera, gtsam::OptionalMatrixType H) const {
+  // 获取点的位姿
+  gtsam::Matrix36 H_transform;
+  gtsam::Point3 p_cam = armor_pose_camera.transformFrom(
+      armor_point_, H ? &H_transform : nullptr, nullptr);
+  // if (p_cam.z() <= 1e-6) {
+  //   if (H)
+  //     *H = gtsam::Matrix::Zero(2, 6);
+  //   return gtsam::Vector2::Zero();
+  // }
+  // 投影
+  gtsam::Matrix23 H_norm;
+  gtsam::Point2 pn = gtsam::PinholeCamera<gtsam::Cal3DS2>::Project(
+      p_cam, H ? &H_norm : nullptr);
+  // 添加畸变
+  gtsam::Matrix22 H_calib;
+  gtsam::Point2 px = calib_.uncalibrate(pn, {}, H ? &H_calib : nullptr);
+  if (H)
+    *H = H_calib * H_norm * H_transform;
+  return px - px_point_;
 }

@@ -2,17 +2,22 @@
 #pragma once
 
 #include "types.hpp"
+#include "types/ArmorType.hpp"
 
 #include <gtsam/base/Vector.h>
 #include <gtsam/base/numericalDerivative.h>
 #include <gtsam/base/types.h>
+#include <gtsam/geometry/Cal3DS2.h>
+#include <gtsam/geometry/PinholeCamera.h>
 #include <gtsam/geometry/Point2.h>
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Rot2.h>
 #include <gtsam/linear/NoiseModel.h>
 #include <gtsam/nonlinear/NoiseModelFactorN.h>
+#include <gtsam/nonlinear/NonlinearFactor.h>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
+#include <opencv2/core.hpp>
 
 namespace auto_aim {
 // NOTE:
@@ -177,6 +182,54 @@ private:
   Eigen::Isometry3d T_camera_to_odom_;
   ArmorIndex armor_index_;
   double radius_min_, radius_max_;
+};
+
+class ArmorRadiusDZFactor
+    : public gtsam::NoiseModelFactorN<gtsam::Pose3, double, double, gtsam::Rot2,
+                                      gtsam::Point3> {
+  using Base = gtsam::NoiseModelFactorN<gtsam::Pose3, double, double,
+                                        gtsam::Rot2, gtsam::Point3>;
+
+public:
+  ArmorRadiusDZFactor(const gtsam::SharedNoiseModel &model,
+                      gtsam::Key armor_pose_key, gtsam::Key radius_key,
+                      gtsam::Key dz_key, gtsam::Key center_yaw_key,
+                      gtsam::Key center_point_key,
+                      const Eigen::Isometry3d &T_camera_to_odom,
+                      ArmorIndex armor_index, double radius_min,
+                      double radius_max);
+
+  gtsam::Vector
+  evaluateError(const gtsam::Pose3 &armor_pose_camera, const double &radius,
+                const double &dz, const gtsam::Rot2 &center_yaw,
+                const gtsam::Point3 &center_point, gtsam::OptionalMatrixType H1,
+                gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
+                gtsam::OptionalMatrixType H4,
+                gtsam::OptionalMatrixType H5) const override;
+
+private:
+  Eigen::Isometry3d T_camera_to_odom_;
+  ArmorIndex armor_index_;
+  double radius_min_, radius_max_;
+};
+
+class ArmorReprojFactor : public gtsam::NoiseModelFactorN<gtsam::Pose3> {
+  using Base = gtsam::NoiseModelFactorN<gtsam::Pose3>;
+
+public:
+  ArmorReprojFactor(const gtsam::SharedNoiseModel &model,
+                    gtsam::Key armor_pose_key, const cv::Mat &camera_matrix,
+                    const cv::Mat &distortion_coefficients,
+                    types::ArmorType type,
+                    types::ArmorPointPosition point_position,
+                    Eigen::Vector2d px_point);
+  gtsam::Vector evaluateError(const gtsam::Pose3 &armor_pose_camera,
+                              gtsam::OptionalMatrixType H) const override;
+
+private:
+  gtsam::Point2 px_point_;
+  gtsam::Point3 armor_point_;
+  gtsam::Cal3DS2 calib_;
 };
 
 } // namespace auto_aim
