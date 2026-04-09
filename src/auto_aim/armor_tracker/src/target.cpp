@@ -98,18 +98,21 @@ std::vector<
     std::pair<auto_aim::ArmorPositionRollPitchYawPoints, auto_aim::ArmorIndex>>
 auto_aim::RobotTarget::matchArmors(
     const RobotTargetState &state,
-    const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors) const {
+    const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors_camera,
+    const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors_odom) const {
   auto armors = RobotTarget::getArmorsFromTargetState(state);
   std::vector<std::pair<ArmorPositionRollPitchYawPoints, ArmorIndex>>
       matched_armors;
   std::array<bool, 4> used_index{false, false, false, false};
-  for (const auto &obs : obs_armors) {
+  for (std::size_t i = 0;
+       i < obs_armors_camera.size() && i < obs_armors_odom.size(); ++i) {
+    const auto &obs = obs_armors_odom.at(i);
     auto result = Target::matchArmor(
         armors, obs, config_.max_match_distance_m,
         tools::angle2Radian(config_.max_match_yaw_diff_degree));
     if (!result.empty() &&
         !used_index.at(static_cast<int>(result.front().index))) {
-      matched_armors.emplace_back(obs, result.front().index);
+      matched_armors.emplace_back(obs_armors_camera.at(i), result.front().index);
       used_index.at(static_cast<int>(result.front().index)) = true;
     }
   }
@@ -399,19 +402,32 @@ auto_aim::RobotTarget::update(
              dt + dt_tracking_to_update);
     return {{}, TrackState::State::LOST};
   }
+  auto obs_armors_odom = armors;
+  for (auto &armor : obs_armors_odom) {
+    Eigen::Isometry3d armor_pose_camera{Eigen::Isometry3d::Identity()};
+    armor_pose_camera.pretranslate(armor.position);
+    armor_pose_camera.rotate(armor.getRotation());
+    const auto armor_pose_odom = T * armor_pose_camera;
+    const auto rpy = tools::rotationMatrixToRPY(armor_pose_odom.rotation());
+    armor.position = armor_pose_odom.translation();
+    armor.roll = rpy.x();
+    armor.pitch = rpy.y();
+    armor.yaw = gtsam::Rot2::fromAngle(rpy.z());
+  }
+
   auto target_state = target_state_.predict(dt);
   if (track_state_.state == TrackState::State::LOST) {
-    if (armors.empty()) {
+    if (obs_armors_odom.empty()) {
       return {{}, TrackState::State::LOST};
     } else {
-      target_state = getTargetStateFromArmor(armors.front());
+      target_state = getTargetStateFromArmor(obs_armors_odom.front());
     }
   }
-  auto matched_armors = matchArmors(target_state, armors);
-  if (matched_armors.size() < armors.size()) {
+  auto matched_armors = matchArmors(target_state, armors, obs_armors_odom);
+  if (matched_armors.size() < obs_armors_odom.size()) {
     LOG_DEBUG(logger_, "[Target {}]: Miss match {} armors! k = {}.",
               rfl::enum_to_string(target_state.type),
-              armors.size() - matched_armors.size(), track_state_.k);
+              obs_armors_odom.size() - matched_armors.size(), track_state_.k);
   }
 
   gtsam::Values values;

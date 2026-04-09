@@ -67,7 +67,8 @@ private:
   std::vector<std::pair<ArmorPositionRollPitchYawPoints, ArmorIndex>>
   matchArmors(
       const RobotTargetState &state,
-      const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors) const;
+      const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors_camera,
+      const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors_odom) const;
 
   RobotTargetState getTargetStateFromArmor(const ArmorPositionYaw &armor) const;
 
