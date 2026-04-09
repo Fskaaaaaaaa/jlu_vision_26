@@ -28,6 +28,18 @@ Eigen::Quaterniond auto_aim::ArmorPositionYaw::getRotation(double pitch,
   return tools::rpyToQuaterniond({roll, pitch, yaw.theta()});
 }
 
+auto_aim::ArmorPositionRollPitchYawPoints::ArmorPositionRollPitchYawPoints(
+    const types::Armor &armor)
+    : ArmorPositionYaw(armor), points(armor.key_points) {
+  this->pitch = armor.getRpy()(1);
+  this->roll = armor.getRpy()(0);
+}
+
+Eigen::Quaterniond
+auto_aim::ArmorPositionRollPitchYawPoints::getRotation() const {
+  return static_cast<const ArmorPositionYaw *>(this)->getRotation(pitch, roll);
+}
+
 auto_aim::TargetState auto_aim::TargetState::predict(double dt) const {
   TargetState state = *this;
   state.center_position = this->center_position + this->center_velocity * dt;

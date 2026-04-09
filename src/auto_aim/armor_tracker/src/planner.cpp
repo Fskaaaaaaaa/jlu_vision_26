@@ -16,7 +16,6 @@
 #include <optional>
 #include <stdexcept>
 #include <tuple>
-#include <utility>
 
 auto_aim::Planner::Planner(quill::Logger *logger, const PlannerConfig &config)
     : logger_(logger), config_(config),

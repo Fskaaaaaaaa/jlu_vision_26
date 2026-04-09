@@ -1,4 +1,4 @@
-log_level: Info
+log_level: Debug
 plot_info: true
 always_on_task: true
 show_image: true
@@ -9,8 +9,8 @@ camera_frame_id: camera
 odom_frame_id: odom
 armors_sub_topic:
   service: armors
-  instance: fake_ap
-  # instance: detector
+  # instance: fake_ap
+  instance: detector
   event: data
 serial_topic:
   service: aim_command
@@ -48,6 +48,9 @@ robot_conf:
   dz_prior_noise: 0.05
   default_dz: 0.0
   armor_observation_noise:
+    pixel_error:
+      x: 2.0
+      y: 2.0
     tangential_error_m: 1.0e-5
     radial_error_m: 6.0e-3
     height_error_m: 1.25e-6

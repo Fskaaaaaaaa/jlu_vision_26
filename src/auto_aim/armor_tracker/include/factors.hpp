@@ -43,6 +43,8 @@ namespace auto_aim {
 // 但是这样是否意味着Point3和Rot2的先验无法传递给Pose3？
 // 不，应该直接让观测因子连接四个角点，根据Point3、Rot2和pnp得到的roll和pitch得到三维点，再转换到相机系进行投影
 // 这样连接四个像素观测的因子返回的误差向量就应该是四个角点的重投影误差了
+// 存在同时添加两个装甲板的情况，即使同一个armor之间没有直接的运动因子相连（纯靠观测因子提供先验约束）
+// 也需要有独立的变量分配，先暂时给四块装甲板设成F(k)U(k)C(k)K(k)了
 
 class TranslationFactor
     : public gtsam::NoiseModelFactorN<gtsam::Point3, gtsam::Vector3,

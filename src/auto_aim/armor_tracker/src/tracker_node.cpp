@@ -56,6 +56,12 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       aiming_target_(types::ArmorType::Negative),
       planner_(logger_, configs_.planner_conf) {
   LOG_INFO(logger_, "start tracker node!");
+  // 初始化畸变内参和坐标变换
+  tf_listener_.init();
+  auto camera_info =
+      hardware::CameraInfoListener{logger_, configs_.camera_name}.get();
+  this->camera_matrix_ = camera_info.camera_matrix.clone();
+  this->distortion_coefficients_ = camera_info.distortion_coefficients.clone();
   // 添加目标
   for (auto target_type : std::array{
            types::ArmorType::One, types::ArmorType::Two,
@@ -66,15 +72,10 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
        }) {
     targets_.emplace(target_type,
                      std::make_unique<RobotTarget>(logger_, configs_.robot_conf,
-                                                   target_type));
+                                                   target_type, camera_matrix_,
+                                                   distortion_coefficients_));
     LOG_INFO(logger_, "add target {}.", rfl::enum_to_string(target_type));
   }
-  // 初始化畸变内参和坐标变换
-  tf_listener_.init();
-  auto camera_info =
-      hardware::CameraInfoListener{logger_, configs_.camera_name}.get();
-  this->camera_matrix_ = camera_info.camera_matrix.clone();
-  this->distortion_coefficients_ = camera_info.distortion_coefficients.clone();
   // 开始订阅装甲板
   armors_listener_
       .attachEvent(armors_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
@@ -226,41 +227,31 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   // 排除连心跳都没有的假唤醒
   if (armors.empty())
     return;
-  // 过滤掉心跳信号并按照光心距离排序，之后装甲板可能为空
+  // 由于frame_id从相机的配置文件读取，依赖图像回调获得，故心跳帧只有时间戳无坐标系
   auto image_stamp = armors.front().stamp; // 假设一次接收的armors来自同一帧
-  std::erase_if(armors, [](const types::Armor &a) { return a.heart_beat; });
-  LOG_TRACE_L1(self->logger_, "receive {} valid armors.", armors.size());
-  // 将坐标变换到odom系并抹除变换失败的装甲板
-  std::erase_if(armors, [&](types::Armor &armor) {
-    // 过滤掉非同一帧的装甲板
+  std::erase_if(armors, [&](const types::Armor &armor) {
+    return armor.heart_beat;
     if (self->configs_.erase_if_not_key_frame && !armor.key_frame)
       return true;
     if (armor.stamp != image_stamp)
       return true;
+  }); // 之后armors可能为空
+  LOG_TRACE_L1(self->logger_, "receive {} valid armors.", armors.size());
+  Eigen::Isometry3d T_camera_to_odom;
+  // 查找该帧的坐标变换
+  if (!armors.empty())
     try {
-      Eigen::Isometry3d armor_pose_camera{Eigen::Isometry3d::Identity()};
-      // 虽然PNP得到的是绝对坐标，但发布出来时已经是prerotate的了
-      armor_pose_camera.pretranslate(armor.position);
-      armor_pose_camera.rotate(armor.orientation.matrix());
-      Eigen::Isometry3d T = self->tf_buffer_.get(
-          self->configs_.odom_frame_id, armor.frame_id, armor.stamp,
+      T_camera_to_odom = self->tf_buffer_.get(
+          self->configs_.odom_frame_id, armors.front().frame_id,
+          armors.front().stamp,
           std::chrono::nanoseconds{static_cast<int64_t>(
               self->configs_.tf_query_tolerance_ms * 1e6)});
-      Eigen::Isometry3d armor_pose_odom = T * armor_pose_camera;
-      LOG_TRACE_L3(self->logger_, "armor position before tf: x{},y{},z{}",
-                   armor.position.x(), armor.position.y(), armor.position.z());
-      armor.position = armor_pose_odom.translation();
-      armor.orientation =
-          Eigen::Quaterniond{armor_pose_odom.rotation().matrix()};
-      LOG_TRACE_L3(self->logger_, "armor position after tf: x{},y{},z{}",
-                   armor.position.x(), armor.position.y(), armor.position.z());
-      return false;
     } catch (const std::exception &e) {
-      LOG_ERROR(self->logger_, "tf from {} to {} failed: {}", armor.frame_id,
-                self->configs_.odom_frame_id, e.what());
-      return true;
+      armors.clear(); // 失败舍弃该帧接收的装甲板
+      LOG_ERROR(self->logger_, "tf from {} to {} failed: {}",
+                armors.front().frame_id, self->configs_.odom_frame_id,
+                e.what());
     }
-  });
   std::ranges::sort(
       armors, [](const types::Armor &a, const types::Armor &b) -> bool {
         return a.distance_to_image_center < b.distance_to_image_center;
@@ -278,7 +269,7 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   // 更新所有目标。track由图像时间戳驱动，图像到发射瞬间的补偿由planner完成
   bool all_targets_lost{true};
   for (auto &[type, target] : self->targets_) {
-    auto track_state = target->track(armors, image_stamp);
+    auto track_state = target->track(armors, image_stamp, T_camera_to_odom);
     if (track_state != TrackState::State::LOST)
       all_targets_lost = false;
   }

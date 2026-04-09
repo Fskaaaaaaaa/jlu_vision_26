@@ -11,6 +11,7 @@
 namespace auto_aim {
 
 struct ArmorObservationNoiseConfig {
+  confs::Vector2d pixel_error;
   double tangential_error_m;
   double radial_error_m;
   double height_error_m;

@@ -1,21 +1,23 @@
 // Copyright (c) 2026 shuodedaoli. All Rights Reserved.
-// TODO 换马氏距离匹配armor，
-// 添加自适应噪声
-// 添加半径窗口平滑（不推荐，违背因子图初衷）
 #include "target.hpp"
 #include "configs.hpp"
 #include "factors.hpp"
 #include "math/angle_tools.hpp"
 #include "math/sigmoid_functions.hpp"
 #include "types.hpp"
+#include "types/Armor.hpp"
 #include "types/ArmorType.hpp"
 
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
 #include <array>
+#include <cstdint>
 #include <gtsam/base/Vector.h>
+#include <gtsam/base/types.h>
 #include <gtsam/geometry/Point3.h>
+#include <gtsam/geometry/Quaternion.h>
 #include <gtsam/geometry/Rot2.h>
+#include <gtsam/geometry/Rot3.h>
 #include <gtsam/inference/Symbol.h>
 #include <gtsam/linear/NoiseModel.h>
 #include <gtsam/nonlinear/ISAM2.h>
@@ -43,14 +45,18 @@ std::vector<auto_aim::ArmorMatchResult> auto_aim::Target::matchArmor(
       results.emplace_back(static_cast<ArmorIndex>(i), distance, yaw_diff);
     ++i;
   }
-  std::ranges::sort(results, std::ranges::less{}, &ArmorMatchResult::distance);
+  // 暂时先选择最面对的
+  std::ranges::sort(results, std::ranges::less{}, &ArmorMatchResult::yaw_diff);
   return results;
 }
 
 auto_aim::RobotTarget::RobotTarget(quill::Logger *logger,
                                    const RobotConfig &config,
-                                   types::ArmorType type)
-    : logger_(logger), config_(config) {
+                                   types::ArmorType type,
+                                   const cv::Mat &camera_matrix,
+                                   const cv::Mat &distortion_coefficients)
+    : logger_(logger), config_(config), camera_matrix_(camera_matrix),
+      distortion_coefficients_(distortion_coefficients) {
   target_state_.type = type;
   target_state_.radius_a = config_.default_radius;
   target_state_.radius_b = config_.default_radius;
@@ -75,6 +81,7 @@ auto_aim::RobotTarget::getArmorsFromTargetState(const TargetState &state,
     auto [_r, _dz] = (i == ArmorIndex::_0 || i == ArmorIndex::_2)
                          ? std::make_pair(radius_a, 0.0)
                          : std::make_pair(radius_b, dz);
+    // NOTE: 好像只在这里用到了positionyaw对center状态的构造函数
     armors.emplace_back(state.center_position, state.center_yaw, _r, _dz, 4, i);
   }
   return armors;
@@ -87,38 +94,19 @@ auto_aim::RobotTarget::getArmorsFromTargetState(
                                                state.radius_b, state.dz);
 }
 
-std::vector<std::pair<auto_aim::ArmorPositionYaw, auto_aim::ArmorIndex>>
-auto_aim::RobotTarget::matchArmorsUnique(
+std::vector<
+    std::pair<auto_aim::ArmorPositionRollPitchYawPoints, auto_aim::ArmorIndex>>
+auto_aim::RobotTarget::matchArmors(
     const RobotTargetState &state,
-    const std::vector<ArmorPositionYaw> &obs_armors) const {
-  auto armors_for_association = RobotTarget::getArmorsFromTargetState(state);
-  std::vector<MatchCandidate> candidates;
-  for (std::size_t obs_i = 0; obs_i < obs_armors.size(); ++obs_i) {
-    auto match_result = Target::matchArmor(
-        armors_for_association, obs_armors[obs_i], config_.max_match_distance_m,
+    const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors) const {
+  auto armors = RobotTarget::getArmorsFromTargetState(state);
+  std::vector<std::pair<ArmorPositionRollPitchYawPoints, ArmorIndex>>
+      matched_armors;
+  for (const auto &obs : obs_armors) {
+    auto result = Target::matchArmor(
+        armors, obs, config_.max_match_distance_m,
         tools::angle2Radian(config_.max_match_yaw_diff_degree));
-    for (const auto &match : match_result)
-      candidates.emplace_back(obs_i, match.index, match.distance,
-                              match.yaw_diff);
-  }
-  std::ranges::sort(
-      candidates, [](const MatchCandidate &a, const MatchCandidate &b) -> bool {
-        if (a.distance != b.distance)
-          return a.distance < b.distance;
-        return a.yaw_diff < b.yaw_diff;
-      });
-  std::array<bool, 4> used_index{false, false, false, false};
-  std::vector<bool> used_obs(obs_armors.size(), false);
-  std::vector<std::pair<ArmorPositionYaw, ArmorIndex>> matched_armors;
-  matched_armors.reserve(candidates.size());
-  for (const auto &candidate : candidates) {
-    auto idx = static_cast<std::size_t>(candidate.index);
-    if (used_obs.at(candidate.obs_i) || used_index.at(idx))
-      continue;
-    used_obs.at(candidate.obs_i) = true;
-    used_index.at(idx) = true;
-    matched_armors.emplace_back(obs_armors.at(candidate.obs_i),
-                                candidate.index);
+    matched_armors.emplace_back(obs, result.front().index);
   }
   return matched_armors;
 }
@@ -155,20 +143,21 @@ auto_aim::RobotTarget::getTargetTrackState() const {
   };
 }
 
-auto_aim::TrackState::State auto_aim::RobotTarget::track(
-    const std::vector<types::Armor> &armors,
-    const std::chrono::system_clock::time_point &stamp) {
-  std::vector<ArmorPositionYaw> selected_armors;
+auto_aim::TrackState::State
+auto_aim::RobotTarget::track(const std::vector<types::Armor> &armors,
+                             const std::chrono::system_clock::time_point &stamp,
+                             const Eigen::Isometry3d &T_camera_to_odom) {
+  std::vector<ArmorPositionRollPitchYawPoints> selected_armors;
   std::copy_if(armors.begin(), armors.end(),
                std::back_inserter(selected_armors),
                [this](const types::Armor &armor) -> bool {
                  return armor.type == target_state_.type;
-               });
+               }); // 隐式调用构造函数
   double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
                   stamp - track_state_.stamp_last_update)
                   .count();
   auto [estimated_target_state, updated_track_state] =
-      update(selected_armors, dt);
+      update(selected_armors, dt, T_camera_to_odom);
   if (updated_track_state == TrackState::State::TRACKING) {
     if (track_state_.state != TrackState::State::TRACKING) {
       LOG_INFO(logger_, "[Target {}]: {} -> TRACKING. dt{}, k{}.",
@@ -217,6 +206,20 @@ double auto_aim::RobotTarget::get(const std::string &key) {
 }
 
 using namespace gtsam::symbol_shorthand;
+
+// XXX: 太粗俗了
+inline gtsam::Key getArmorPoseKeyFromIndex(auto_aim::ArmorIndex index,
+                                           std::uint64_t k) {
+  if (index == auto_aim::ArmorIndex::_0)
+    return F(k);
+  if (index == auto_aim::ArmorIndex::_1)
+    return U(k);
+  if (index == auto_aim::ArmorIndex::_2)
+    return C(k);
+  if (index == auto_aim::ArmorIndex::_3)
+    return K(k);
+  return {};
+}
 
 void auto_aim::RobotTarget::addMotionValuesFactors(
     gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
@@ -283,10 +286,39 @@ void auto_aim::RobotTarget::addMotionValuesFactors(
                rfl::enum_to_string(target_state_.type), k, dt);
 }
 
+void auto_aim::RobotTarget::addArmorReprojValuesFactors(
+    gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
+    gtsam::Key armor_pose_key, const ArmorPositionRollPitchYawPoints &armor,
+    std::uint64_t k) const {
+  // XXX: 不知道这样设置初始值正不正确，注意检查下
+  values.insert(armor_pose_key,
+                gtsam::Pose3{gtsam::Rot3{armor.getRotation()}, armor.position});
+  for (auto position : std::array{
+           types::ArmorPointPosition::LeftBottom,
+           types::ArmorPointPosition::LeftTop,
+           types::ArmorPointPosition::RightTop,
+           types::ArmorPointPosition::RightBottom,
+       }) {
+    graph.add(ArmorReprojFactor{
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2{
+            config_.armor_observation_noise.pixel_error.x,
+            config_.armor_observation_noise.pixel_error.y,
+        }),
+        armor_pose_key,
+        camera_matrix_,
+        distortion_coefficients_,
+        target_state_.type,
+        position,
+        armor.points.at(static_cast<int>(position)),
+    });
+  }
+}
+
 void auto_aim::RobotTarget::addArmorValuesFactors(
     gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
-    const std::vector<std::pair<ArmorPositionYaw, ArmorIndex>> &armor_indexs,
-    std::uint64_t k) const {
+    const std::vector<std::pair<ArmorPositionRollPitchYawPoints, ArmorIndex>>
+        &armor_indexs,
+    const Eigen::Isometry3d &T, std::uint64_t k) const {
   auto default_radius = tools::logisticInverse(
       config_.default_radius, config_.radius_min, config_.radius_max);
   if (k == 0) {
@@ -304,37 +336,39 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
         gtsam::noiseModel::Isotropic::Sigma(1, config_.dz_prior_noise));
   }
   for (const auto &[armor, index] : armor_indexs) {
+    auto armor_pose_key = getArmorPoseKeyFromIndex(index, k);
+    addArmorReprojValuesFactors(values, graph, armor_pose_key, armor, k);
     if (index == ArmorIndex::_0 || index == ArmorIndex::_2) {
-      graph.add(ArmorRACenterZFactor{
+      graph.add(ArmorRadiusCenterZFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
               config_.armor_observation_noise.tangential_error_m,
               config_.armor_observation_noise.radial_error_m,
               config_.armor_observation_noise.height_error_m,
               config_.armor_observation_noise.yaw_error_rad,
           }),
+          armor_pose_key,
           A(0),
           R(k),
           X(k),
-          armor.position,
-          armor.yaw.theta(),
+          T,
           index,
           config_.radius_min,
           config_.radius_max,
       });
     } else {
-      graph.add(ArmorRBDZFactor{
+      graph.add(ArmorRadiusDZFactor{
           gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector4{
               config_.armor_observation_noise.tangential_error_m,
               config_.armor_observation_noise.radial_error_m,
               config_.armor_observation_noise.height_error_m,
               config_.armor_observation_noise.yaw_error_rad,
           }),
+          armor_pose_key,
           B(0),
           Z(0),
           R(k),
           X(k),
-          armor.position,
-          armor.yaw.theta(),
+          T,
           index,
           config_.radius_min,
           config_.radius_max,
@@ -346,8 +380,9 @@ void auto_aim::RobotTarget::addArmorValuesFactors(
 }
 
 std::pair<auto_aim::RobotTargetState, auto_aim::TrackState::State>
-auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
-                              double dt) const {
+auto_aim::RobotTarget::update(
+    const std::vector<ArmorPositionRollPitchYawPoints> &armors, double dt,
+    const Eigen::Isometry3d &T) const {
   auto dt_tracking_to_update =
       std::chrono::duration_cast<std::chrono::duration<double>>(
           track_state_.stamp_last_update - track_state_.stamp_last_tracking)
@@ -367,7 +402,7 @@ auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
       target_state = getTargetStateFromArmor(armors.front());
     }
   }
-  auto matched_armors = matchArmorsUnique(target_state, armors);
+  auto matched_armors = matchArmors(target_state, armors);
   if (matched_armors.size() < armors.size()) {
     LOG_DEBUG(logger_, "[Target {}]: Miss match {} armors! k = {}.",
               rfl::enum_to_string(target_state.type),
@@ -377,7 +412,7 @@ auto_aim::RobotTarget::update(const std::vector<ArmorPositionYaw> &armors,
   gtsam::Values values;
   gtsam::NonlinearFactorGraph graph;
   addMotionValuesFactors(values, graph, target_state, track_state_.k, dt);
-  addArmorValuesFactors(values, graph, matched_armors, track_state_.k);
+  addArmorValuesFactors(values, graph, matched_armors, T, track_state_.k);
 
   try {
     this->isam2_.update(graph, values);

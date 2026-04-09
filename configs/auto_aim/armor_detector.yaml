@@ -15,7 +15,7 @@ show_pnp_result: true
 plot_pnp_result: true
 all_is_three: false
 step_by_step_debug: false
-default_enemy_color: Blue
+default_enemy_color: Red
 camera_name: camera0
 armors_topic:
   service: armors

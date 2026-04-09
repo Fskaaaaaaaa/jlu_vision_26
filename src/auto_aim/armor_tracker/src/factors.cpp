@@ -11,6 +11,7 @@
 #include <gtsam/geometry/PinholeCamera.h>
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Rot2.h>
+
 #include <numbers>
 
 inline double getArmorBetweenYawFromIndex(auto_aim::ArmorIndex index) {

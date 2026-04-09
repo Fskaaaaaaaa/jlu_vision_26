@@ -5,6 +5,7 @@
 #include "types/ArmorType.hpp"
 
 #include <Eigen/Core>
+#include <array>
 #include <gtsam/geometry/Rot2.h>
 
 #include <functional>
@@ -23,7 +24,6 @@ namespace auto_aim {
 //            0
 //            |
 // 三个装甲板时同理（都是均分圆周后由-x轴开始逆时针旋转）
-// Robot在13方向上使用dz，outpost在1使用dz_a，在2使用dz_b
 enum class ArmorIndex {
   _0 = 0,
   _1,
@@ -40,6 +40,15 @@ struct ArmorPositionYaw {
   Eigen::Quaterniond getRotation(double pitch, double roll) const;
   Eigen::Vector3d position;
   gtsam::Rot2 yaw;
+};
+
+struct ArmorPositionRollPitchYawPoints : public ArmorPositionYaw {
+  ArmorPositionRollPitchYawPoints() = default;
+  ArmorPositionRollPitchYawPoints(const types::Armor &armor);
+  Eigen::Quaterniond getRotation() const;
+  std::array<Eigen::Vector2d, 4> points;
+  double pitch;
+  double roll;
 };
 
 struct TargetState {
@@ -87,13 +96,6 @@ struct TrackState {
   std::uint64_t k = 0;
   std::chrono::system_clock::time_point stamp_last_update;
   std::chrono::system_clock::time_point stamp_last_tracking;
-};
-
-struct MatchCandidate {
-  std::size_t obs_i;
-  ArmorIndex index;
-  double distance;
-  double yaw_diff;
 };
 
 struct ArmorMatchResult {
