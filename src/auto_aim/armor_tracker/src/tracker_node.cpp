@@ -247,10 +247,10 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
           std::chrono::nanoseconds{static_cast<int64_t>(
               self->configs_.tf_query_tolerance_ms * 1e6)});
     } catch (const std::exception &e) {
-      armors.clear(); // 失败舍弃该帧接收的装甲板
       LOG_ERROR(self->logger_, "tf from {} to {} failed: {}",
                 armors.front().frame_id, self->configs_.odom_frame_id,
                 e.what());
+      armors.clear(); // 失败舍弃该帧接收的装甲板
     }
   std::ranges::sort(
       armors, [](const types::Armor &a, const types::Armor &b) -> bool {

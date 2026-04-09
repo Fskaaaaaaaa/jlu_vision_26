@@ -102,11 +102,16 @@ auto_aim::RobotTarget::matchArmors(
   auto armors = RobotTarget::getArmorsFromTargetState(state);
   std::vector<std::pair<ArmorPositionRollPitchYawPoints, ArmorIndex>>
       matched_armors;
+  std::array<bool, 4> used_index{false, false, false, false};
   for (const auto &obs : obs_armors) {
     auto result = Target::matchArmor(
         armors, obs, config_.max_match_distance_m,
         tools::angle2Radian(config_.max_match_yaw_diff_degree));
-    matched_armors.emplace_back(obs, result.front().index);
+    if (!result.empty() &&
+        !used_index.at(static_cast<int>(result.front().index))) {
+      matched_armors.emplace_back(obs, result.front().index);
+      used_index.at(static_cast<int>(result.front().index)) = true;
+    }
   }
   return matched_armors;
 }
