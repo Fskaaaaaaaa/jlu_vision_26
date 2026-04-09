@@ -230,11 +230,13 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   // 由于frame_id从相机的配置文件读取，依赖图像回调获得，故心跳帧只有时间戳无坐标系
   auto image_stamp = armors.front().stamp; // 假设一次接收的armors来自同一帧
   std::erase_if(armors, [&](const types::Armor &armor) {
-    return armor.heart_beat;
+    if (armor.heart_beat)
+      return true;
     if (self->configs_.erase_if_not_key_frame && !armor.key_frame)
       return true;
     if (armor.stamp != image_stamp)
       return true;
+    return false;
   }); // 之后armors可能为空
   LOG_TRACE_L1(self->logger_, "receive {} valid armors.", armors.size());
   Eigen::Isometry3d T_camera_to_odom;
