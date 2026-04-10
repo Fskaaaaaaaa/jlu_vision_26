@@ -253,7 +253,7 @@ gtsam::Vector auto_aim::ArmorRadiusCenterZFactor::evaluateError(
         (gtsam::Matrix(4, 1) << 0.0, -d_radius_d_radius, 0.0, 0.0).finished();
   }
   if (H3) {
-    (*H3) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, -1.0).finished();
+    (*H3) = (gtsam::Matrix(4, 1) << 0.0, 0.0, 0.0, 1.0).finished();
   }
   if (H4) {
     (*H4) = (gtsam::Matrix(4, 3) << tx, ty, 0.0, nx, ny, 0.0, 0.0, 0.0, 1.0,
