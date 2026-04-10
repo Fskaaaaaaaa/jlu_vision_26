@@ -28,7 +28,7 @@ public:
         const Eigen::Isometry3d &T_camera_to_odom) = 0;
   // NOTE: 因为涉及到给targetstate注入armors逻辑，需要是虚函数
   virtual std::pair<TargetState, TrackState> getTargetTrackState() const = 0;
-  virtual double get(const std::string &key) { return 0; };
+  virtual double get(const std::string &key) const { return 0; };
 
   static std::vector<ArmorMatchResult>
   matchArmor(const std::vector<ArmorPositionYaw> &armors,
@@ -49,7 +49,7 @@ public:
   std::pair<TargetState, TrackState> getTargetTrackState() const override;
 
   // for debug
-  double get(const std::string &key) override;
+  double get(const std::string &key) const override;
 
 private:
   // NOTE: 为了添加像素关键点信息将PoseYaw换成添加了Points的子类了
@@ -68,7 +68,8 @@ private:
   matchArmors(
       const RobotTargetState &state,
       const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors_camera,
-      const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors_odom) const;
+      const std::vector<ArmorPositionRollPitchYawPoints> &obs_armors_odom)
+      const;
 
   RobotTargetState getTargetStateFromArmor(const ArmorPositionYaw &armor) const;
 
@@ -91,10 +92,15 @@ private:
   RobotConfig config_;
   cv::Mat camera_matrix_;
   cv::Mat distortion_coefficients_;
+
   RobotTargetState target_state_;
   TrackState track_state_;
+
   mutable std::mutex state_mtx_;
   mutable gtsam::ISAM2 isam2_;
+
+  mutable gtsam::Values initial_values_;
+  mutable gtsam::NonlinearFactorGraph initial_graph_;
 };
 
 class OutpostTarget : public Target {

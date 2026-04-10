@@ -21,6 +21,7 @@
 #include <gtsam/inference/Symbol.h>
 #include <gtsam/linear/NoiseModel.h>
 #include <gtsam/nonlinear/ISAM2.h>
+#include <gtsam/nonlinear/NonlinearFactorGraph.h>
 #include <gtsam/nonlinear/Values.h>
 
 #include <algorithm>
@@ -112,7 +113,8 @@ auto_aim::RobotTarget::matchArmors(
         tools::angle2Radian(config_.max_match_yaw_diff_degree));
     if (!result.empty() &&
         !used_index.at(static_cast<int>(result.front().index))) {
-      matched_armors.emplace_back(obs_armors_camera.at(i), result.front().index);
+      matched_armors.emplace_back(obs_armors_camera.at(i),
+                                  result.front().index);
       used_index.at(static_cast<int>(result.front().index)) = true;
     }
   }
@@ -202,7 +204,7 @@ auto_aim::RobotTarget::track(const std::vector<types::Armor> &armors,
   return track_state_.state;
 }
 
-double auto_aim::RobotTarget::get(const std::string &key) {
+double auto_aim::RobotTarget::get(const std::string &key) const {
   std::scoped_lock lk{state_mtx_};
   if (key == "ra")
     return target_state_.radius_a;
@@ -298,7 +300,6 @@ void auto_aim::RobotTarget::addArmorReprojValuesFactors(
     gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
     gtsam::Key armor_pose_key, const ArmorPositionRollPitchYawPoints &armor,
     std::uint64_t k) const {
-  // XXX: 不知道这样设置初始值正不正确，注意检查下
   values.insert(armor_pose_key,
                 gtsam::Pose3{gtsam::Rot3{armor.getRotation()}, armor.position});
   for (auto position : std::array{
@@ -407,8 +408,8 @@ auto_aim::RobotTarget::update(
     Eigen::Isometry3d armor_pose_camera{Eigen::Isometry3d::Identity()};
     armor_pose_camera.pretranslate(armor.position);
     armor_pose_camera.rotate(armor.getRotation());
-    const auto armor_pose_odom = T * armor_pose_camera;
-    const auto rpy = tools::rotationMatrixToRPY(armor_pose_odom.rotation());
+    auto armor_pose_odom = T * armor_pose_camera;
+    auto rpy = tools::rotationMatrixToRPY(armor_pose_odom.rotation());
     armor.position = armor_pose_odom.translation();
     armor.roll = rpy.x();
     armor.pitch = rpy.y();
@@ -417,12 +418,18 @@ auto_aim::RobotTarget::update(
 
   auto target_state = target_state_.predict(dt);
   if (track_state_.state == TrackState::State::LOST) {
-    if (obs_armors_odom.empty()) {
+    if (obs_armors_odom.empty())
       return {{}, TrackState::State::LOST};
-    } else {
+    else
       target_state = getTargetStateFromArmor(obs_armors_odom.front());
-    }
   }
+
+  // XXX: 这里似乎没有考虑到冷启动过程中的临时丢失
+  if (track_state_.k < config_.first_update_batch_size &&
+      !obs_armors_odom.empty()) {
+    target_state = getTargetStateFromArmor(obs_armors_odom.front());
+  }
+
   auto matched_armors = matchArmors(target_state, armors, obs_armors_odom);
   if (matched_armors.size() < obs_armors_odom.size()) {
     LOG_DEBUG(logger_, "[Target {}]: Miss match {} armors! k = {}.",
@@ -432,8 +439,25 @@ auto_aim::RobotTarget::update(
 
   gtsam::Values values;
   gtsam::NonlinearFactorGraph graph;
+
+  if (track_state_.k <= config_.first_update_batch_size) {
+    if (track_state_.k == 0) {
+      this->initial_values_ = gtsam::Values{};
+      this->initial_graph_ = gtsam::NonlinearFactorGraph{};
+    }
+    values = this->initial_values_;
+    graph = this->initial_graph_;
+  }
   addMotionValuesFactors(values, graph, target_state, track_state_.k, dt);
   addArmorValuesFactors(values, graph, matched_armors, T, track_state_.k);
+
+  // NOTE: 冷启动时先不更新到isam2里(避免在缺少约束前几帧优化爆掉)
+  if (track_state_.k < config_.first_update_batch_size) {
+    this->initial_values_ = values;
+    this->initial_graph_ = graph;
+    return {target_state, matched_armors.empty() ? TrackState::State::TEMPLOST
+                                                 : TrackState::State::TRACKING};
+  }
 
   try {
     this->isam2_.update(graph, values);
