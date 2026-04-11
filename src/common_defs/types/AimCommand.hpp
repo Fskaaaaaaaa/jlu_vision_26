@@ -11,6 +11,8 @@ struct AimCommand {
   uint8_t control;      // 自瞄是否控制云台 0 不控制 1 控制
   float fire_thres_yaw; // 火控阈值
   float fire_thres_pitch;
+  float target_yaw;
+  float target_pitch;
   float yaw; // 云台角度、速度、加速度(弧度制,直接发,不要乘1000)
   float yaw_vel;
   float yaw_acc;

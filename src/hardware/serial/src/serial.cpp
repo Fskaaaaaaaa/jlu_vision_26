@@ -200,6 +200,8 @@ void hardware::Serial::onAimCommandReceivedCallback(
             .control = sample->control,
             .fire_thres_yaw = sample->fire_thres_yaw,
             .fire_thres_pitch = sample->fire_thres_pitch,
+            .target_yaw = sample->target_yaw,
+            .target_pitch = sample->target_pitch,
             .yaw = sample->yaw,
             .yaw_vel = sample->yaw_vel,
             .yaw_acc = sample->yaw_acc,
