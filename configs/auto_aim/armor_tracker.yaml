@@ -74,8 +74,8 @@ planner_conf:
   aim_center_distance_high: 3.0
   aim_center_distance_low: 2.0
   shoot_offset: 0
-  yaw_offset: 0.0
-  pitch_offset: 0.0
+  yaw_offset: 0.1
+  pitch_offset: 0.1
   predict_offset_ms: 73
   max_yaw_acc: 50.0
   Q_yaw: [9e6, 0]
@@ -104,8 +104,8 @@ planner_conf:
     iterative_max_facing_angle: 75.0
     flytime0_distance_offset: -0.3
   fire_ctrl_conf:
-    norm_dispersion_yaw_degree: 0.1
+    norm_dispersion_yaw_degree: 1.0
     norm_dispersion_pitch_degree: 0.1
-    min_fire_thres_yaw_degree: 0.1
-    min_fire_thres_pitch_degree: 0.1
+    min_fire_thres_yaw_degree: 0.001
+    min_fire_thres_pitch_degree: 0.001
 

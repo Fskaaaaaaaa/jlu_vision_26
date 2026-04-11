@@ -20,8 +20,8 @@ auto_aim::Trajectory::Trajectory(quill::Logger *logger,
 
 double
 auto_aim::Trajectory::getArmorFacingAngleAbs(const ArmorPositionYaw &armor) {
-  return std::abs(tools::radian2Angle(
-      armor.yaw.theta() - std::atan2(armor.position.y(), armor.position.x())));
+  return std::abs(tools::shortestRadianDistance(
+      std::atan2(armor.position.y(), armor.position.x()), armor.yaw.theta()));
 }
 
 auto_aim::ArmorIndex

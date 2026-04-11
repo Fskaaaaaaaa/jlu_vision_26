@@ -20,13 +20,15 @@ auto_aim::FireController::FireController(quill::Logger *logger,
 auto_aim::BallisticDispersion auto_aim::FireController::calculateDispersion(
     double target_pitch, double bullet_speed,
     const ArmorPositionYaw &armor) const {
+  auto line_of_sight_yaw = std::atan2(armor.position.y(), armor.position.x());
   auto facing_theta_abs = std::abs(
-      armor.yaw.theta() - std::atan2(armor.position.y(), armor.position.x()));
+      tools::shortestRadianDistance(line_of_sight_yaw, armor.yaw.theta()));
+  auto facing_cos_abs = std::abs(std::cos(facing_theta_abs));
   auto distance = std::hypot(armor.position.x(), armor.position.y());
   return {
       .horizontal = distance *
                     tools::angle2Radian(config_.norm_dispersion_yaw_degree) /
-                    std::cos(facing_theta_abs),
+                    facing_cos_abs,
       .vertical =
           distance * tools::angle2Radian(config_.norm_dispersion_pitch_degree),
   };

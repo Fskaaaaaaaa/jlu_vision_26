@@ -103,6 +103,11 @@ msgs::AimCommand auto_aim::Planner::plan(
       target_state.predict(predict_time_cache_ + fly_time_cache_)
           .armors()
           .at(static_cast<int>(selected_index_cache_)));
+  cmd.target_yaw = tools::limitRadian(cmd.target_yaw + config_.yaw_offset);
+  cmd.target_pitch =
+      tools::limitRadian(cmd.target_pitch + config_.pitch_offset);
+  cmd.yaw = tools::limitRadian(cmd.yaw + config_.yaw_offset);
+  cmd.pitch = tools::limitRadian(cmd.pitch + config_.pitch_offset);
   yaw_fire_thres_ = cmd.fire_thres_yaw;
   pitch_fire_thres_ = cmd.fire_thres_pitch;
   return cmd;
@@ -164,19 +169,17 @@ msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
 
   msgs::AimCommand cmd;
   cmd.control = true;
-  cmd.target_yaw = tools::limitRadian(
+  cmd.target_yaw =
       reference.state_reference(0, config_.trajectory_half_horizon) +
-      reference.center_yaw + config_.yaw_offset);
+      reference.center_yaw;
   cmd.target_pitch =
-      reference.state_reference(2, config_.trajectory_half_horizon) +
-      config_.pitch_offset;
-  cmd.yaw = tools::limitRadian(
-      yaw_solver_->work->x(0, config_.trajectory_half_horizon) +
-      reference.center_yaw + config_.yaw_offset);
+      reference.state_reference(2, config_.trajectory_half_horizon);
+  cmd.yaw = yaw_solver_->work->x(0, config_.trajectory_half_horizon) +
+            reference.center_yaw;
   cmd.yaw_vel = yaw_solver_->work->x(1, config_.trajectory_half_horizon);
   cmd.yaw_acc = yaw_solver_->work->u(0, config_.trajectory_half_horizon);
-  cmd.pitch = pitch_solver_->work->x(0, config_.trajectory_half_horizon) +
-              config_.pitch_offset;
+  cmd.pitch = pitch_solver_->work->x(0, config_.trajectory_half_horizon);
+
   cmd.pitch_vel = pitch_solver_->work->x(1, config_.trajectory_half_horizon);
   cmd.pitch_acc = pitch_solver_->work->u(0, config_.trajectory_half_horizon);
   cmd.bullet_id = bullet_id_++;
@@ -286,6 +289,5 @@ auto_aim::Planner::buildReferenceTrajectory(const TargetState &target_state,
     LOG_TRACE_L1(logger_, "[Planner]: fallback solve used {}/{} samples.",
                  reference.fallback_sample_count, trajectory_horizon_ + 2);
   }
-  // HACK: 锁的颗粒度太粗了
   return reference;
 }

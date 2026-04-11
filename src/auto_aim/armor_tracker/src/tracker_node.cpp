@@ -39,6 +39,7 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <memory>
@@ -205,6 +206,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                 // 绘制正在瞄准的装甲板（绿色）
                 drawArmor(aimed_armor, target_state.type, copy, stamp,
                           tools::Color::bgr::GREEN);
+                drawCrosshair(copy, fire_thres_yaw, fire_thres_pitch);
               }
               cv::imshow("tracker", copy);
               cv::waitKey(1);
@@ -396,18 +398,20 @@ void auto_aim::TrackerNode::drawCrosshair(cv::Mat &image, double yaw_fire_thres,
   auto crosshair_y = std::clamp(static_cast<int>(std::lround(crosshair_v)), 0,
                                 std::max(0, image.rows - 1));
   cv::Point2i crosshair_center{crosshair_x, crosshair_y};
-  constexpr auto fire_thres{0.0035};
-  constexpr auto crosshair_half_px{20};
+  constexpr auto fire_thres{0.01};
+  constexpr auto crosshair_half_px{10};
   auto yaw_ratio = std::abs(yaw_fire_thres / fire_thres);
   auto pitch_ratio = std::abs(pitch_fire_thres / fire_thres);
-  cv::line(image, crosshair_center + cv::Point2i{0, -crosshair_half_px},
-           crosshair_center + cv::Point2i{0, crosshair_half_px},
+  auto yaw_half_px =
+      std::max(1, static_cast<int>(std::lround(crosshair_half_px * yaw_ratio)));
+  auto pitch_half_px = std::max(
+      1, static_cast<int>(std::lround(crosshair_half_px * pitch_ratio)));
+  cv::ellipse(image, crosshair_center, cv::Size{yaw_half_px, pitch_half_px}, 0,
+              0, 360, tools::Color::bgr::YELLOW);
+  cv::line(image, crosshair_center + cv::Point2i{0, -pitch_half_px},
+           crosshair_center + cv::Point2i{0, pitch_half_px},
            tools::Color::bgr::PURPLE);
-  cv::line(image, crosshair_center + cv::Point2i{-crosshair_half_px, 0},
-           crosshair_center + cv::Point2i{crosshair_half_px, 0},
+  cv::line(image, crosshair_center + cv::Point2i{-yaw_half_px, 0},
+           crosshair_center + cv::Point2i{yaw_half_px, 0},
            tools::Color::bgr::PURPLE);
-  cv::ellipse(image, crosshair_center,
-              cv::Size{static_cast<int>(2 * crosshair_half_px * yaw_ratio),
-                       static_cast<int>(2 * crosshair_half_px * pitch_ratio)},
-              0, 0, 360, tools::Color::bgr::YELLOW);
 }

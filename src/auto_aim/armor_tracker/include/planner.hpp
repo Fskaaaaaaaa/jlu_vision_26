@@ -54,7 +54,7 @@ private:
   mutable std::mutex cache_mtx_;
   double predict_time_cache_{0};
   double fly_time_cache_{0};
-  ArmorIndex selected_index_cache_;
+  ArmorIndex selected_index_cache_{ArmorIndex::_0};
   double yaw_fire_thres_{0};
   double pitch_fire_thres_{0};
 
