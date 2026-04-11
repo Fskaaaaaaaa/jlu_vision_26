@@ -20,26 +20,16 @@ auto_aim::FireController::FireController(quill::Logger *logger,
 auto_aim::BallisticDispersion auto_aim::FireController::calculateDispersion(
     double target_pitch, double bullet_speed,
     const ArmorPositionYaw &armor) const {
-  auto cos_a = std::cos(armor.yaw.theta());
-  auto sin_a = std::sin(armor.yaw.theta());
-  auto d = armor.position.x() * cos_a + armor.position.y() * sin_a;
-  BallisticDispersion dispersion;
-  dispersion.horizontal =
-      d / (cos_a * cos_a) *
-      tools::angle2Radian(config_.norm_dispersion_yaw_degree);
-  auto cos_pitch = std::cos(target_pitch);
-  auto tan_pitch = std::tan(target_pitch);
-  // XXX: 没有人类了
-  dispersion.vertical =
-      d / (cos_pitch * cos_pitch * cos_a) *
-          (1 - (g_ * d * tan_pitch) / (bullet_speed * bullet_speed * cos_a)) *
-          tools::angle2Radian(config_.norm_dispersion_pitch_degree) -
-      sin_a *
-          ((d * tan_pitch) / (cos_a * cos_a) -
-           (g_ * d * d) / (bullet_speed * bullet_speed * cos_pitch * cos_pitch *
-                           cos_a * cos_a * cos_a)) *
-          tools::angle2Radian(config_.norm_dispersion_yaw_degree);
-  return dispersion;
+  auto facing_theta_abs = std::abs(
+      armor.yaw.theta() - std::atan2(armor.position.y(), armor.position.x()));
+  auto distance = std::hypot(armor.position.x(), armor.position.y());
+  return {
+      .horizontal = distance *
+                    tools::angle2Radian(config_.norm_dispersion_yaw_degree) /
+                    std::cos(facing_theta_abs),
+      .vertical =
+          distance * tools::angle2Radian(config_.norm_dispersion_pitch_degree),
+  };
 }
 
 std::optional<double>
@@ -68,14 +58,16 @@ void auto_aim::FireController::calculateFireThres(
         tools::angle2Radian(config_.min_fire_thres_pitch_degree);
     return;
   }
-  auto distance = std::hypot(armor.position.x(), armor.position.y());
   // 中线一般不等分顶角，这里取严的那个
-  auto yaw_high =
-      std::atan2(armor.position.y() + half_width * std::cos(armor.yaw.theta()),
-                 armor.position.x() - half_width * std::sin(armor.yaw.theta()));
-  auto yaw_low =
-      std::atan2(armor.position.y() - half_width * std::cos(armor.yaw.theta()),
-                 armor.position.x() + half_width * std::sin(armor.yaw.theta()));
+  auto cos_theta = std::cos(armor.yaw.theta());
+  auto sin_theta = std::sin(armor.yaw.theta());
+  auto yaw1 = std::atan2(
+      armor.position.y() + (half_width - dispersion.horizontal) * cos_theta,
+      armor.position.x() - (half_width - dispersion.horizontal) * sin_theta);
+  auto yaw2 = std::atan2(
+      armor.position.y() - (half_width - dispersion.horizontal) * cos_theta,
+      armor.position.x() + (half_width - dispersion.horizontal) * sin_theta);
+  auto distance = std::hypot(armor.position.x(), armor.position.y());
   auto pitch_high =
       getTargetPitch(bullet_speed, distance,
                      armor.position.z() + half_height - dispersion.vertical);
@@ -83,8 +75,8 @@ void auto_aim::FireController::calculateFireThres(
       getTargetPitch(bullet_speed, distance,
                      armor.position.z() - half_height + dispersion.vertical);
   cmd.fire_thres_yaw =
-      std::max(std::min(std::abs(tools::limitRadian(yaw_high - cmd.target_yaw)),
-                        std::abs(tools::limitRadian(yaw_low - cmd.target_yaw))),
+      std::max(std::min(std::abs(tools::limitRadian(yaw1 - cmd.target_yaw)),
+                        std::abs(tools::limitRadian(yaw2 - cmd.target_yaw))),
                tools::angle2Radian(config_.min_fire_thres_yaw_degree));
   cmd.fire_thres_pitch = std::max(
       std::min(std::abs(tools::limitRadian(

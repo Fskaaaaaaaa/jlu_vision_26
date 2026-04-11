@@ -42,9 +42,12 @@ private:
   void drawArmor(const ArmorPositionYaw &armor, types::ArmorType type,
                  cv::Mat &image,
                  const std::chrono::system_clock::time_point &img_stamp,
-                 const cv::Scalar &color = tools::Color::bgr::RED) const;
+                 const cv::Scalar &color = tools::Color::bgr::RED,
+                 const std::string &txt = "") const;
   void drawTarget(const Target &target, cv::Mat &image,
                   const std::chrono::system_clock::time_point &img_stamp) const;
+  void drawCrosshair(cv::Mat &image, double yaw_fire_thres,
+                     double pitch_fire_thres) const;
 
   quill::Logger *logger_;
   TrackerConfigs configs_;

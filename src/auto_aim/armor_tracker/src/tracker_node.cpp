@@ -41,6 +41,7 @@
 #include <cstdlib>
 #include <exception>
 #include <memory>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -190,8 +191,10 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                   targets_.contains(aim_target)) {
                 auto [target_state, track_state] =
                     targets_.at(aim_target)->getTargetTrackState();
-                auto [aimed_armor, armor_index, predict_time] =
-                    planner_.getAimingArmorIndexPredictTime(target_state);
+                auto [aimed_armor, armor_index, predict_time, fire_thres_yaw,
+                      fire_thres_pitch] =
+                    planner_.getAimingArmorIndexPredictTimeFireThres(
+                        target_state);
                 // HACK: 不应该放到这里
                 plotter_.plot("select_index", static_cast<int>(armor_index));
                 plotter_.plot("predict_time", predict_time);
@@ -325,8 +328,8 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
 
 void auto_aim::TrackerNode::drawArmor(
     const ArmorPositionYaw &armor, types::ArmorType type, cv::Mat &image,
-    const std::chrono::system_clock::time_point &stamp,
-    const cv::Scalar &color) const {
+    const std::chrono::system_clock::time_point &stamp, const cv::Scalar &color,
+    const std::string &txt) const {
   try {
     Eigen::Isometry3d T_odom_to_camera =
         tf_buffer_.get(configs_.camera_frame_id, configs_.odom_frame_id, stamp,
@@ -351,6 +354,8 @@ void auto_aim::TrackerNode::drawArmor(
     cv::projectPoints(obj_points, rvec, tvec, camera_matrix_,
                       distortion_coefficients_, image_points);
     tools::drawPoints(image, image_points, color);
+    cv::putText(image, txt, image_points.front(), cv::FONT_HERSHEY_SIMPLEX, 1.0,
+                color, 2);
   } catch (const std::exception &e) {
     LOG_WARNING(logger_, "{}", e.what());
   }
@@ -366,6 +371,27 @@ void auto_aim::TrackerNode::drawTarget(
                 .count();
   auto status_predict = target_state.predict(dt);
   // 绘制所有装甲板
+  int armor_index{0};
   for (const auto &armor : status_predict.armors())
-    drawArmor(armor, target_state.type, image, image_stamp);
+    drawArmor(armor, target_state.type, image, image_stamp,
+              tools::Color::bgr::RED, std::to_string(armor_index++));
+}
+
+void auto_aim::TrackerNode::drawCrosshair(cv::Mat &image, double yaw_fire_thres,
+                                          double pitch_fire_thres) const {
+  cv::Point2i crosshair_center{image.rows / 2, image.cols / 2};
+  constexpr auto fire_thres{0.0035};
+  constexpr auto crosshair_half_px{20};
+  auto yaw_ratio = yaw_fire_thres / fire_thres;
+  auto pitch_ratio = pitch_fire_thres / fire_thres;
+  cv::line(image, crosshair_center + cv::Point2i{0, -crosshair_half_px},
+           crosshair_center + cv::Point2i{0, crosshair_half_px},
+           tools::Color::bgr::PURPLE);
+  cv::line(image, crosshair_center + cv::Point2i{-crosshair_half_px, 0},
+           crosshair_center + cv::Point2i{crosshair_half_px, 0},
+           tools::Color::bgr::PURPLE);
+  cv::ellipse(image, crosshair_center,
+              cv::Size{static_cast<int>(2 * crosshair_half_px * yaw_ratio),
+                       static_cast<int>(2 * crosshair_half_px * pitch_ratio)},
+              0, 0, 360, tools::Color::bgr::YELLOW);
 }

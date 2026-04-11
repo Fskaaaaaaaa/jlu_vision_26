@@ -25,8 +25,8 @@ public:
        const std::chrono::system_clock::time_point &target_stamp,
        const msgs::GimbalInfo &gimbal_info);
 
-  std::tuple<ArmorPositionYaw, ArmorIndex, double>
-  getAimingArmorIndexPredictTime(const TargetState &state) const;
+  std::tuple<ArmorPositionYaw, ArmorIndex, double, double, double>
+  getAimingArmorIndexPredictTimeFireThres(const TargetState &state) const;
 
 private:
   AimTrajectoryReference
@@ -52,9 +52,11 @@ private:
   // debug异步，用于还原现场
   // 调试线程只在有未过时的瞄准目标时访问，故无需opt语义
   mutable std::mutex cache_mtx_;
-  double predict_time_cache_;
-  double fly_time_cache_;
+  double predict_time_cache_{0};
+  double fly_time_cache_{0};
   ArmorIndex selected_index_cache_;
+  double yaw_fire_thres_{0};
+  double pitch_fire_thres_{0};
 
   TinySolver *yaw_solver_;
   TinySolver *pitch_solver_;
