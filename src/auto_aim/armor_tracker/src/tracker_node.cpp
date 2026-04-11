@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <cstdlib>
 #include <exception>
 #include <memory>
@@ -379,11 +380,26 @@ void auto_aim::TrackerNode::drawTarget(
 
 void auto_aim::TrackerNode::drawCrosshair(cv::Mat &image, double yaw_fire_thres,
                                           double pitch_fire_thres) const {
-  cv::Point2i crosshair_center{image.rows / 2, image.cols / 2};
+  auto fx = camera_matrix_.at<double>(0, 0);
+  auto fy = camera_matrix_.at<double>(1, 1);
+  auto cx = camera_matrix_.at<double>(0, 2);
+  auto cy = camera_matrix_.at<double>(1, 2);
+  // 用角度偏置在归一化平面上的投影近似准星中心偏移
+  auto crosshair_u = cx + fx * std::tan(configs_.planner_conf.yaw_offset);
+  auto crosshair_v = cy - fy * std::tan(configs_.planner_conf.pitch_offset);
+  if (!std::isfinite(crosshair_u) || !std::isfinite(crosshair_v)) {
+    crosshair_u = static_cast<double>(image.cols) / 2.0;
+    crosshair_v = static_cast<double>(image.rows) / 2.0;
+  }
+  auto crosshair_x = std::clamp(static_cast<int>(std::lround(crosshair_u)), 0,
+                                std::max(0, image.cols - 1));
+  auto crosshair_y = std::clamp(static_cast<int>(std::lround(crosshair_v)), 0,
+                                std::max(0, image.rows - 1));
+  cv::Point2i crosshair_center{crosshair_x, crosshair_y};
   constexpr auto fire_thres{0.0035};
   constexpr auto crosshair_half_px{20};
-  auto yaw_ratio = yaw_fire_thres / fire_thres;
-  auto pitch_ratio = pitch_fire_thres / fire_thres;
+  auto yaw_ratio = std::abs(yaw_fire_thres / fire_thres);
+  auto pitch_ratio = std::abs(pitch_fire_thres / fire_thres);
   cv::line(image, crosshair_center + cv::Point2i{0, -crosshair_half_px},
            crosshair_center + cv::Point2i{0, crosshair_half_px},
            tools::Color::bgr::PURPLE);
