@@ -216,13 +216,6 @@ gtsam::Vector auto_aim::ArmorRadiusCenterZFactor::evaluateError(
   auto yaw_err = armor_yaw.localCoordinates(pred_armor_yaw).x();
   gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
   if (H1) {
-    // auto error_func = [this, &radius, &center_yaw, &center_point](
-    //                       const gtsam::Pose3 &pose) -> gtsam::Vector {
-    //   return this->evaluateError(pose, radius, center_yaw, center_point,
-    //                              nullptr, nullptr, nullptr, nullptr);
-    // };
-    // (*H1) = numericalDerivative11<gtsam::Vector, gtsam::Pose3>(
-    //     error_func, armor_pose_camera, 1e-6);
     Eigen::Matrix<double, 4, 3> J_p;
     J_p << -tx, -ty, 0.0, -nx, -ny, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0;
     auto radial_proj = nx * dx + ny * dy;
@@ -301,13 +294,6 @@ gtsam::Vector auto_aim::ArmorRadiusDZFactor::evaluateError(
   auto yaw_err = armor_yaw.localCoordinates(pred_armor_yaw).x();
   gtsam::Vector4 error{tangential_err, radial_err, z_err, yaw_err};
   if (H1) {
-    // auto error_func = [this, &radius, &center_yaw, &center_point](
-    //                       const gtsam::Pose3 &pose) -> gtsam::Vector {
-    //   return this->evaluateError(pose, radius, center_yaw, center_point,
-    //                              nullptr, nullptr, nullptr, nullptr);
-    // };
-    // (*H1) = numericalDerivative11<gtsam::Vector, gtsam::Pose3>(
-    //     error_func, armor_pose_camera, 1e-6);
     Eigen::Matrix<double, 4, 3> J_p;
     J_p << -tx, -ty, 0.0, -nx, -ny, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0;
     auto radial_proj = nx * dx + ny * dy;
@@ -378,11 +364,6 @@ gtsam::Vector auto_aim::ArmorReprojFactor::evaluateError(
   gtsam::Matrix36 H_transform;
   gtsam::Point3 p_cam = armor_pose_camera.transformFrom(
       armor_point_, H ? &H_transform : nullptr, nullptr);
-  // if (p_cam.z() <= 1e-6) {
-  //   if (H)
-  //     *H = gtsam::Matrix::Zero(2, 6);
-  //   return gtsam::Vector2::Zero();
-  // }
   // 投影
   gtsam::Matrix23 H_norm;
   gtsam::Point2 pn = gtsam::PinholeCamera<gtsam::Cal3DS2>::Project(
