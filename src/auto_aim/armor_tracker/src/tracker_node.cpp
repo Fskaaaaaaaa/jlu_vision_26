@@ -43,6 +43,7 @@
 #include <cstdlib>
 #include <exception>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -197,9 +198,6 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                       fire_thres_pitch] =
                     planner_.getAimingArmorIndexPredictTimeFireThres(
                         target_state);
-                // HACK: 不应该放到这里
-                plotter_.plot("select_index", static_cast<int>(armor_index));
-                plotter_.plot("predict_time", predict_time);
                 const auto &target = targets_.at(aim_target);
                 // 绘制所有目标装甲板（红色）
                 drawTarget(*target, copy, stamp);
@@ -207,6 +205,13 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                 drawArmor(aimed_armor, target_state.type, copy, stamp,
                           tools::Color::bgr::GREEN);
                 drawCrosshair(copy, fire_thres_yaw, fire_thres_pitch);
+                std::stringstream predict_time_ss;
+                predict_time_ss << "PredictTime: " << std::fixed
+                                << std::setprecision(2) << predict_time * 1000
+                                << "ms";
+                cv::putText(copy, predict_time_ss.str(), cv::Point(10, 90),
+                            cv::FONT_HERSHEY_SIMPLEX, 1.0,
+                            tools::Color::bgr::GREEN, 2);
               }
               cv::imshow("tracker", copy);
               cv::waitKey(1);
@@ -398,14 +403,14 @@ void auto_aim::TrackerNode::drawCrosshair(cv::Mat &image, double yaw_fire_thres,
   auto crosshair_y = std::clamp(static_cast<int>(std::lround(crosshair_v)), 0,
                                 std::max(0, image.rows - 1));
   cv::Point2i crosshair_center{crosshair_x, crosshair_y};
-  constexpr auto fire_thres{0.01};
-  constexpr auto crosshair_half_px{10};
+  constexpr auto fire_thres{0.005};
+  constexpr auto basic_half_px{10};
   auto yaw_ratio = std::abs(yaw_fire_thres / fire_thres);
   auto pitch_ratio = std::abs(pitch_fire_thres / fire_thres);
   auto yaw_half_px =
-      std::max(1, static_cast<int>(std::lround(crosshair_half_px * yaw_ratio)));
-  auto pitch_half_px = std::max(
-      1, static_cast<int>(std::lround(crosshair_half_px * pitch_ratio)));
+      std::max(1, static_cast<int>(std::lround(basic_half_px * yaw_ratio)));
+  auto pitch_half_px =
+      std::max(1, static_cast<int>(std::lround(basic_half_px * pitch_ratio)));
   cv::ellipse(image, crosshair_center, cv::Size{yaw_half_px, pitch_half_px}, 0,
               0, 360, tools::Color::bgr::YELLOW);
   cv::line(image, crosshair_center + cv::Point2i{0, -pitch_half_px},
@@ -414,4 +419,15 @@ void auto_aim::TrackerNode::drawCrosshair(cv::Mat &image, double yaw_fire_thres,
   cv::line(image, crosshair_center + cv::Point2i{-yaw_half_px, 0},
            crosshair_center + cv::Point2i{yaw_half_px, 0},
            tools::Color::bgr::PURPLE);
+  std::stringstream yaw_ss, pitch_ss;
+  yaw_ss << std::fixed << std::setprecision(2)
+         << tools::radian2Angle(yaw_fire_thres);
+  pitch_ss << std::fixed << std::setprecision(2)
+           << tools::radian2Angle(pitch_fire_thres);
+  cv::putText(image, yaw_ss.str(),
+              crosshair_center + cv::Point2i{yaw_half_px, 0},
+              cv::FONT_HERSHEY_SIMPLEX, 1.0, tools::Color::bgr::GREEN, 2);
+  cv::putText(image, pitch_ss.str(),
+              crosshair_center + cv::Point2i{0, yaw_half_px},
+              cv::FONT_HERSHEY_SIMPLEX, 1.0, tools::Color::bgr::GREEN, 2);
 }

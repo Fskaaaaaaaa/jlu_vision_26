@@ -51,10 +51,10 @@ void auto_aim::FireController::calculateFireThres(
   auto half_width = types::points::getArmorWidth(armor_type) / 2;
   auto half_height = types::points::getArmorHeight(armor_type) / 2;
   if (dispersion.horizontal > half_width || dispersion.vertical > half_height) {
-    LOG_WARNING(logger_,
-                "[FireController]: Dispersion greater than armor area! "
-                "(horizontal{}, vertical{})",
-                dispersion.horizontal, dispersion.vertical);
+    LOG_DEBUG(logger_,
+              "[FireController]: Dispersion greater than armor area! "
+              "(horizontal{}, vertical{})",
+              dispersion.horizontal, dispersion.vertical);
     cmd.fire_thres_yaw = tools::angle2Radian(config_.min_fire_thres_yaw_degree);
     cmd.fire_thres_pitch =
         tools::angle2Radian(config_.min_fire_thres_pitch_degree);
