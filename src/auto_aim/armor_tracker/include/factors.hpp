@@ -109,55 +109,6 @@ public:
                               gtsam::OptionalMatrixType H2) const override;
 };
 
-class [[deprecated]] ArmorRACenterZFactor
-    : public gtsam::NoiseModelFactorN<double, gtsam::Rot2, gtsam::Point3> {
-  using Base = gtsam::NoiseModelFactorN<double, gtsam::Rot2, gtsam::Point3>;
-
-public:
-  ArmorRACenterZFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_a,
-                       gtsam::Key rot_cur, gtsam::Key x_cur,
-                       const Eigen::Vector3d &obs_armor_position,
-                       double obs_armor_yaw, ArmorIndex armor_index,
-                       double radius_min, double radius_max);
-
-  gtsam::Vector evaluateError(const double &ra, const gtsam::Rot2 &rotation,
-                              const gtsam::Point3 &center,
-                              gtsam::OptionalMatrixType H1,
-                              gtsam::OptionalMatrixType H2,
-                              gtsam::OptionalMatrixType H3) const override;
-
-private:
-  gtsam::Vector3 obs_armor_position_;
-  gtsam::Rot2 obs_armor_yaw_;
-  ArmorIndex armor_index_;
-  double min_, max_;
-};
-class [[deprecated]] ArmorRBDZFactor
-    : public gtsam::NoiseModelFactorN<double, double, gtsam::Rot2,
-                                      gtsam::Point3> {
-  using Base =
-      gtsam::NoiseModelFactorN<double, double, gtsam::Rot2, gtsam::Vector3>;
-
-public:
-  ArmorRBDZFactor(const gtsam::SharedNoiseModel &model, gtsam::Key rad_b,
-                  gtsam::Key dz, gtsam::Key rot_cur, gtsam::Key x_cur,
-                  const Eigen::Vector3d &obs_armor_position,
-                  double obs_armor_yaw, ArmorIndex armor_index,
-                  double radius_min, double radius_max);
-
-  gtsam::Vector
-  evaluateError(const double &rb, const double &dz, const gtsam::Rot2 &rotation,
-                const gtsam::Point3 &center, gtsam::OptionalMatrixType H1,
-                gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
-                gtsam::OptionalMatrixType H4) const override;
-
-private:
-  gtsam::Vector3 obs_armor_position_;
-  gtsam::Rot2 obs_armor_yaw_;
-  ArmorIndex armor_index_;
-  double min_, max_;
-};
-
 class ArmorRadiusCenterZFactor
     : public gtsam::NoiseModelFactorN<gtsam::Pose3, double, gtsam::Rot2,
                                       gtsam::Point3> {
@@ -199,7 +150,7 @@ public:
                       gtsam::Key center_point_key,
                       const Eigen::Isometry3d &T_camera_to_odom,
                       ArmorIndex armor_index, double radius_min,
-                      double radius_max);
+                      double radius_max, int armor_numbers = 4);
 
   gtsam::Vector
   evaluateError(const gtsam::Pose3 &armor_pose_camera, const double &radius,
@@ -213,6 +164,7 @@ private:
   Eigen::Isometry3d T_camera_to_odom_;
   ArmorIndex armor_index_;
   double radius_min_, radius_max_;
+  int armor_numbers_;
 };
 
 class ArmorReprojFactor : public gtsam::NoiseModelFactorN<gtsam::Pose3> {

@@ -43,10 +43,26 @@ struct RobotConfig {
 };
 
 struct OutpostConfig {
-  double lost_threshold_sec; // 超时重置因子图的阈值
+  double max_match_distance_m;
+  double max_match_yaw_diff_degree;
+  int first_update_batch_size; // 冷启动时第一次优化时最少的k
+  double lost_threshold_sec;   // 超时重置因子图的阈值
+  // 先验噪声
+  double yaw_prior_noise;
+  double vyaw_prior_noise;
+  confs::Vector3d translation_prior_noise;
+  confs::Vector3d velocity_prior_noise;
+  // 因子噪声
+  double yaw_factor_noise;
+  double vyaw_factor_noise;
+  confs::Vector3d translation_factor_noise;
+  confs::Vector3d velocity_factor_noise;
+  double radius_prior_noise;
   double default_radius;
-  double default_dz_a;
-  double default_dz_b;
+  double radius_min;
+  double radius_max;
+  double dz_prior_noise;
+  ArmorObservationNoiseConfig armor_observation_noise;
 };
 
 struct TrajectoryConfig {
@@ -110,6 +126,7 @@ struct TrackerConfigs {
   confs::IceoryxServiceDescription armors_sub_topic;
   confs::IceoryxServiceDescription serial_topic;
   RobotConfig robot_conf;
+  OutpostConfig outpost_conf;
   PlannerConfig planner_conf;
 };
 } // namespace auto_aim

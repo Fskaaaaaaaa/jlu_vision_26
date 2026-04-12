@@ -71,7 +71,6 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
            types::ArmorType::One, types::ArmorType::Two,
            types::ArmorType::Three, types::ArmorType::Four,
            types::ArmorType::Sentry,
-           // types::ArmorType::Outpost,
            // types::ArmorType::Base,
        }) {
     targets_.emplace(target_type,
@@ -80,6 +79,12 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                                                    distortion_coefficients_));
     LOG_INFO(logger_, "add target {}.", rfl::enum_to_string(target_type));
   }
+  targets_.emplace(types::ArmorType::Outpost,
+                   std::make_unique<OutpostTarget>(
+                       logger_, configs_.outpost_conf, camera_matrix_,
+                       distortion_coefficients_));
+  LOG_INFO(logger_, "add target {}.",
+           rfl::enum_to_string(types::ArmorType::Outpost));
   // 开始订阅装甲板
   armors_listener_
       .attachEvent(armors_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
@@ -323,7 +328,14 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   self->plotter_.plot(type_name + "vyaw",
                       tools::radian2Angle(state.center_vyaw));
   if (state.type == types::ArmorType::Outpost) {
-    // TODO
+    auto r = target_ptr->get("r");
+    auto dz0 = target_ptr->get("dz0");
+    auto dz1 = target_ptr->get("dz1");
+    auto dz2 = target_ptr->get("dz2");
+    self->plotter_.plot(type_name + "r", r);
+    self->plotter_.plot(type_name + "dz_0", dz0);
+    self->plotter_.plot(type_name + "dz_1", dz1);
+    self->plotter_.plot(type_name + "dz_2", dz2);
   } else if (state.type != types::ArmorType::Base) {
     auto ra = target_ptr->get("ra");
     auto rb = target_ptr->get("rb");

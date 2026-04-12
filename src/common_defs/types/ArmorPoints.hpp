@@ -19,7 +19,7 @@ constexpr double TINY_ARMOR_HEIGHT = 100e-3;  // m
 constexpr double LIGHTBAR_LENGTH = 56e-3;     // m
 constexpr double BIG_ARMOR_WIDTH = 230e-3;    // m
 constexpr double SMALL_ARMOR_WIDTH = 135e-3;  // m
-constexpr double TINY_ARMOR_WIDTH = 129e-3;   // m
+constexpr double TINY_ARMOR_WIDTH = 135e-3;   // m
 
 inline double getArmorWidth(types::ArmorType type) {
   switch (type) {

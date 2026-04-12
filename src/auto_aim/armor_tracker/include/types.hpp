@@ -82,9 +82,11 @@ struct RobotTargetState : public TargetState {
 };
 
 struct OutpostTargetState : public TargetState {
+  OutpostTargetState predict(double dt) const;
   double radius;
-  double dz_a;
-  double dz_b;
+  double dz_0;
+  double dz_1;
+  double dz_2;
 };
 
 struct TrackState {

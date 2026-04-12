@@ -1,4 +1,4 @@
-log_level: Debug
+log_level: Info
 plot_info: true
 always_on_task: true
 show_image: true
@@ -19,7 +19,7 @@ serial_topic:
 robot_conf:
   first_update_batch_size: 10
   max_match_distance_m: 1.5
-  max_match_yaw_diff_degree: 45.0
+  max_match_yaw_diff_degree: 60.0
   lost_threshold_sec: 0.5
   yaw_prior_noise: 9.0
   vyaw_prior_noise: 9.0
@@ -31,8 +31,7 @@ robot_conf:
     x: 0.5
     y: 0.5
     z: 0.5
-
-  yaw_factor_noise: 0.05
+  yaw_factor_noise: 0.01
   vyaw_factor_noise: 0.1
   translation_factor_noise:
     x: 0.05
@@ -50,8 +49,47 @@ robot_conf:
   default_dz: 0.0
   armor_observation_noise:
     pixel_error:
-      x: 0.5
-      y: 0.5
+      x: 2.0
+      y: 2.0
+    tangential_error_m: 0.01
+    radial_error_m: 0.03
+    height_error_m: 0.005
+    yaw_error_rad: 0.01
+
+outpost_conf:
+  first_update_batch_size: 5
+  max_match_distance_m: 1.5
+  max_match_yaw_diff_degree: 45.0
+  lost_threshold_sec: 0.8
+  yaw_prior_noise: 9.0
+  vyaw_prior_noise: 9.0
+  translation_prior_noise:
+    x: 0.1
+    y: 0.1
+    z: 0.0001
+  velocity_prior_noise:
+    x: 0.01
+    y: 0.01
+    z: 0.01
+  yaw_factor_noise: 0.05
+  vyaw_factor_noise: 0.1
+  translation_factor_noise:
+    x: 0.05
+    y: 0.05
+    z: 0.05
+  velocity_factor_noise:
+    x: 0.05
+    y: 0.05
+    z: 0.05
+  radius_prior_noise: 0.001
+  radius_min: 0.15
+  default_radius: 0.23
+  radius_max: 0.5
+  dz_prior_noise: 0.5
+  armor_observation_noise:
+    pixel_error:
+      x: 2.0
+      y: 2.0
     tangential_error_m: 0.01
     radial_error_m: 0.03
     height_error_m: 0.005

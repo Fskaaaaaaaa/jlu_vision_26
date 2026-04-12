@@ -55,6 +55,14 @@ auto_aim::RobotTargetState::predict(double dt) const {
   return state;
 }
 
+auto_aim::OutpostTargetState
+auto_aim::OutpostTargetState::predict(double dt) const {
+  OutpostTargetState state = *this;
+  state.center_position = this->center_position + this->center_velocity * dt;
+  state.center_yaw = this->center_yaw + this->center_vyaw * dt;
+  return state;
+}
+
 std::vector<auto_aim::ArmorPositionYaw> auto_aim::TargetState::armors() const {
   return get_armors_(*this);
 }
