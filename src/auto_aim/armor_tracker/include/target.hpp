@@ -145,10 +145,9 @@ private:
                               double dt) const;
   void addArmorValuesFactors(
       gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
-      const OutpostTargetState &target_state,
       const std::vector<std::pair<ArmorPositionRollPitchYawPoints, ArmorIndex>>
           &armors_indexs,
-      const Eigen::Isometry3d &T, std::uint64_t k) const;
+      const Eigen::Isometry3d &T, std::uint64_t k, double dz_0) const;
   void addArmorReprojValuesFactors(gtsam::Values &values,
                                    gtsam::NonlinearFactorGraph &graph,
                                    gtsam::Key armor_pose_key,

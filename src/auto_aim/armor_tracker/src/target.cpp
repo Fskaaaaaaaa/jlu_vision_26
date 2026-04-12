@@ -746,28 +746,27 @@ void auto_aim::OutpostTarget::addArmorReprojValuesFactors(
 
 void auto_aim::OutpostTarget::addArmorValuesFactors(
     gtsam::Values &values, gtsam::NonlinearFactorGraph &graph,
-    const OutpostTargetState &target_state,
     const std::vector<std::pair<ArmorPositionRollPitchYawPoints, ArmorIndex>>
         &armors_indexs,
-    const Eigen::Isometry3d &T, std::uint64_t k) const {
+    const Eigen::Isometry3d &T, std::uint64_t k, double dz_0) const {
   auto default_radius = tools::logisticInverse(
       config_.default_radius, config_.radius_min, config_.radius_max);
   if (k == 0) {
     values.insert(A(0), default_radius);
-    values.insert(Z(0), target_state.dz_0);
-    values.insert(Z(1), target_state.dz_0);
-    values.insert(Z(2), target_state.dz_0);
+    values.insert(Z(0), dz_0);
+    values.insert(Z(1), dz_0);
+    values.insert(Z(2), dz_0);
     graph.addPrior(
         A(0), default_radius,
         gtsam::noiseModel::Isotropic::Sigma(1, config_.radius_prior_noise));
     graph.addPrior(
-        Z(0), target_state.dz_0,
+        Z(0), dz_0,
         gtsam::noiseModel::Isotropic::Sigma(1, config_.dz_prior_noise));
     graph.addPrior(
-        Z(1), target_state.dz_0,
+        Z(1), dz_0,
         gtsam::noiseModel::Isotropic::Sigma(1, config_.dz_prior_noise));
     graph.addPrior(
-        Z(2), target_state.dz_0,
+        Z(2), dz_0,
         gtsam::noiseModel::Isotropic::Sigma(1, config_.dz_prior_noise));
   }
   for (const auto &[armor, index] : armors_indexs) {
@@ -858,8 +857,8 @@ auto_aim::OutpostTarget::update(
     graph = this->initial_graph_;
   }
   addMotionValuesFactors(values, graph, target_state, track_state_.k, dt);
-  addArmorValuesFactors(values, graph, target_state, matched_armors, T,
-                        track_state_.k);
+  addArmorValuesFactors(values, graph, matched_armors, T, track_state_.k,
+                        target_state.dz_0);
 
   // NOTE: 冷启动时先不更新到isam2里(避免在缺少约束前几帧优化爆掉)
   if (track_state_.k < config_.first_update_batch_size) {
