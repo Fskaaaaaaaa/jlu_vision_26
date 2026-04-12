@@ -61,7 +61,9 @@ private:
   iox::popo::Publisher<msgs::AimCommand, msgs::Header> aimcommand_pub_;
 
   std::unordered_map<types::ArmorType, std::unique_ptr<Target>> targets_;
+  // XXX: 貌似是内存不安全的，可能导致mat的越界访问
   std::atomic<types::ArmorType> aiming_target_;
+  std::atomic<bool> hit_target_;
   Planner planner_;
   std::jthread plan_thread_;
 

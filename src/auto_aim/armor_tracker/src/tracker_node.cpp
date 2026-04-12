@@ -19,6 +19,7 @@
 #include "types/Armor.hpp"
 #include "types/ArmorPoints.hpp"
 #include "types/ArmorType.hpp"
+#include "types/EnemyColor.hpp"
 #include "types/IceoryxServiceDescription.hpp"
 #include "types/TaskMode.hpp"
 
@@ -57,7 +58,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       tf_listener_(logger_, tf_buffer_), gimbal_listener_(logger_),
       aimcommand_pub_(
           types::IceoryxServiceDescription{configs_.serial_topic}.description),
-      aiming_target_(types::ArmorType::Negative),
+      aiming_target_(types::ArmorType::Negative), hit_target_(false),
       planner_(logger_, configs_.planner_conf) {
   LOG_INFO(logger_, "start tracker node!");
   // 初始化畸变内参和坐标变换
@@ -125,6 +126,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       auto gimbal_info = gimbal_listener_.getLatestInfo();
       auto cmd = planner_.plan(target_state, track_state.stamp_last_update,
                                gimbal_info);
+      // TODO: this->hit_target_.load()
       if (!cmd.control) {
         LOG_WARNING(logger_, "Aimcommand not control!");
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
@@ -245,18 +247,26 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
     return;
   // 由于frame_id从相机的配置文件读取，依赖图像回调获得，故心跳帧只有时间戳无坐标系
   auto image_stamp = armors.front().stamp; // 假设一次接收的armors来自同一帧
+  bool all_target_not_hit{true};
   std::erase_if(armors, [&](const types::Armor &armor) {
     if (armor.heart_beat)
       return true;
+    if (armor.type == self->aiming_target_.load() &&
+        armor.color == types::EnemyColor::Extinguished) {
+      self->hit_target_.store(true);
+      all_target_not_hit = false;
+    }
     if (self->configs_.erase_if_not_key_frame && !armor.key_frame)
       return true;
     if (armor.stamp != image_stamp)
       return true;
     return false;
   }); // 之后armors可能为空
+  if (all_target_not_hit)
+    self->hit_target_.store(false);
   LOG_TRACE_L1(self->logger_, "receive {} valid armors.", armors.size());
-  Eigen::Isometry3d T_camera_to_odom;
   // 查找该帧的坐标变换
+  Eigen::Isometry3d T_camera_to_odom;
   if (!armors.empty())
     try {
       T_camera_to_odom = self->tf_buffer_.get(
