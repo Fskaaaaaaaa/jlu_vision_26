@@ -1,0 +1,6 @@
+working_dir: "."
+processes:
+  main:
+    command: build/linux/x86_64/release/rune_detector -d
+    availability:
+      restart: always

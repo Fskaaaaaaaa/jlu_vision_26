@@ -1,0 +1,6 @@
+log_level: Info
+camera_params:
+  exposure_time: 3000
+  gain: 15.0
+  frame_rate: -1.0
+num: 96000
