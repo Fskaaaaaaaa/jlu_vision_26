@@ -15,10 +15,10 @@ constexpr char DEFAULT_CONFIG_PATH[] = "configs/auto_buff/rune_detector.yaml";
 constexpr char DEFAULT_LOG_PATH[] = "logs/auto_buff";
 struct RuneDetectorConfigs {
   quill::LogLevel log_level;
-  confs::CameraParams camera_params;
 
   int num;
 };
+
 
 class ConfigManager : public Single<ConfigManager> {
   friend class Single<ConfigManager>;
