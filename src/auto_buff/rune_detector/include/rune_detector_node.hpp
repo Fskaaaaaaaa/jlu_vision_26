@@ -13,4 +13,4 @@ private:
   quill::Logger *logger_;
   RuneDetectorConfigs configs_;
 };
-}
+} // namespace auto_buff

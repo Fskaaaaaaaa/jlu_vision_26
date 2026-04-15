@@ -8,9 +8,8 @@
 namespace auto_buff {
 struct RuneDetectorConfigs {
   quill::LogLevel log_level;
-  confs::CameraParams camera_params;
 
   int num;
 };
 
-}
+} // namespace auto_buff
