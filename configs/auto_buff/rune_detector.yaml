@@ -3,4 +3,6 @@ camera_params:
   exposure_time: 3000
   gain: 15.0
   frame_rate: -1.0
-num: 96000
+detect_when_idle: true
+default_enemy_color: Red
+camera_name: camera0

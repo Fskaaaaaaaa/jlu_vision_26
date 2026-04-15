@@ -1,20 +1,24 @@
 #pragma once
-//单例模板
-#include <memory>
+// 单例模板
 
 template <typename T> class Single {
-public:
+protected:
   Single() = default;
   ~Single() = default;
-
-  static std::unique_ptr<T> instance() {
+public:
+  static T* instance() {
     if (t == nullptr)
-      t = std::make_unique<t>();
+      t = new T();
     return t;
   }
+
+  Single(const Single&) = delete;
+  Single& operator=(const Single&) = delete;
+  Single(Single&&) = delete;
+  Single& operator=(Single&&) = delete;
 private:
-  static std::unique_ptr<T> t;
+  static T* t;
 };
 
 template <typename T>
-std::unique_ptr<T> Single<T>::t = nullptr;
+T* Single<T>::t = nullptr;

@@ -1,9 +1,7 @@
 #include "rune_detector_node.hpp"
 #include "configs.hpp"
 
-// #include <cstdlib>
 #include <cxxopts.hpp>
-// #include <iceoryx_posh/runtime/posh_runtime.hpp>
 
 #include <string>
 #include <iostream>
@@ -25,10 +23,12 @@ int main(int argc, char *argv[]) {
     auto config_path = result["config"].as<std::string>();
     auto log_path = result["log"].as<std::string>();
     /*
-    我觉得main函数里的东西太多了，遂加入一些小巧思，把config的初始化加到ConfigManager里，其它类初始化时自己去ConfigManager里读。
+    我觉得main函数里的东西太多了，
+    遂加入一些小巧思，把config的初始化加到ConfigManager里，
+    其它类初始化时自己去ConfigManager里读。
     */
+    iox::runtime::PoshRuntime::initRuntime(auto_buff::APP_NAME);
+
     auto_buff::ConfigManager::instance()->init(config_path, log_path);
-    while (true) {
-    }
-    return 0;
+    return auto_buff::RuneDetectorNode::instance()->run();;
 }

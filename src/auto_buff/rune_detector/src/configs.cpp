@@ -6,7 +6,6 @@
 #include "quill/LogMacros.h"
 
 #include <fstream>
-#include <iostream>
 
 extern const char APP_NAME[];
 
@@ -34,6 +33,18 @@ void auto_buff::ConfigManager::init(const std::string config_path,
 void auto_buff::ConfigManager::init() {
   init(DEFAULT_CONFIG_PATH, DEFAULT_LOG_PATH);
   LOG_ERROR(logger_, "use default config init!");
+}
+
+void auto_buff::ConfigManager::setDebugMode() {}
+
+quill::Logger* auto_buff::ConfigManager::logger(){
+    check_init();
+    return logger_;
+}
+
+const auto_buff::RuneDetectorConfigs& auto_buff::ConfigManager::configs() {
+  check_init();
+  return configs_;
 }
 
 void auto_buff::ConfigManager::check_init() {
