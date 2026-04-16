@@ -29,9 +29,9 @@ private:
                      const std::chrono::system_clock::time_point &stamp);
 
 private:
-  // hardware::CameraParamsChanger cam_params_changer_;
+  hardware::CameraParamsChanger cam_params_changer_;
   hardware::EnemyColorListener enemy_color_listener_;
- hardware::TaskModeListener task_mode_listener_;
+  hardware::TaskModeListener* task_mode_listener_;
   std::unique_ptr<hardware::ImagePoller<msgs::Image1440x1080_8UC3>> image_poller_;
 };
 } // namespace auto_buff

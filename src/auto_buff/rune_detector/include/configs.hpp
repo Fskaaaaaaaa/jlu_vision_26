@@ -15,13 +15,30 @@ constexpr char APP_NAME[] = "rune_detector";
 constexpr char DEFAULT_CONFIG_PATH[] = "configs/auto_buff/rune_detector.yaml";
 constexpr char DEFAULT_LOG_PATH[] = "logs/auto_buff";
 
+enum class YOLOVersion {
+  YOLOv5,
+  YOLOv8,
+  YOLO11,
+};
+
+struct YOLOConfig {
+  std::string device;
+  std::string model_path;
+  bool use_latency_performancemode; // NOTE: 注意MT时设成false
+  float threshold;
+  float nms_threshold;
+  float merge_conf_error;
+  float merge_min_iou;
+};
+
 struct RuneDetectorConfigs {
   quill::LogLevel log_level;
   confs::CameraParams camera_params;
 
   bool detect_when_idle;
-  
+
   types::EnemyColor default_enemy_color;
+  YOLOConfig yolo_config;
   std::string camera_name;
 };
 
