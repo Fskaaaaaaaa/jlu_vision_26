@@ -7,7 +7,8 @@ namespace msgs {
 // NOTE: 因为风车位姿提取全权在buff_tracker中完成
 // 即msg中不包含位姿信息，不需要做3D可视化
 // 所以整个commen_defs里面仅仅包含一个buff的msg
-// types和各种构造函数都是不需要的
+// types的镜像和各种构造函数都是不需要的
+// 但是待击打和已经击打的枚举类还是有的
 
 struct BuffBlade {
   int color;
