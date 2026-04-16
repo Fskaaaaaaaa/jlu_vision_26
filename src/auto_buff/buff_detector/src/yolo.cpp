@@ -1,10 +1,10 @@
 #include "yolo.hpp"
 #include "configs.hpp"
+#include "types.hpp"
 
 #include <Eigen/Dense>
 #include "quill/LogMacros.h"
 #include "opencv2/core/types.hpp"
-#include "types.hpp"
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
 

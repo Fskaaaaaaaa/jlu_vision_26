@@ -11,7 +11,7 @@
 #include <string>
 
 namespace auto_buff {
-constexpr char APP_NAME[] = "rune_detector";
+constexpr char APP_NAME[] = "buff_detector";
 constexpr char DEFAULT_CONFIG_PATH[] = "configs/auto_buff/rune_detector.yaml";
 constexpr char DEFAULT_LOG_PATH[] = "logs/auto_buff";
 
