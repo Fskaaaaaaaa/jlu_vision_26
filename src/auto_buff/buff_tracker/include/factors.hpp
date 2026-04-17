@@ -19,18 +19,18 @@
 namespace auto_buff {
 
 // 零速模型，仅做帧间约束
-class BuffCenterFactor
+class PositionFactor
     : public gtsam::NoiseModelFactorN<gtsam::Point3, gtsam::Point3> {
   using Base = gtsam::NoiseModelFactorN<gtsam::Point3, gtsam::Point3>;
 
 public:
-  BuffCenterFactor(const gtsam::SharedNoiseModel &model, gtsam::Key x_pre,
-                   gtsam::Key x_cur);
+  PositionFactor(const gtsam::SharedNoiseModel &model, gtsam::Key x_pre,
+                 gtsam::Key x_cur);
 
   gtsam::Vector evaluateError(const gtsam::Point3 &x_pre,
                               const gtsam::Point3 &x_cur,
                               gtsam::OptionalMatrixType H1,
-                              gtsam::OptionalMatrixType H3) const override;
+                              gtsam::OptionalMatrixType H2) const override;
 };
 
 // NOTE: 这个是给小符用的匀速约束（和auto_aim的一样），大符的再说
@@ -81,7 +81,7 @@ public:
 
 private:
   gtsam::Point2 px_point_;
-  gtsam::Point3 armor_point_;
+  gtsam::Point3 buff_point_;
   gtsam::Cal3DS2 calib_;
 };
 

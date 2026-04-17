@@ -36,7 +36,7 @@ struct BuffBlade {
 //                |
 //        4       |        1
 //                |
-// <--------------o
+// <--------------x
 // y
 //           3          2
 enum class BuffIndex {
@@ -47,20 +47,26 @@ enum class BuffIndex {
   _4,
 };
 
+// inline const std::vector<cv::Point3f> SINGLE_BLADE_OBJ_POINTS{
+//     cv::Point3f(0, 0, 0) / 1000,         cv::Point3f(0, -541.5, 186) / 1000,
+//     cv::Point3f(0, -858.5, 160) / 1000,  cv::Point3f(0, -858.5, -160) / 1000,
+//     cv::Point3f(0, -541.5, -186) / 1000,
+// };
+// NOTE: 将风车的世界点从朝右改为朝上的了，更符合index定义
+// Rune object points
+// r_tag, bottom_left, top_left, top_right, bottom_right
+inline const std::vector<cv::Point3f> BUFF_BLADE_OBJ_POINTS{
+    cv::Point3f(0, 0, 0) / 1000,        cv::Point3f(0, 186, 541.5) / 1000,
+    cv::Point3f(0, 160, 858.5) / 1000,  cv::Point3f(0, -160, 858.5) / 1000,
+    cv::Point3f(0, -186, 541.5) / 1000,
+};
+
 enum class BuffPointPosition {
   Center,
   BottomRight,
   TopRight,
   TopLeft,
   BottomLeft,
-};
-
-// Rune object points
-// r_tag, bottom_left, top_left, top_right, bottom_right
-inline const std::vector<cv::Point3f> SINGLE_BLADE_OBJ_POINTS{
-    cv::Point3f(0, 0, 0) / 1000,         cv::Point3f(0, -541.5, 186) / 1000,
-    cv::Point3f(0, -858.5, 160) / 1000,  cv::Point3f(0, -858.5, -160) / 1000,
-    cv::Point3f(0, -541.5, -186) / 1000,
 };
 
 } // namespace auto_buff
