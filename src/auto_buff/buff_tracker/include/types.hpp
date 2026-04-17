@@ -73,18 +73,20 @@ struct BuffBlade {
   // NOTE: 有需要的随时再添加
 };
 
-// 只保留位置信息，用于弹道解算
+// 只保留位置信息
 struct BuffBladePositionRoll {
-  // NOTE: 因为要同时添加激活和未激活的扇叶
-  // 需要保留类型信息
-  types::BuffBladeType type;
   Eigen::Vector3d position;
   gtsam::Rot2 roll;
+  Eigen::Vector3d getHitPosition();
 };
 
 // 添加了角点信息
 struct BuffBladePositionRollPoints : BuffBladePositionRoll {
   BuffBladePoints points;
+};
+
+struct BuffState {
+  Eigen::Vector3d position;
 };
 
 } // namespace auto_buff

@@ -4,6 +4,10 @@
 
 #include <gtsam/base/Vector.h>
 
+// HACK:
+// 这一版的因子图是不考虑风车的倾斜角的（即假设始终正对着镜头，只有roll的自由度）
+// 即没法斜着开符
+
 inline double
 getBuffBladeBetweenRollFromIndex(auto_buff::BuffBladeIndex index) {
   return static_cast<int>(index) * (std::numbers::pi * 2.0 / 5);
