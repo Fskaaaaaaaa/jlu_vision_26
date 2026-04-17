@@ -66,6 +66,9 @@ public:
 
 // NOTE:
 // 一个扇叶对应着五个keypoint，N个观测会产生N*5个重投影因子，优化N个扇叶位姿
+// 重投影因子只需要知道自身的点编号（用来访问世界点）
+// 从每个重投影因子优化的扇叶的位姿约束整个风车位姿是下面的因子干的活
+// 即这个类不需要BladeIndex
 class BuffBladeReprojFactor : public gtsam::NoiseModelFactorN<gtsam::Pose3> {
   using Base = gtsam::NoiseModelFactorN<gtsam::Pose3>;
 
@@ -74,7 +77,7 @@ public:
                         gtsam::Key buff_blade_pose_key,
                         const cv::Mat &camera_matrix,
                         const cv::Mat &distortion_coefficients,
-                        BuffIndex buff_index, BuffPointPosition point_position,
+                        BuffPointPosition point_position,
                         Eigen::Vector2d px_point);
   gtsam::Vector evaluateError(const gtsam::Pose3 &armor_pose_camera,
                               gtsam::OptionalMatrixType H) const override;
@@ -85,31 +88,31 @@ private:
   gtsam::Cal3DS2 calib_;
 };
 
-// NOTE: 每一个扇叶约束因子连接一个扇叶和xyz roll，每一帧可能添加0-5个约束因子
+// NOTE: 每一个扇叶约束因子连接一个扇叶和roll xyz，每一帧可能添加0-5个约束因子
 class BuffBladeFactor
-    : public gtsam::NoiseModelFactorN<gtsam::Pose3, double, gtsam::Rot2,
+    : public gtsam::NoiseModelFactorN<gtsam::Pose3, gtsam::Rot2,
                                       gtsam::Point3> {
-  using Base = gtsam::NoiseModelFactorN<gtsam::Pose3, double, gtsam::Rot2,
-                                        gtsam::Point3>;
+  using Base =
+      gtsam::NoiseModelFactorN<gtsam::Pose3, gtsam::Rot2, gtsam::Point3>;
 
 public:
   BuffBladeFactor(const gtsam::SharedNoiseModel &model,
-                  gtsam::Key armor_pose_key, gtsam::Key radius_key,
-                  gtsam::Key center_yaw_key, gtsam::Key center_point_key,
+                  gtsam::Key buff_blade_pose_key, gtsam::Key roll_key,
+                  gtsam::Key center_point_key,
                   const Eigen::Isometry3d &T_camera_to_odom,
-                  BuffIndex armor_index, double radius_min, double radius_max);
+                  BuffBladeIndex blade_index);
 
-  gtsam::Vector
-  evaluateError(const gtsam::Pose3 &armor_pose_camera, const double &radius,
-                const gtsam::Rot2 &center_yaw,
-                const gtsam::Point3 &center_point, gtsam::OptionalMatrixType H1,
-                gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
-                gtsam::OptionalMatrixType H4) const override;
+  // 返回的误差定义为{x y z roll}
+  gtsam::Vector evaluateError(const gtsam::Pose3 &buff_blade_pose_camera,
+                              const gtsam::Rot2 &center_roll,
+                              const gtsam::Point3 &center_point,
+                              gtsam::OptionalMatrixType H1,
+                              gtsam::OptionalMatrixType H2,
+                              gtsam::OptionalMatrixType H3) const override;
 
 private:
   Eigen::Isometry3d T_camera_to_odom_;
-  BuffIndex armor_index_;
-  double radius_min_, radius_max_;
+  BuffBladeIndex blade_index_;
 };
 
 } // namespace auto_buff

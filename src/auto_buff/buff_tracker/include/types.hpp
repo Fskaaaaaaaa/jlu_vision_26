@@ -8,26 +8,10 @@
 #include "iceoryx_posh/popo/sample.hpp"
 #include "opencv2/core/types.hpp"
 #include <Eigen/Dense>
+#include <gtsam/geometry/Rot2.h>
 #include <opencv2/core.hpp>
 
 namespace auto_buff {
-
-struct BuffBlade {
-  BuffBlade() = default;
-  BuffBlade(const iox::popo::Sample<const msgs::BuffBlade, const msgs::Header>
-                &sample);
-  types::EnemyColor color;
-  types::BuffBladeType type;
-  float confidence;
-  struct {
-    cv::Point2f r_center;
-    cv::Point2f bottom_right;
-    cv::Point2f top_right;
-    cv::Point2f top_left;
-    cv::Point2f bottom_left;
-  } points;
-  // NOTE: 有需要的随时再添加
-};
 
 // NOTE:
 //                ^ z
@@ -39,7 +23,7 @@ struct BuffBlade {
 // <--------------x
 // y
 //           3          2
-enum class BuffIndex {
+enum class BuffBladeIndex {
   _0 = 0,
   _1,
   _2,
@@ -67,6 +51,40 @@ enum class BuffPointPosition {
   TopRight,
   TopLeft,
   BottomLeft,
+};
+
+struct BuffBladePoints {
+  cv::Point2f r_center;
+  cv::Point2f bottom_right;
+  cv::Point2f top_right;
+  cv::Point2f top_left;
+  cv::Point2f bottom_left;
+};
+
+// 从msg构造，用于接受信息
+struct BuffBlade {
+  BuffBlade() = default;
+  BuffBlade(const iox::popo::Sample<const msgs::BuffBlade, const msgs::Header>
+                &sample);
+  types::EnemyColor color;
+  types::BuffBladeType type;
+  float confidence;
+  BuffBladePoints points;
+  // NOTE: 有需要的随时再添加
+};
+
+// 只保留位置信息，用于弹道解算
+struct BuffBladePositionRoll {
+  // NOTE: 因为要同时添加激活和未激活的扇叶
+  // 需要保留类型信息
+  types::BuffBladeType type;
+  Eigen::Vector3d position;
+  gtsam::Rot2 roll;
+};
+
+// 添加了角点信息
+struct BuffBladePositionRollPoints : BuffBladePositionRoll {
+  BuffBladePoints points;
 };
 
 } // namespace auto_buff
