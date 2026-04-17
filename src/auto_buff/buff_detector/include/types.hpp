@@ -41,6 +41,8 @@ struct RunePoints {
   std::vector<RunePoints> children;
 };
 
+
+// NOTE: 在commen_def里已经有风车叶片是否激活的枚举类了
 enum class RuneType { INACTIVE = 0, ACTIVE = 1 };
 
 struct RuneObject {
