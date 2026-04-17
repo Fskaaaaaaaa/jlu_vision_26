@@ -1,18 +1,18 @@
 #pragma once
 #include "quill/Logger.h"
 #include "single.hpp"
+#include "confs/IceoryxServiceDescription.hpp"
 // #include "basic/logger.hpp"
 
 #include "confs/CameraParams.hpp"
 #include "types/EnemyColor.hpp"
-// #include "confs/IceoryxServiceDescription.hpp"
 #include "quill/core/LogLevel.h"
 
 #include <string>
 
 namespace auto_buff {
 constexpr char APP_NAME[] = "buff_detector";
-constexpr char DEFAULT_CONFIG_PATH[] = "configs/auto_buff/rune_detector.yaml";
+constexpr char DEFAULT_CONFIG_PATH[] = "configs/auto_buff/buff_detector.yaml";
 constexpr char DEFAULT_LOG_PATH[] = "logs/auto_buff";
 
 enum class YOLOVersion {
@@ -26,6 +26,7 @@ struct YOLOConfig {
   std::string model_path;
   bool use_latency_performancemode; // NOTE: 注意MT时设成false
   float threshold;
+  int top_k;
   float nms_threshold;
   float merge_conf_error;
   float merge_min_iou;
@@ -36,10 +37,14 @@ struct RuneDetectorConfigs {
   confs::CameraParams camera_params;
 
   bool detect_when_idle;
+  bool debug_mode;
+  bool step_by_step_debug;
 
+  
   types::EnemyColor default_enemy_color;
-  YOLOConfig yolo_config;
   std::string camera_name;
+  confs::IceoryxServiceDescription runes_topic;
+  YOLOConfig yolo_config;
 };
 
 class ConfigManager : public Single<ConfigManager> {

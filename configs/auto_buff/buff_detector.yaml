@@ -1,0 +1,24 @@
+log_level: Info
+camera_params:
+  exposure_time: 3000
+  gain: 15.0
+  frame_rate: -1.0
+detect_when_idle: true
+debug_mode: true
+step_by_step_debug: false
+default_enemy_color: Red
+camera_name: camera0
+runes_topic: 
+  service: runes
+  instance: detector
+  event: data
+yolo_config:
+  device: CPU
+  model_path: assets/yolox_rune_3.6m.onnx
+  use_latency_performancemode: true
+  # 抄的中南的参数没改
+  threshold: 0.50
+  top_k: 128
+  nms_threshold: 0.3
+  merge_conf_error: 0.15
+  merge_min_iou: 0.9

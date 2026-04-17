@@ -1,29 +1,17 @@
 #pragma once
 #include "types/EnemyColor.hpp"
+#include "types/BuffBladeType.hpp"
 
 #include "opencv2/core/types.hpp"
 
+#include <string>
+#include <chrono>
+
 namespace auto_buff {
 struct RunePoints {
-  RunePoints operator+(const RunePoints &other) {
-    RunePoints res;
-    res.center = center + other.center;
-    res.bottom_right = bottom_right + other.bottom_right;
-    res.top_right = top_right + other.top_right;
-    res.top_left = top_left + other.top_left;
-    res.bottom_left = bottom_left + other.bottom_left;
-    return res;
-  }
+  RunePoints operator+(const RunePoints &other) const;
 
-  RunePoints operator/(const float &other) {
-    RunePoints res;
-    res.center = center / other;
-    res.bottom_right = bottom_right / other;
-    res.top_right = top_right / other;
-    res.top_left = top_left / other;
-    res.bottom_left = bottom_left / other;
-    return res;
-  }
+  RunePoints operator/(const float &other) const;
 
   std::vector<cv::Point2f> toVector2f() const {
     return {center, bottom_left, top_left, top_right, bottom_right};
@@ -41,14 +29,14 @@ struct RunePoints {
   std::vector<RunePoints> children;
 };
 
-enum class RuneType { INACTIVE = 0, ACTIVE = 1 };
-
 struct RuneObject {
   types::EnemyColor color;
-  RuneType type;
+  types::BuffBladeType type;
   RunePoints points;
   float prob;
   cv::Rect box;
+  std::string frame_id;
+  std::chrono::system_clock::time_point stamp;  
 };
 
 struct GridAndStride {
@@ -56,4 +44,5 @@ struct GridAndStride {
   int grid1;
   int stride;
 };
+
 }

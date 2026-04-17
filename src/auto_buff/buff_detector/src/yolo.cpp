@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include "quill/LogMacros.h"
 #include "opencv2/core/types.hpp"
+#include "types/BuffBladeType.hpp"
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -104,7 +105,7 @@ ov::InferRequest auto_buff::YOLO::requestInfer(const ov::Tensor &input_tensor) {
   return infer_request;
 }
 
-float intersectionArea(const auto_buff::RuneObject &a, const auto_buff::RuneObject &b) {
+float auto_buff::YOLO::intersectionArea(const RuneObject &a, const RuneObject &b) const {
   cv::Rect_<float> inter = a.box & b.box;
   return inter.area();
 }
@@ -124,7 +125,12 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
   std::sort(
       objs_tmp.begin(), objs_tmp.end(),
       [](const RuneObject &a, const RuneObject &b) { return a.prob > b.prob; });
-  
+  if (objs_tmp.size() > static_cast<size_t>(config_.top_k)) {
+    objs_tmp.resize(config_.top_k);
+  }
+
+  nmsMergeSortedBboxes(objs_tmp,indices);
+
   for (size_t i = 0; i < indices.size(); i++) {
     objs_result.push_back(std::move(objs_tmp[indices[i]]));
 
@@ -203,12 +209,13 @@ void auto_buff::YOLO::generateProposals(
 
     obj.box = rect;
     obj.color = color_id.x ? types::EnemyColor::Red : types::EnemyColor::Blue;
-    obj.type = static_cast<RuneType>(class_id.x);
+    obj.type = static_cast<types::BuffBladeType>(class_id.x);
     obj.prob = confidence;
 
     scores.push_back(confidence);
     output_objs.push_back(std::move(obj));
   }
+
 }
 
 void auto_buff::YOLO::nmsMergeSortedBboxes(std::vector<RuneObject> &rune_objects,
@@ -238,7 +245,9 @@ void auto_buff::YOLO::nmsMergeSortedBboxes(std::vector<RuneObject> &rune_objects
         // Stored for Merge
         if (obj_waiting_to_be_merged.type == obj_has_been_merged.type && obj_waiting_to_be_merged.color == obj_has_been_merged.color && iou > config_.merge_min_iou &&
             abs(obj_waiting_to_be_merged.prob - obj_has_been_merged.prob) < config_.merge_conf_error) {
-          obj_waiting_to_be_merged.points.children.push_back(obj_has_been_merged.points);
+          obj_waiting_to_be_merged.points.children.push_back(
+              obj_has_been_merged.points);
+          obj_has_been_merged.prob = std::max(obj_waiting_to_be_merged.prob, obj_has_been_merged.prob);
         }
       }
     }

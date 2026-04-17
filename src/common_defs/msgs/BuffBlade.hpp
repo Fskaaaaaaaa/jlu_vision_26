@@ -14,6 +14,7 @@ struct BuffBlade {
   int color;
   int type;
   float confidence;
+  bool heart_beat;
   struct {
     Point2d r_center;
     Point2d bottom_right;

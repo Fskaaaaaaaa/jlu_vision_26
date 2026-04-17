@@ -1,4 +1,4 @@
-#include "rune_detector_node.hpp"
+#include "buff_detector_node.hpp"
 #include "configs.hpp"
 
 #include <cxxopts.hpp>
@@ -30,5 +30,5 @@ int main(int argc, char *argv[]) {
     iox::runtime::PoshRuntime::initRuntime(auto_buff::APP_NAME);
 
     auto_buff::ConfigManager::instance()->init(config_path, log_path);
-    return auto_buff::RuneDetectorNode::instance()->run();;
+    return auto_buff::DetectorNode::instance()->run();;
 }
