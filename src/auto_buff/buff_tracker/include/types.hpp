@@ -2,11 +2,11 @@
 
 #include "msgs/BuffBlade.hpp"
 #include "msgs/Header.hpp"
+#include "types/BuffBladeType.hpp"
+#include "types/EnemyColor.hpp"
 
 #include "iceoryx_posh/popo/sample.hpp"
 #include "opencv2/core/types.hpp"
-#include "types/BuffBladeType.hpp"
-#include "types/EnemyColor.hpp"
 #include <Eigen/Dense>
 #include <opencv2/core.hpp>
 
@@ -45,6 +45,22 @@ enum class BuffIndex {
   _2,
   _3,
   _4,
+};
+
+enum class BuffPointPosition {
+  Center,
+  BottomRight,
+  TopRight,
+  TopLeft,
+  BottomLeft,
+};
+
+// Rune object points
+// r_tag, bottom_left, top_left, top_right, bottom_right
+inline const std::vector<cv::Point3f> SINGLE_BLADE_OBJ_POINTS{
+    cv::Point3f(0, 0, 0) / 1000,         cv::Point3f(0, -541.5, 186) / 1000,
+    cv::Point3f(0, -858.5, 160) / 1000,  cv::Point3f(0, -858.5, -160) / 1000,
+    cv::Point3f(0, -541.5, -186) / 1000,
 };
 
 } // namespace auto_buff
