@@ -149,10 +149,11 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
 
 void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
                                         const cv::Mat &output_buffer) const {
+  float max_confidence = 0;
   for (int anchor_idx = 0; anchor_idx < grid_strides_.size(); anchor_idx++) {
     float confidence =
         output_buffer.at<float>(anchor_idx, yolo_point_number * 2);
-    
+    max_confidence = std::max(confidence, max_confidence);
     if (confidence < config_.threshold) {
       continue;
     }
@@ -215,6 +216,8 @@ void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
 
     output_objs.push_back(std::move(obj));
   }
+  LOG_INFO(ConfigManager::instance()->logger(), "max_confidence{}",  max_confidence);
+
 }
 
 void auto_buff::YOLO::nmsMergeSortedBboxes(std::vector<RuneObject> &rune_objects,

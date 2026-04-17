@@ -1,6 +1,7 @@
 #include "buff_detector_node.hpp"
 #include "configs.hpp"
 #include "basic/colors.hpp"
+#include "opencv2/core/types.hpp"
 #include "types/IceoryxServiceDescription.hpp"
 
 #include "msgs/BuffBlade.hpp"
@@ -102,7 +103,9 @@ void auto_buff::DetectorNode::imageCallback(
                 1.0, cv::Scalar(0, 255, 0), 2);
     cv::putText(img, camera_str, cv::Point(10, 120), cv::FONT_HERSHEY_SIMPLEX,
                 1.0, cv::Scalar(0, 255, 0), 2);
-    cv::imshow("detector", img);
+    cv::Mat resize_img;
+    cv::resize(img, resize_img, cv::Size(img.size().width/2, img.size().height/2));
+    cv::imshow("detector", resize_img);
     cv::waitKey(ConfigManager::instance()->configs().step_by_step_debug ? 0 : 1);
   }
 }
@@ -135,7 +138,7 @@ std::optional<cv::Mat> auto_buff::DetectorNode::afterDetect(
 
 void auto_buff::DetectorNode::drawRune(const RuneObject &rune, cv::Mat &image,
                                         const cv::Scalar &color) {
-  cv::polylines(image, rune.points.toVector2f(), true, color, 2, cv::LINE_AA);
+  cv::polylines(image, rune.points.toVector2i(), true, color, 2, cv::LINE_AA);
   cv::putText(image,
               rfl::enum_to_string(rune.color) + rfl::enum_to_string(rune.type) +
                   std::to_string(rune.prob),
