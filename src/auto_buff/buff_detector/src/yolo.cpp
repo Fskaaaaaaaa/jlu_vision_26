@@ -10,6 +10,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include <cmath>
+#include <string>
 
 auto_buff::YOLO::YOLO() {
   generateGridsAndStride();
@@ -117,11 +118,10 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
                         output_tensor.data());
   
   std::vector<RuneObject> objs_tmp, objs_result;
-  std::vector<cv::Rect> rects;
-  std::vector<float> scores;
   std::vector<int> indices;
 
-  generateProposals(objs_tmp, scores, rects, output_buffer);
+  generateProposals(objs_tmp, output_buffer);
+  LOG_INFO(ConfigManager::instance()->logger(), "runes size:{}",  std::to_string(objs_tmp.size()));
   std::sort(
       objs_tmp.begin(), objs_tmp.end(),
       [](const RuneObject &a, const RuneObject &b) { return a.prob > b.prob; });
@@ -147,11 +147,12 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
   return objs_result;
 }
 
-void auto_buff::YOLO::generateProposals(
-    std::vector<RuneObject> &output_objs, std::vector<float> &scores,
-    std::vector<cv::Rect> &rects, const cv::Mat &output_buffer) const{
+void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
+                                        const cv::Mat &output_buffer) const {
   for (int anchor_idx = 0; anchor_idx < grid_strides_.size(); anchor_idx++) {
-    float confidence = output_buffer.at<float>(anchor_idx, yolo_point_number * 2);
+    float confidence =
+        output_buffer.at<float>(anchor_idx, yolo_point_number * 2);
+    
     if (confidence < config_.threshold) {
       continue;
     }
@@ -212,10 +213,8 @@ void auto_buff::YOLO::generateProposals(
     obj.type = static_cast<types::BuffBladeType>(class_id.x);
     obj.prob = confidence;
 
-    scores.push_back(confidence);
     output_objs.push_back(std::move(obj));
   }
-
 }
 
 void auto_buff::YOLO::nmsMergeSortedBboxes(std::vector<RuneObject> &rune_objects,

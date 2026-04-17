@@ -5,7 +5,7 @@ camera_params:
   frame_rate: -1.0
 detect_when_idle: true
 debug_mode: true
-step_by_step_debug: false
+step_by_step_debug: true
 default_enemy_color: Red
 camera_name: camera0
 runes_topic: 

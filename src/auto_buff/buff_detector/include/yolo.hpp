@@ -27,8 +27,8 @@ public:
 
 private:
   void generateProposals(
-    std::vector<RuneObject> &output_objs, std::vector<float> &scores,
-    std::vector<cv::Rect> &rects, const cv::Mat &output_buffer) const;
+    std::vector<RuneObject> &output_objs,
+     const cv::Mat &output_buffer) const;
 
   void nmsMergeSortedBboxes(std::vector<RuneObject> &faceobjects,
                             std::vector<int> &indices) const;

@@ -112,6 +112,7 @@ std::optional<cv::Mat> auto_buff::DetectorNode::afterDetect(
     const std::string &frame_id,
     const std::chrono::system_clock::time_point &stamp) {
   if (runes.empty()) {
+    // LOG_INFO(ConfigManager::instance()->logger(),"runes empty");
     publishHeartbeat(stamp);
     return debug ? std::optional{bgr_image.clone()} : std::nullopt;
   }
