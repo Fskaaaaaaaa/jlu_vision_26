@@ -49,7 +49,7 @@ add_requires("nameof")
 add_requires("ftxui")
 add_requires("nlohmann_json")
 -- add_requires("boost") 这个应该用不到
-add_requires("ceres", { system = true })
+-- add_requires("ceres", { system = true })
 -- ceres是openvins的依赖，拟合大符应该也能用到
 add_requires("serial")
 -- add_requires("g2o")
