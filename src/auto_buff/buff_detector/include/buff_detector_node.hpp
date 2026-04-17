@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace auto_buff {
@@ -50,13 +51,12 @@ private:
 
   iox::popo::Publisher<msgs::BuffBlade, msgs::Header> rune_pub_;
 
-
   std::unique_ptr<STDetector> st_detector_;
   std::unique_ptr<MTDetector> mt_detector_;
 
   std::unique_ptr<hardware::ImagePoller<msgs::Image1440x1080_8UC3>>
       image_poller_;
-  
+
   bool debug;
 };
 } // namespace auto_buff

@@ -3,10 +3,10 @@
 #include "opencv2/highgui.hpp"
 #include "types.hpp"
 
-#include <Eigen/Dense>
-#include "quill/LogMacros.h"
 #include "opencv2/core/types.hpp"
+#include "quill/LogMacros.h"
 #include "types/BuffBladeType.hpp"
+#include <Eigen/Dense>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -19,9 +19,9 @@ auto_buff::YOLO::YOLO() {
   auto model = core_.read_model(config_.model_path);
   ov::preprocess::PrePostProcessor ppp(model);
   auto &input = ppp.input();
-  //Note: 回头来看看这里怎么写
+  // Note: 回头来看看这里怎么写
   input.tensor()
-      .set_element_type(ov::element::u8)
+      .set_element_type(ov::element::f32)
       .set_shape({1, yolo_input_size, yolo_input_size, 3})
       .set_layout("NHWC")
       .set_color_format(ov::preprocess::ColorFormat::BGR);
@@ -58,9 +58,9 @@ ov::Tensor auto_buff::YOLO::preProcess(const cv::Mat &img) {
   int left = static_cast<int>(round(half_w - 0.1));
   int right = static_cast<int>(round(half_w + 0.1));
 
-  ov::Tensor input_tensor{ov::element::u8,
+  ov::Tensor input_tensor{ov::element::f32,
                           {1, yolo_input_size, yolo_input_size, 3}};
-  cv::Mat input_mat(480, 480, CV_8UC3, input_tensor.data<uint8_t>());
+  cv::Mat input_mat(480, 480, CV_8UC3, input_tensor.data<float>());
 
   cv::Mat resized_img;
   cv::resize(img, resized_img, cv::Size(resize_w, resize_h));
@@ -102,13 +102,14 @@ void auto_buff::YOLO::generateGridsAndStride() {
 }
 
 ov::InferRequest auto_buff::YOLO::requestInfer(const ov::Tensor &input_tensor) {
-  //这个也是
+  // 这个也是
   auto infer_request = compiled_model_.create_infer_request();
   infer_request.set_input_tensor(input_tensor);
   return infer_request;
 }
 
-float auto_buff::YOLO::intersectionArea(const RuneObject &a, const RuneObject &b) const {
+float auto_buff::YOLO::intersectionArea(const RuneObject &a,
+                                        const RuneObject &b) const {
   cv::Rect_<float> inter = a.box & b.box;
   return inter.area();
 }
@@ -118,12 +119,13 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
   auto output_shape = output_tensor.get_shape();
   cv::Mat output_buffer(output_shape[1], output_shape[2], CV_32F,
                         output_tensor.data());
-  
+
   std::vector<RuneObject> objs_tmp, objs_result;
   std::vector<int> indices;
 
   generateProposals(objs_tmp, output_buffer);
-  LOG_INFO(ConfigManager::instance()->logger(), "runes size:{}",  std::to_string(objs_tmp.size()));
+  LOG_INFO(ConfigManager::instance()->logger(), "runes size:{}",
+           std::to_string(objs_tmp.size()));
   std::sort(
       objs_tmp.begin(), objs_tmp.end(),
       [](const RuneObject &a, const RuneObject &b) { return a.prob > b.prob; });
@@ -131,7 +133,7 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
     objs_tmp.resize(config_.top_k);
   }
 
-  nmsMergeSortedBboxes(objs_tmp,indices);
+  nmsMergeSortedBboxes(objs_tmp, indices);
 
   for (size_t i = 0; i < indices.size(); i++) {
     objs_result.push_back(std::move(objs_tmp[indices[i]]));
@@ -168,11 +170,13 @@ void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
     cv::Point color_id, class_id;
     cv::Mat color_scores =
         output_buffer.row(anchor_idx)
-            .colRange(yolo_point_number * 2 + 1, yolo_point_number * 2 + 1 + yolo_color_number);
+            .colRange(yolo_point_number * 2 + 1,
+                      yolo_point_number * 2 + 1 + yolo_color_number);
     cv::Mat num_scores =
         output_buffer.row(anchor_idx)
             .colRange(yolo_point_number * 2 + 1 + yolo_color_number,
-                      yolo_point_number * 2 + 1 + yolo_color_number + yolo_class_number);
+                      yolo_point_number * 2 + 1 + yolo_color_number +
+                          yolo_class_number);
     // Argmax
     cv::minMaxLoc(color_scores, NULL, &color_score, NULL, &color_id);
     cv::minMaxLoc(num_scores, NULL, &class_score, NULL, &class_id);
@@ -218,12 +222,12 @@ void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
 
     output_objs.push_back(std::move(obj));
   }
-  LOG_INFO(ConfigManager::instance()->logger(), "max_confidence{}",  max_confidence);
-
+  LOG_INFO(ConfigManager::instance()->logger(), "max_confidence{}",
+           max_confidence);
 }
 
-void auto_buff::YOLO::nmsMergeSortedBboxes(std::vector<RuneObject> &rune_objects,
-                                           std::vector<int> &indices) const {
+void auto_buff::YOLO::nmsMergeSortedBboxes(
+    std::vector<RuneObject> &rune_objects, std::vector<int> &indices) const {
   indices.clear();
 
   const int object_num = rune_objects.size();
@@ -241,17 +245,22 @@ void auto_buff::YOLO::nmsMergeSortedBboxes(std::vector<RuneObject> &rune_objects
       RuneObject &obj_has_been_merged = rune_objects[idx];
 
       // intersection over union
-      float inter_area = intersectionArea(obj_waiting_to_be_merged, obj_has_been_merged);
+      float inter_area =
+          intersectionArea(obj_waiting_to_be_merged, obj_has_been_merged);
       float union_area = areas[i] + areas[idx] - inter_area;
       float iou = inter_area / union_area;
       if (iou > config_.nms_threshold || std::isnan(iou)) {
         keep = false;
         // Stored for Merge
-        if (obj_waiting_to_be_merged.type == obj_has_been_merged.type && obj_waiting_to_be_merged.color == obj_has_been_merged.color && iou > config_.merge_min_iou &&
-            abs(obj_waiting_to_be_merged.prob - obj_has_been_merged.prob) < config_.merge_conf_error) {
+        if (obj_waiting_to_be_merged.type == obj_has_been_merged.type &&
+            obj_waiting_to_be_merged.color == obj_has_been_merged.color &&
+            iou > config_.merge_min_iou &&
+            abs(obj_waiting_to_be_merged.prob - obj_has_been_merged.prob) <
+                config_.merge_conf_error) {
           obj_waiting_to_be_merged.points.children.push_back(
               obj_has_been_merged.points);
-          obj_has_been_merged.prob = std::max(obj_waiting_to_be_merged.prob, obj_has_been_merged.prob);
+          obj_has_been_merged.prob =
+              std::max(obj_waiting_to_be_merged.prob, obj_has_been_merged.prob);
         }
       }
     }
