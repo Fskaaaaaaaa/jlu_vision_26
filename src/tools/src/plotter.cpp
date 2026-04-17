@@ -9,7 +9,7 @@ Plotter::Plotter(std::string host, uint16_t port) {
   socket_ = ::socket(AF_INET, SOCK_DGRAM, 0);
 
   destination_.sin_family = AF_INET;
-  destination_.sin_port = ::htons(port);
+  destination_.sin_port = htons(port);
   destination_.sin_addr.s_addr = ::inet_addr(host.c_str());
 }
 

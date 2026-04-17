@@ -3,6 +3,7 @@
 #include "msgs/KinematicFunctions.hpp"
 #include "msgs/Target.hpp"
 
+#include <numbers>
 #include <tuple>
 #include <vector>
 
@@ -12,7 +13,6 @@ types::Target::Target(
 
     // XXX: 这里不应该包含Header部分
     : frame_id(std::string{sample.getUserHeader().frame_id.c_str()}),
-      stamp(std::chrono::nanoseconds{sample.getUserHeader().stamp_ns}),
       type(static_cast<types::TargetType>(sample->type)) {
   auto limit_radian = [](double angle,
                          std::pair<double, double> range = {-std::numbers::pi,

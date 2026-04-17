@@ -4,8 +4,11 @@
 
 types::Armor::Armor(
     const iox::popo::Sample<const msgs::Armor, const msgs::Header> &sample) {
-  this->stamp = std::chrono::time_point<std::chrono::system_clock>{
-      std::chrono::nanoseconds{sample.getUserHeader().stamp_ns}};
+  // this->stamp = std::chrono::time_point<std::chrono::system_clock>{
+  //     std::chrono::nanoseconds{sample.getUserHeader().stamp_ns}};
+  this->stamp = std::chrono::time_point<std::chrono::system_clock>(
+      std::chrono::duration_cast<std::chrono::system_clock::duration>(
+          std::chrono::nanoseconds(sample.getUserHeader().stamp_ns)));
   this->frame_id = std::string{sample.getUserHeader().frame_id.c_str()};
 
   this->distance_to_image_center = sample->distance_to_image_center;
