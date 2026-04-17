@@ -1,5 +1,6 @@
 #include "yolo.hpp"
 #include "configs.hpp"
+#include "opencv2/highgui.hpp"
 #include "types.hpp"
 
 #include <Eigen/Dense>
@@ -49,13 +50,6 @@ ov::Tensor auto_buff::YOLO::preProcess(const cv::Mat &img) {
 
   int pad_h = yolo_input_size - resize_h;
   int pad_w = yolo_input_size - resize_w;
-
-  ov::Tensor input_tensor{ov::element::u8,
-                          {1, yolo_input_size, yolo_input_size, 3}};
-  cv::Mat resized_img{yolo_input_size, yolo_input_size, CV_8UC3,
-                input_tensor.data<unsigned char>()};
-  cv::resize(img, resized_img, cv::Size(resize_w, resize_h));
-
   float half_h = pad_h * 1.0 / 2;
   float half_w = pad_w * 1.0 / 2;
 
@@ -64,14 +58,22 @@ ov::Tensor auto_buff::YOLO::preProcess(const cv::Mat &img) {
   int left = static_cast<int>(round(half_w - 0.1));
   int right = static_cast<int>(round(half_w + 0.1));
 
+  ov::Tensor input_tensor{ov::element::u8,
+                          {1, yolo_input_size, yolo_input_size, 3}};
+  cv::Mat input_mat(480, 480, CV_8UC3, input_tensor.data<uint8_t>());
+
+  cv::Mat resized_img;
+  cv::resize(img, resized_img, cv::Size(resize_w, resize_h));
+
   if (!is_recoded_image_parameters_) {
     is_recoded_image_parameters_ = true;
     getTransformMatrix(half_h, half_w, scale);
     input_image_size_ = img.size();
   }
 
-  cv::copyMakeBorder(resized_img, resized_img, top, bottom, left, right,
+  cv::copyMakeBorder(resized_img, input_mat, top, bottom, left, right,
                      cv::BORDER_CONSTANT, cv::Scalar(114, 114, 114));
+  cv::imshow("input", input_mat);
   return input_tensor;
 }
 

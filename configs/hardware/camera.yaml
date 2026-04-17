@@ -6,7 +6,7 @@ camera_name: camera0
 camera_frame_id: camera
 image_publish_interval_ms: 0
 cam_info_publish_interval_ms: 1000
-video_path: assets/buff_test.mp4
+video_path: assets/buff_test_2.avi
 camera_info:
   view_width_px: 1440
   view_height_px: 1080
