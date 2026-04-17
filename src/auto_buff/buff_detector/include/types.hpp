@@ -10,8 +10,8 @@
 namespace auto_buff {
 struct RunePoints {
   RunePoints operator+(const RunePoints &other) const;
-
   RunePoints operator/(const float &other) const;
+  RunePoints operator*(const float &other) const;
 
   std::vector<cv::Point2f> toVector2f() const {
     return {center, bottom_left, top_left, top_right, bottom_right};
@@ -27,6 +27,7 @@ struct RunePoints {
   cv::Point2f bottom_left;
 
   std::vector<RunePoints> children;
+  std::vector<float> probs;
 };
 
 struct RuneObject {

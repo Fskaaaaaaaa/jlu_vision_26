@@ -1,5 +1,6 @@
 #include "yolo.hpp"
 #include "configs.hpp"
+#include "opencv2/core/hal/interface.h"
 #include "opencv2/highgui.hpp"
 #include "types.hpp"
 
@@ -28,8 +29,8 @@ auto_buff::YOLO::YOLO() {
   input.model().set_layout("NCHW");
   input.preprocess()
       .convert_element_type(ov::element::f32)
-      .convert_color(ov::preprocess::ColorFormat::RGB)
-      .scale(255.0);
+      .convert_color(ov::preprocess::ColorFormat::RGB);
+      // .scale(255.0);
   model = ppp.build();
   compiled_model_ = core_.compile_model(
       model, config_.device,
@@ -60,20 +61,20 @@ ov::Tensor auto_buff::YOLO::preProcess(const cv::Mat &img) {
 
   ov::Tensor input_tensor{ov::element::f32,
                           {1, yolo_input_size, yolo_input_size, 3}};
-  cv::Mat input_mat(480, 480, CV_8UC3, input_tensor.data<float>());
+  cv::Mat input_mat(480, 480, CV_32FC3, input_tensor.data<float>());
 
   cv::Mat resized_img;
   cv::resize(img, resized_img, cv::Size(resize_w, resize_h));
-
+  cv::Mat float_img;
+  resized_img.convertTo(float_img, CV_32FC3,1.0);
   if (!is_recoded_image_parameters_) {
     is_recoded_image_parameters_ = true;
     getTransformMatrix(half_h, half_w, scale);
     input_image_size_ = img.size();
   }
 
-  cv::copyMakeBorder(resized_img, input_mat, top, bottom, left, right,
+  cv::copyMakeBorder(float_img, input_mat, top, bottom, left, right,
                      cv::BORDER_CONSTANT, cv::Scalar(114, 114, 114));
-  cv::imshow("input", input_mat);
   return input_tensor;
 }
 
@@ -117,15 +118,14 @@ float auto_buff::YOLO::intersectionArea(const RuneObject &a,
 std::vector<auto_buff::RuneObject>
 auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
   auto output_shape = output_tensor.get_shape();
-  cv::Mat output_buffer(output_shape[1], output_shape[2], CV_32F,
+  // LOG_INFO(ConfigManager::instance()->logger(), "output_shape[1]{}, output_shape[2]{}", output_shape[1], output_shape[2]);
+  cv::Mat output_buffer = cv::Mat(output_shape[1], output_shape[2], CV_32F,
                         output_tensor.data());
 
   std::vector<RuneObject> objs_tmp, objs_result;
   std::vector<int> indices;
 
   generateProposals(objs_tmp, output_buffer);
-  LOG_INFO(ConfigManager::instance()->logger(), "runes size:{}",
-           std::to_string(objs_tmp.size()));
   std::sort(
       objs_tmp.begin(), objs_tmp.end(),
       [](const RuneObject &a, const RuneObject &b) { return a.prob > b.prob; });
@@ -138,26 +138,53 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
   for (size_t i = 0; i < indices.size(); i++) {
     objs_result.push_back(std::move(objs_tmp[indices[i]]));
 
-    if (objs_result[i].points.children.size() > 0) {
-      const float N =
-          static_cast<float>(objs_result[i].points.children.size() + 1);
-      RunePoints pts_final = std::accumulate(
-          objs_result[i].points.children.begin(),
-          objs_result[i].points.children.end(), objs_result[i].points);
-      objs_result[i].points = pts_final / N;
+    // if (objs_result[i].points.children.size() > 0) {
+    //   const float N =
+    //       static_cast<float>(objs_result[i].points.children.size() + 1);
+    //   RunePoints pts_final = std::accumulate(
+    //       objs_result[i].points.children.begin(),
+    //       objs_result[i].points.children.end(), objs_result[i].points);
+    //   objs_result[i].points = pts_final / N;
+    // }
+    
+    //这里取加权平均不知道会不会好一点
+    float weights = objs_result[i].prob;
+    objs_result[i].points = objs_result[i].points * objs_result[i].prob;
+    for (size_t j = 0; j < objs_result[i].points.children.size(); j++) {
+      objs_result[i].points =
+          objs_result[i].points + objs_result[i].points.children[j];
+      weights += objs_result[i].points.probs[j];
     }
+    objs_result[i].points = objs_result[i].points / weights;
+    objs_result[i].prob = weights / (objs_result[i].points.children.size() + 1);
   }
 
+  // if (objs_result.size() != 0) {
+  //   float center_x = 0, center_y = 0, weight = 0;
+  //   for (auto &obj : objs_result) {
+  //     center_x += obj.points.center.x * obj.prob;
+  //     center_y += obj.points.center.y * obj.prob;
+  //     weight += obj.prob;
+  //   }
+  //   center_x = center_x / weight;
+  //   center_y = center_y / weight;
+  //   for (auto &obj : objs_result) {
+  //     obj.points.center.x = center_x;
+  //     obj.points.center.x = center_y;
+  //   }
+  // }
+
+  LOG_INFO(ConfigManager::instance()->logger(), "runes size:{}",
+           std::to_string(objs_result.size()));
   return objs_result;
 }
 
 void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
                                         const cv::Mat &output_buffer) const {
-  float max_confidence = 0;
+  
   for (int anchor_idx = 0; anchor_idx < grid_strides_.size(); anchor_idx++) {
     float confidence =
         output_buffer.at<float>(anchor_idx, yolo_point_number * 2);
-    max_confidence = std::max(confidence, max_confidence);
     if (confidence < config_.threshold) {
       continue;
     }
@@ -195,6 +222,9 @@ void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
     Eigen::Matrix<float, 3, 5> apex_norm;
     Eigen::Matrix<float, 3, 5> apex_dst;
 
+    // LOG_INFO(ConfigManager::instance()->logger(),
+    //          "\nx1:{} y1:{}\n x2:{} y2:{}\n x3:{} y3:{}\n x4:{} y4:{}\n x5:{} y5:{}",
+    //          x_1, y_1, x_2, y_2, x_3, y_3, x_4, y_4, x_5, y_5);
     /* clang-format off */
     /* *INDENT-OFF* */
     apex_norm << x_1, x_2, x_3, x_4, x_5,
@@ -222,8 +252,6 @@ void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
 
     output_objs.push_back(std::move(obj));
   }
-  LOG_INFO(ConfigManager::instance()->logger(), "max_confidence{}",
-           max_confidence);
 }
 
 void auto_buff::YOLO::nmsMergeSortedBboxes(
@@ -234,11 +262,15 @@ void auto_buff::YOLO::nmsMergeSortedBboxes(
 
   std::vector<float> areas(object_num);
 
-  for (RuneObject &obj : rune_objects)
-    areas.push_back(obj.box.area());
+  for (int i = 0; i < object_num; i++) {
+    areas[i] = rune_objects[i].box.area();
+  }
 
   for (int i = 0; i < object_num; i++) {
     RuneObject &obj_waiting_to_be_merged = rune_objects[i];
+    if(areas[i] <= 0) {
+      continue;
+    }
 
     bool keep = true;
     for (int idx : indices) {
@@ -257,10 +289,12 @@ void auto_buff::YOLO::nmsMergeSortedBboxes(
             iou > config_.merge_min_iou &&
             abs(obj_waiting_to_be_merged.prob - obj_has_been_merged.prob) <
                 config_.merge_conf_error) {
-          obj_waiting_to_be_merged.points.children.push_back(
-              obj_has_been_merged.points);
-          obj_has_been_merged.prob =
-              std::max(obj_waiting_to_be_merged.prob, obj_has_been_merged.prob);
+          obj_has_been_merged.points.children.push_back(
+              obj_waiting_to_be_merged.points);
+          obj_has_been_merged.points.probs.push_back(obj_waiting_to_be_merged.prob);
+          
+          // obj_has_been_merged.prob =
+          //     std::max(obj_waiting_to_be_merged.prob, obj_has_been_merged.prob);
         }
       }
     }

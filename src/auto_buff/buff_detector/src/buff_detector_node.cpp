@@ -137,7 +137,19 @@ std::optional<cv::Mat> auto_buff::DetectorNode::afterDetect(
 }
 
 void auto_buff::DetectorNode::drawRune(const RuneObject &rune, cv::Mat &image,
-                                        const cv::Scalar &color) {
+                                       const cv::Scalar &color) {
+  
+  // LOG_INFO(ConfigManager::instance()->logger(), "r_center x:{} y:{}",
+  //          rune.points.center.x, rune.points.center.y);
+  // LOG_INFO(ConfigManager::instance()->logger(), "top_left x:{} y:{}",
+  //          rune.points.top_left.x, rune.points.top_left.y);
+  // LOG_INFO(ConfigManager::instance()->logger(), "top_right x:{} y:{}",
+  //          rune.points.top_right.x, rune.points.top_right.y);
+  // LOG_INFO(ConfigManager::instance()->logger(), "bottom_left x:{} y:{}",
+  //          rune.points.bottom_left.x, rune.points.bottom_left.y);
+  // LOG_INFO(ConfigManager::instance()->logger(), "bottom_right x:{} y:{}",
+  //          rune.points.bottom_right.x, rune.points.bottom_right.y);
+  
   cv::polylines(image, rune.points.toVector2i(), true, color, 2, cv::LINE_AA);
   cv::putText(image,
               rfl::enum_to_string(rune.color) + rfl::enum_to_string(rune.type) +

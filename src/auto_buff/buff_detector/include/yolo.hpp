@@ -30,7 +30,7 @@ private:
     std::vector<RuneObject> &output_objs,
      const cv::Mat &output_buffer) const;
 
-  void nmsMergeSortedBboxes(std::vector<RuneObject> &faceobjects,
+  void nmsMergeSortedBboxes(std::vector<RuneObject> &rune_objects,
                             std::vector<int> &indices) const;
   
   void getTransformMatrix(float half_h, float half_w, float scale);

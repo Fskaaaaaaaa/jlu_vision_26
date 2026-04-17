@@ -18,7 +18,7 @@ yolo_config:
   use_latency_performancemode: true
   # 抄的中南的参数没改
   threshold: 0.50
-  # threshold: 0.0002
+  # threshold: 0.9
   top_k: 128
   nms_threshold: 0.3
   merge_conf_error: 0.15
