@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <array>
+#include <numbers>
 #include <vector>
 
 namespace auto_aim {
