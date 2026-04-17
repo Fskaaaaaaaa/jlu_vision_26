@@ -39,7 +39,7 @@ private:
 
 private:
   YOLOConfig config_;
-  static constexpr int yolo_input_size = 640;
+  static constexpr int yolo_input_size = 480;
   static constexpr int yolo_class_number = 2;
   static constexpr int yolo_color_number = 2;
   static constexpr int yolo_point_number = 5;

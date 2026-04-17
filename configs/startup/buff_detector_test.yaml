@@ -13,9 +13,7 @@ processes:
       iox_roudi:
         condition: process_log_ready
   main:
-    command: build/linux/x86_64/release/rune_detector -d
-    availability:
-      restart: always
+    command: build/linux/x86_64/release/buff_detector -d
     depends_on:
       camera:
         condition: process_started

@@ -44,12 +44,11 @@ auto_buff::DetectorNode::~DetectorNode() {
 }
 
 int auto_buff::DetectorNode::run() {
-  LOG_INFO(ConfigManager::instance()->logger(), "rune detector node is running!");
+  LOG_INFO(ConfigManager::instance()->logger(),
+           "rune detector node is running!");
   init();
-
-  while (true) {
-  }
-
+  iox::runtime::PoshRuntime::initRuntime(APP_NAME);
+  iox::waitForTerminationRequest();
   return 0;
 }
 
