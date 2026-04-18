@@ -8,6 +8,8 @@
 #include "iceoryx_posh/popo/sample.hpp"
 #include "opencv2/core/types.hpp"
 #include <Eigen/Dense>
+#include <array>
+#include <functional>
 #include <gtsam/geometry/Rot2.h>
 #include <opencv2/core.hpp>
 
@@ -73,11 +75,12 @@ struct BuffBlade {
   // NOTE: 有需要的随时再添加
 };
 
-// 只保留位置信息
+// 保留位置信息和是否需要激活（用于选择击打扇叶）
 struct BuffBladePositionRoll {
+  types::BuffBladeType type;
   Eigen::Vector3d position;
   gtsam::Rot2 roll;
-  Eigen::Vector3d getHitPosition();
+  Eigen::Vector3d getHitPosition() const;
 };
 
 // 添加了角点信息
@@ -86,7 +89,17 @@ struct BuffBladePositionRollPoints : BuffBladePositionRoll {
 };
 
 struct BuffState {
-  Eigen::Vector3d position;
+  Eigen::Vector3d center_position;
+  double center_roll;
+  std::array<bool, 5> activated_flag;
+  // 大小符的旋转模式不同，设计一个类型擦除统一下
+  BuffState getStateWithPredictFunc(
+      std::function<BuffState(const BuffState &, double)> &&func) const;
+  BuffState predict(double dt) const;
+  std::array<BuffBladePositionRoll, 5> blades();
+
+private:
+  std::function<BuffState(const BuffState &self, double dt)> predict_fn_;
 };
 
 } // namespace auto_buff
