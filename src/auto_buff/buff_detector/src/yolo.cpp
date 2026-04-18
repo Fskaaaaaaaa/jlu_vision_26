@@ -1,7 +1,6 @@
 #include "yolo.hpp"
 #include "configs.hpp"
 #include "opencv2/core/hal/interface.h"
-#include "opencv2/highgui.hpp"
 #include "types.hpp"
 
 #include "opencv2/core/types.hpp"
@@ -118,7 +117,6 @@ float auto_buff::YOLO::intersectionArea(const RuneObject &a,
 std::vector<auto_buff::RuneObject>
 auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
   auto output_shape = output_tensor.get_shape();
-  // LOG_INFO(ConfigManager::instance()->logger(), "output_shape[1]{}, output_shape[2]{}", output_shape[1], output_shape[2]);
   cv::Mat output_buffer = cv::Mat(output_shape[1], output_shape[2], CV_32F,
                         output_tensor.data());
 
@@ -159,23 +157,6 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
     objs_result[i].prob = weights / (objs_result[i].points.children.size() + 1);
   }
 
-  if (objs_result.size() != 0) {
-    float center_x = 0, center_y = 0, weight = 0;
-    for (auto &obj : objs_result) {
-      center_x += obj.points.center.x * obj.prob;
-      center_y += obj.points.center.y * obj.prob;
-      weight += obj.prob;
-    }
-    center_x = center_x / weight;
-    center_y = center_y / weight;
-    for (auto &obj : objs_result) {
-      obj.points.center.x = center_x;
-      obj.points.center.y = center_y;
-    }
-  }
-
-  LOG_INFO(ConfigManager::instance()->logger(), "runes size:{}",
-           std::to_string(objs_result.size()));
   return objs_result;
 }
 

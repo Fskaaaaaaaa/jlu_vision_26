@@ -32,6 +32,18 @@ struct YOLOConfig {
   float merge_min_iou;
 };
 
+struct CorrectorConfig {
+  int roi_size;
+  //单个扇叶时往中心的偏移
+  float skewing;
+  //排除过小扇叶
+  float rune_size_tolerance;
+  //判断近似正方形
+  float center_shape_tolerance;
+  //计算得到的中心权重
+  float center_weight;
+};
+
 struct RuneDetectorConfigs {
   quill::LogLevel log_level;
   confs::CameraParams camera_params;
@@ -40,11 +52,11 @@ struct RuneDetectorConfigs {
   bool debug_mode;
   bool step_by_step_debug;
 
-  
   types::EnemyColor default_enemy_color;
   std::string camera_name;
   confs::IceoryxServiceDescription runes_topic;
   YOLOConfig yolo_config;
+  CorrectorConfig corrector_config;
 };
 
 class ConfigManager : public Single<ConfigManager> {

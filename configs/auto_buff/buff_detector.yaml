@@ -23,3 +23,9 @@ yolo_config:
   nms_threshold: 0.3
   merge_conf_error: 0.15
   merge_min_iou: 0.9
+corrector_config:
+  roi_size: 100
+  skewing: 0.2
+  rune_size_tolerance: 0.3
+  center_shape_tolerance: 0.2
+  center_weight: 5
