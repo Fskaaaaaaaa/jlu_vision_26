@@ -194,6 +194,18 @@ void auto_buff::BuffTarget::addBladeValuesFactors(
                blades_camera_indexs.size(), k);
 }
 
+auto_buff::SmallBuffTarget::SmallBuffTarget(
+    quill::Logger *logger, const SmallBuffConfig &config,
+    const cv::Mat &camera_matrix, const cv::Mat &distortion_coefficients)
+    : BuffTarget(logger, config.match_conf, config.blade_conf, camera_matrix,
+                 distortion_coefficients),
+      config_(config) {
+  track_state_.state = TrackState::State::LOST;
+  track_state_.stamp_last_update = std::chrono::system_clock::from_time_t(0);
+  track_state_.stamp_last_tracking = std::chrono::system_clock::from_time_t(0);
+  track_state_.k = 0;
+}
+
 double auto_buff::SmallBuffTarget::get(const std::string &str) const {
   std::scoped_lock lk{state_mtx_};
   if (str == "vroll")

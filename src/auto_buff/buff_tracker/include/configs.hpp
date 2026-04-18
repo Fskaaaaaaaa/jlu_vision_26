@@ -1,6 +1,7 @@
 #pragma once
 
 #include "confs/Basic.hpp"
+#include "confs/IceoryxServiceDescription.hpp"
 #include "quill/core/LogLevel.h"
 
 namespace auto_buff {
@@ -36,9 +37,22 @@ struct SmallBuffConfig {
 
 struct BigBuffConfig {};
 
+struct TrajectoryConfig {};
+
+struct PlannerConfig {};
+
 struct TrackerConfigs {
   quill::LogLevel log_level;
-
+  bool plot_info;
+  bool show_image;
+  bool erase_if_not_key_frame;
+  double tf_query_tolerance_ms;
+  std::string camera_name;
+  std::string camera_frame_id; // 这两个用在tf上
+  confs::IceoryxServiceDescription buff_blade_topic;
+  confs::IceoryxServiceDescription serial_topic;
   SmallBuffConfig small_buff_conf;
+  // BigBuffConfig big_buff_conf;
 };
+
 }; // namespace auto_buff

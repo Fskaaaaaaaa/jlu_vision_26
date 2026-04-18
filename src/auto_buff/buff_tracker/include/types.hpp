@@ -10,6 +10,7 @@
 #include "opencv2/core/types.hpp"
 #include <Eigen/Dense>
 #include <array>
+#include <chrono>
 #include <functional>
 #include <gtsam/geometry/Rot2.h>
 #include <opencv2/core.hpp>
@@ -72,6 +73,9 @@ struct BuffBlade {
   BuffBlade() = default;
   BuffBlade(const iox::popo::Sample<const msgs::BuffBlade, const msgs::Header>
                 &sample);
+  std::string frame_id;
+  std::chrono::system_clock::time_point stamp;
+  bool heart_beat;
   types::EnemyColor color;
   types::BuffBladeType type;
   float confidence;
@@ -131,8 +135,8 @@ struct TrackState {
     LOST,
     TEMPLOST,
     TRACKING,
-  } state = State::LOST;
-  std::uint64_t k = 0;
+  } state{State::LOST};
+  std::uint64_t k{0};
   std::chrono::system_clock::time_point stamp_last_update;
   std::chrono::system_clock::time_point stamp_last_tracking;
 };
@@ -141,5 +145,12 @@ struct BuffMatchResult {
   BuffBladeIndex index;
   double distance;
   double roll_diff;
+};
+
+struct YawPitchFlyTimeIndex {
+  double yaw;
+  double pitch;
+  double fly_time;
+  BuffBladeIndex index;
 };
 } // namespace auto_buff

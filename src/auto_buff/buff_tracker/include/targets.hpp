@@ -52,9 +52,8 @@ private:
                                    gtsam::Key blade_pose_key,
                                    const BladePositionRPYPoints &blade_camera,
                                    std::uint64_t k) const;
-  // 省点内存
-  const BuffBladeMatchConfig &match_config_;
-  const BuffBladeNoiseConfig &blade_config_;
+  BuffBladeMatchConfig match_config_;
+  BuffBladeNoiseConfig blade_config_;
 
   cv::Mat camera_matrix_;
   cv::Mat distortion_coefficients_;
@@ -62,6 +61,9 @@ private:
 
 class SmallBuffTarget : public BuffTarget {
 public:
+  SmallBuffTarget(quill::Logger *logger, const SmallBuffConfig &config,
+                  const cv::Mat &camera_matrix,
+                  const cv::Mat &distortion_coefficients);
   std::pair<BuffState, TrackState> getTargetTrackState() const override;
   double get(const std::string &str) const override;
   TrackState::State track(const std::vector<BuffBlade> &blades,
