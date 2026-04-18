@@ -152,7 +152,7 @@ void auto_buff::DetectorNode::drawRune(const RuneObject &rune, cv::Mat &image,
   
   cv::polylines(image, rune.points.toVector2i(), true, color, 2, cv::LINE_AA);
   cv::putText(image,
-              rfl::enum_to_string(rune.color) + rfl::enum_to_string(rune.type) +
+              rfl::enum_to_string(rune.color) + " " + rfl::enum_to_string(rune.type) + " " +
                   std::to_string(rune.prob),
               (rune.points.top_right + rune.points.top_left + rune.points.bottom_left + rune.points.bottom_right) * 0.25,
               cv::FONT_HERSHEY_SIMPLEX, 0.8, tools::Color::PURPLE, 2);
