@@ -33,14 +33,13 @@ gtsam::Vector auto_buff::RollFactor::evaluateError(
   return error;
 }
 
-auto_buff::VRollFactor::VRollFactor(const gtsam::SharedNoiseModel &model,
-                                    gtsam::Key w_pre, gtsam::Key w_cur)
+auto_buff::ConstVRollFactor::ConstVRollFactor(
+    const gtsam::SharedNoiseModel &model, gtsam::Key w_pre, gtsam::Key w_cur)
     : Base(model, w_pre, w_cur) {}
 
-gtsam::Vector
-auto_buff::VRollFactor::evaluateError(const double &w_pre, const double &w_cur,
-                                      gtsam::OptionalMatrixType H1,
-                                      gtsam::OptionalMatrixType H2) const {
+gtsam::Vector auto_buff::ConstVRollFactor::evaluateError(
+    const double &w_pre, const double &w_cur, gtsam::OptionalMatrixType H1,
+    gtsam::OptionalMatrixType H2) const {
   gtsam::Vector1 error{w_cur - w_pre};
   if (H1)
     *H1 = -gtsam::Matrix1::Identity();
@@ -49,11 +48,11 @@ auto_buff::VRollFactor::evaluateError(const double &w_pre, const double &w_cur,
   return error;
 }
 
-auto_buff::PositionFactor::PositionFactor(const gtsam::SharedNoiseModel &model,
-                                          gtsam::Key x_pre, gtsam::Key x_cur)
+auto_buff::ConstPositionFactor::ConstPositionFactor(
+    const gtsam::SharedNoiseModel &model, gtsam::Key x_pre, gtsam::Key x_cur)
     : Base(model, x_pre, x_cur) {}
 
-gtsam::Vector auto_buff::PositionFactor::evaluateError(
+gtsam::Vector auto_buff::ConstPositionFactor::evaluateError(
     const gtsam::Point3 &x_pre, const gtsam::Point3 &x_cur,
     gtsam::OptionalMatrixType H1, gtsam::OptionalMatrixType H2) const {
   gtsam::Vector3 error{x_cur - x_pre};

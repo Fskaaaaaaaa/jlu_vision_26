@@ -19,13 +19,13 @@
 namespace auto_buff {
 
 // 零速模型，仅做帧间约束
-class PositionFactor
+class ConstPositionFactor
     : public gtsam::NoiseModelFactorN<gtsam::Point3, gtsam::Point3> {
   using Base = gtsam::NoiseModelFactorN<gtsam::Point3, gtsam::Point3>;
 
 public:
-  PositionFactor(const gtsam::SharedNoiseModel &model, gtsam::Key x_pre,
-                 gtsam::Key x_cur);
+  ConstPositionFactor(const gtsam::SharedNoiseModel &model, gtsam::Key x_pre,
+                      gtsam::Key x_cur);
 
   gtsam::Vector evaluateError(const gtsam::Point3 &x_pre,
                               const gtsam::Point3 &x_cur,
@@ -52,12 +52,12 @@ private:
 };
 
 // NOTE: 这个是给小符用的匀速约束（和auto_aim的一样），大符的再说
-class VRollFactor : public gtsam::NoiseModelFactorN<double, double> {
+class ConstVRollFactor : public gtsam::NoiseModelFactorN<double, double> {
   using Base = gtsam::NoiseModelFactorN<double, double>;
 
 public:
-  VRollFactor(const gtsam::SharedNoiseModel &model, gtsam::Key w_pre,
-              gtsam::Key w_cur);
+  ConstVRollFactor(const gtsam::SharedNoiseModel &model, gtsam::Key w_pre,
+                   gtsam::Key w_cur);
 
   gtsam::Vector evaluateError(const double &w_pre, const double &w_cur,
                               gtsam::OptionalMatrixType H1,

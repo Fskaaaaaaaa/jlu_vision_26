@@ -1,6 +1,42 @@
 #pragma once
 
+#include "confs/Basic.hpp"
+#include "quill/core/LogLevel.h"
+
 namespace auto_buff {
-struct SmallBuffConfig {};
-struct BigBuffConfig {};
+
+struct BuffBladeMatchConfig {
+  double max_match_distance_m;
+  double max_match_roll_error_degree;
+};
+
+// 扇叶到风车本体的约束因子和重投影因子的噪声
+struct BuffBladeNoiseConfig {
+  confs::Vector2d pixel_error;
+  confs::Vector3d position_noise_m;
+  double roll_noise_degree;
+};
+
+// 风车运动学一致的噪声
+struct BuffCenterNoiseConfig {
+  confs::Vector3d position_consistency_noise_m;
+  double roll_noise_degree;
+  double vroll_noise_degree;
+};
+
+struct SmallBuffConfig {
+  BuffBladeMatchConfig match_conf;
+  BuffBladeNoiseConfig blade_conf;
+  BuffCenterNoiseConfig center_conf;
+};
+
+struct BigBuffConfig {
+  BuffBladeMatchConfig match_conf;
+};
+
+struct TrackerConfigs {
+  quill::LogLevel log_level;
+
+  SmallBuffConfig small_buff_conf;
+};
 }; // namespace auto_buff

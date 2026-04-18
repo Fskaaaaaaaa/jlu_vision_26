@@ -20,11 +20,11 @@ namespace auto_buff {
 //                |
 //                0
 //                |
-//        4       |        1
+//        1       |        4
 //                |
 // <--------------x
 // y
-//           3          2
+//           2          3
 enum class BuffBladeIndex {
   _0 = 0,
   _1,
@@ -46,6 +46,8 @@ inline const std::vector<cv::Point3f> BUFF_BLADE_OBJ_POINTS{
     cv::Point3f(0, 160, 858.5) / 1000,  cv::Point3f(0, -160, 858.5) / 1000,
     cv::Point3f(0, -186, 541.5) / 1000,
 };
+// 风车旋转中心到击打中心的距离
+constexpr auto BUFF_RADIUS{0.7};
 
 enum class BuffPointPosition {
   Center,
@@ -79,7 +81,9 @@ struct BuffBlade {
 struct BuffBladePositionRoll {
   types::BuffBladeType type;
   Eigen::Vector3d position;
+  // 竖直向上时roll为0，逆时针
   gtsam::Rot2 roll;
+  // 从扇叶获得瞄准点
   Eigen::Vector3d getHitPosition() const;
 };
 
@@ -91,7 +95,7 @@ struct BuffBladePositionRollPoints : BuffBladePositionRoll {
 struct BuffState {
   Eigen::Vector3d center_position;
   double center_roll;
-  std::array<bool, 5> activated_flag;
+  std::array<bool, 5> inactivated_flag{false, false, false, false, false};
   // 大小符的旋转模式不同，设计一个类型擦除统一下
   BuffState getStateWithPredictFunc(
       std::function<BuffState(const BuffState &, double)> &&func) const;
@@ -100,6 +104,15 @@ struct BuffState {
 
 private:
   std::function<BuffState(const BuffState &self, double dt)> predict_fn_;
+};
+
+struct SmallBuffState : public BuffState {
+  double vroll{0};
+};
+
+struct BigBuffState : public BuffState {
+  double theta{0};
+  double omega{0};
 };
 
 } // namespace auto_buff
