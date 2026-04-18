@@ -2,6 +2,7 @@
 
 #include "msgs/BuffBlade.hpp"
 #include "msgs/Header.hpp"
+#include "trajectory.hpp"
 #include "types/BuffBladeType.hpp"
 #include "types/EnemyColor.hpp"
 
@@ -12,6 +13,7 @@
 #include <functional>
 #include <gtsam/geometry/Rot2.h>
 #include <opencv2/core.hpp>
+#include <vector>
 
 namespace auto_buff {
 
@@ -65,7 +67,7 @@ struct BuffBladePoints {
   cv::Point2f bottom_left;
 };
 
-// 从msg构造，用于接受信息
+// 从msg构造，用于接受信息 0
 struct BuffBlade {
   BuffBlade() = default;
   BuffBlade(const iox::popo::Sample<const msgs::BuffBlade, const msgs::Header>
@@ -78,7 +80,8 @@ struct BuffBlade {
 };
 
 // 保留位置信息和是否需要激活（用于选择击打扇叶）
-struct BuffBladePositionRoll {
+// 用在弹道解算中 2
+struct BladePositionRoll {
   types::BuffBladeType type;
   Eigen::Vector3d position;
   // 竖直向上时roll为0，逆时针
@@ -87,27 +90,35 @@ struct BuffBladePositionRoll {
   Eigen::Vector3d getHitPosition() const;
 };
 
-// 添加了角点信息
-struct BuffBladePositionRollPoints : BuffBladePositionRoll {
-  BuffBladePoints points;
+// 添加了角点信息，用在Target中 1
+struct BladePositionRPYPoints : BladePositionRoll {
+  double pitch;
+  double yaw;
+  std::array<cv::Point2f, 5> points;
+  Eigen::Quaterniond getRotation() const;
+  BladePositionRPYPoints transform(const Eigen::Isometry3d &T) const;
 };
 
 struct BuffState {
-  Eigen::Vector3d center_position;
-  double center_roll;
+  BuffState() = default;
+  Eigen::Vector3d center_position = Eigen::Vector3d::Zero();
+  double center_roll{0};
   std::array<bool, 5> inactivated_flag{false, false, false, false, false};
   // 大小符的旋转模式不同，设计一个类型擦除统一下
   BuffState getStateWithPredictFunc(
       std::function<BuffState(const BuffState &, double)> &&func) const;
-  BuffState predict(double dt) const;
-  std::array<BuffBladePositionRoll, 5> blades();
+  std::array<BladePositionRoll, 5> blades() const;
 
 private:
+  friend class auto_buff::Trajectory; // 只允许轨迹规划类访问预测方法
+  BuffState predict(double dt) const;
   std::function<BuffState(const BuffState &self, double dt)> predict_fn_;
 };
 
 struct SmallBuffState : public BuffState {
-  double vroll{0};
+  SmallBuffState() = default;
+  SmallBuffState(const BuffState &state, double vroll);
+  double center_vroll{0};
 };
 
 struct BigBuffState : public BuffState {
@@ -115,4 +126,20 @@ struct BigBuffState : public BuffState {
   double omega{0};
 };
 
+struct TrackState {
+  enum class State {
+    LOST,
+    TEMPLOST,
+    TRACKING,
+  } state = State::LOST;
+  std::uint64_t k = 0;
+  std::chrono::system_clock::time_point stamp_last_update;
+  std::chrono::system_clock::time_point stamp_last_tracking;
+};
+
+struct BuffMatchResult {
+  BuffBladeIndex index;
+  double distance;
+  double roll_diff;
+};
 } // namespace auto_buff

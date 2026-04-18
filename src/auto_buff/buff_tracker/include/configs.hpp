@@ -7,7 +7,7 @@ namespace auto_buff {
 
 struct BuffBladeMatchConfig {
   double max_match_distance_m;
-  double max_match_roll_error_degree;
+  double max_match_roll_diff_degree;
 };
 
 // 扇叶到风车本体的约束因子和重投影因子的噪声
@@ -21,18 +21,20 @@ struct BuffBladeNoiseConfig {
 struct BuffCenterNoiseConfig {
   confs::Vector3d position_consistency_noise_m;
   double roll_noise_degree;
-  double vroll_noise_degree;
+  double vroll_noise_rad;
+  confs::Vector3d position_prior_noise_m;
+  double roll_prior_noise_degree;
+  double vroll_prior_noise_rad;
 };
 
 struct SmallBuffConfig {
   BuffBladeMatchConfig match_conf;
   BuffBladeNoiseConfig blade_conf;
   BuffCenterNoiseConfig center_conf;
+  double lost_threshold_sec;
 };
 
-struct BigBuffConfig {
-  BuffBladeMatchConfig match_conf;
-};
+struct BigBuffConfig {};
 
 struct TrackerConfigs {
   quill::LogLevel log_level;

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "types.hpp"
 namespace auto_buff {
 
-class TrackerNode {
+class Trajectory {
 public:
 private:
 };
