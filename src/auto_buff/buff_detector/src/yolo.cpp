@@ -159,20 +159,20 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
     objs_result[i].prob = weights / (objs_result[i].points.children.size() + 1);
   }
 
-  // if (objs_result.size() != 0) {
-  //   float center_x = 0, center_y = 0, weight = 0;
-  //   for (auto &obj : objs_result) {
-  //     center_x += obj.points.center.x * obj.prob;
-  //     center_y += obj.points.center.y * obj.prob;
-  //     weight += obj.prob;
-  //   }
-  //   center_x = center_x / weight;
-  //   center_y = center_y / weight;
-  //   for (auto &obj : objs_result) {
-  //     obj.points.center.x = center_x;
-  //     obj.points.center.x = center_y;
-  //   }
-  // }
+  if (objs_result.size() != 0) {
+    float center_x = 0, center_y = 0, weight = 0;
+    for (auto &obj : objs_result) {
+      center_x += obj.points.center.x * obj.prob;
+      center_y += obj.points.center.y * obj.prob;
+      weight += obj.prob;
+    }
+    center_x = center_x / weight;
+    center_y = center_y / weight;
+    for (auto &obj : objs_result) {
+      obj.points.center.x = center_x;
+      obj.points.center.y = center_y;
+    }
+  }
 
   LOG_INFO(ConfigManager::instance()->logger(), "runes size:{}",
            std::to_string(objs_result.size()));
@@ -246,8 +246,8 @@ void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
     auto rect = cv::boundingRect(obj.points.toVector2f());
 
     obj.box = rect;
-    obj.color = color_id.x ? types::EnemyColor::Red : types::EnemyColor::Blue;
-    obj.type = static_cast<types::BuffBladeType>(class_id.x);
+    obj.color = color_id.x ? types::EnemyColor::Blue : types::EnemyColor::Red;
+    obj.type = class_id.x ? types::BuffBladeType::Inactivated : types::BuffBladeType::Activated;
     obj.prob = confidence;
 
     output_objs.push_back(std::move(obj));
