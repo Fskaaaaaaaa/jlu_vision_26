@@ -29,3 +29,4 @@ corrector_config:
   rune_size_tolerance: 0.3
   center_shape_tolerance: 0.2
   center_weight: 5
+  show_window: false

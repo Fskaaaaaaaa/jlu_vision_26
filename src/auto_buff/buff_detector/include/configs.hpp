@@ -42,6 +42,7 @@ struct CorrectorConfig {
   float center_shape_tolerance;
   //计算得到的中心权重
   float center_weight;
+  bool show_window;
 };
 
 struct RuneDetectorConfigs {

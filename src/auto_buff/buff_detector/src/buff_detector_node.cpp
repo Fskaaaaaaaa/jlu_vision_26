@@ -6,8 +6,10 @@
 
 #include "msgs/BuffBlade.hpp"
 #include "opencv2/highgui.hpp"
+#include <exception>
 #include <opencv2/imgproc.hpp>
 #include <optional>
+#include <string>
 #include <vector>
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
@@ -78,7 +80,12 @@ void auto_buff::DetectorNode::imageCallback(
     const cv::Mat &image, const std::string &frame_id,
     const std::chrono::system_clock::time_point &stamp) {
   auto infer_start = std::chrono::system_clock::now();
-  auto runes = st_detector_->detect(image);
+  std::vector<RuneObject> runes;
+  try {
+    runes = st_detector_->detect(image);
+  } catch (std::exception &e) {
+    LOG_ERROR(ConfigManager::instance()->logger(), "Detector Error:{}", e.what());
+  }
   auto infer_end = std::chrono::system_clock::now();
 
   std::stringstream infer_ss, camera_ss;

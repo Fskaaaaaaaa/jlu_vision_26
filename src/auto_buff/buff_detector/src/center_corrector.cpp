@@ -136,6 +136,9 @@ bool auto_buff::CenterCorrector::getCenterpoint(const cv::Mat &image,
   }
     break;
   }
+  if (roi.empty() || roi.cols <= 1 || roi.rows <= 1)
+    return false;
+
 //   LOG_INFO(ConfigManager::instance()->logger(), "{} {}", roi.cols, roi.rows);
   cv::Mat gray_img;
   cv::cvtColor(roi, gray_img, cv::COLOR_BGR2GRAY);
@@ -163,6 +166,7 @@ bool auto_buff::CenterCorrector::getCenterpoint(const cv::Mat &image,
   }
   if (rects.size() == 0)
     return false;
+
   std::sort(rects.begin(), rects.end(),
             [](auto &a, auto &b) { return a.size.area() > b.size.area(); });
   auto &center_rect = rects[0];
@@ -172,21 +176,23 @@ bool auto_buff::CenterCorrector::getCenterpoint(const cv::Mat &image,
   center.x = center_rect.center.x;
   center.y = center_rect.center.y;
 
-  cv::Mat image_copy;
-  image.copyTo(image_copy);
-
-  cv::Point2f pts[4];
-  center_rect.points(pts);
-
-  for (int i = 0; i < 4; i++) {
+  if (config_.show_window) {
+    cv::Mat image_copy;
+    image.copyTo(image_copy);
+    
+    cv::Point2f pts[4];
+    center_rect.points(pts);
+    
+    for (int i = 0; i < 4; i++) {
       cv::line(image_copy, pts[i], pts[(i+1)%4], cv::Scalar(0,255,0), 2);
-  }
-
-  cv::circle(image_copy, center_rect.center, 3, cv::Scalar(255, 0, 0), -1);
-  cv::resize(
+    }
+    
+    cv::circle(image_copy, center_rect.center, 3, cv::Scalar(255, 0, 0), -1);
+    cv::resize(
       image_copy, image_copy,
       cv::Size(image_copy.size().width / 2, image_copy.size().height / 2));
-  cv::imshow("image_copy", image_copy);
+      cv::imshow("image_copy", image_copy);
+  }
 
   return true;
 }
