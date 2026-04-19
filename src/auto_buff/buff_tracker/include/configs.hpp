@@ -2,6 +2,7 @@
 
 #include "confs/Basic.hpp"
 #include "confs/IceoryxServiceDescription.hpp"
+#include "math/ballistic_trajectory.hpp"
 #include "quill/core/LogLevel.h"
 
 namespace auto_buff {
@@ -37,9 +38,17 @@ struct SmallBuffConfig {
 
 struct BigBuffConfig {};
 
-struct TrajectoryConfig {};
-
-struct PlannerConfig {};
+struct TrajectoryConfig {
+  tools::ballistic::BallisticConfig ballistic_conf;
+  int max_aim_iterate_count;
+  double aim_ok_error_m;
+  int blade_select_change_count_thres; // 经过几帧的不一样更改叶(有可能是nullopt)
+  double fail_polling_interval_sec;
+  double min_bullet_speed;
+  double max_bullet_speed;
+  double default_bullet_speed;
+  bool iterative_fly_time;
+};
 
 struct TrackerConfigs {
   quill::LogLevel log_level;
@@ -48,6 +57,7 @@ struct TrackerConfigs {
   bool plot_info;
   bool show_image;
   bool erase_if_not_key_frame;
+  double cmd_pub_dt_sec;
   double tf_query_tolerance_ms;
   std::string camera_name;
   std::string odom_frame_id;
@@ -56,6 +66,7 @@ struct TrackerConfigs {
   confs::IceoryxServiceDescription serial_topic;
   SmallBuffConfig small_buff_conf;
   // BigBuffConfig big_buff_conf;
+  TrajectoryConfig trajectory_conf;
 };
 
 }; // namespace auto_buff

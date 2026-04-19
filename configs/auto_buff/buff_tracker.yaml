@@ -18,6 +18,7 @@ serial_topic:
   event: data
 
 small_buff_conf:
+  lost_threshold_sec: 0.3
   match_conf:
     max_match_distance_m: 2.0
     max_match_roll_diff_degree: 30.0
@@ -43,5 +44,3 @@ small_buff_conf:
       z: 0.10
     roll_prior_noise_degree: 30.0
     vroll_prior_noise_rad: 6.0
-
-  lost_threshold_sec: 0.5

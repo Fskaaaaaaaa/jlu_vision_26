@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cmath>
+#include <functional>
 #include <numbers>
 
 auto_buff::BuffBlade::BuffBlade(

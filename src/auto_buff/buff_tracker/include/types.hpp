@@ -2,18 +2,18 @@
 
 #include "msgs/BuffBlade.hpp"
 #include "msgs/Header.hpp"
-#include "trajectory.hpp"
 #include "types/BuffBladeType.hpp"
 #include "types/EnemyColor.hpp"
 
 #include "iceoryx_posh/popo/sample.hpp"
 #include "opencv2/core/types.hpp"
 #include <Eigen/Dense>
+#include <gtsam/geometry/Rot2.h>
+#include <opencv2/core.hpp>
+
 #include <array>
 #include <chrono>
 #include <functional>
-#include <gtsam/geometry/Rot2.h>
-#include <opencv2/core.hpp>
 #include <vector>
 
 namespace auto_buff {
@@ -149,4 +149,10 @@ struct YawPitchFlyTimeIndex {
   double fly_time;
   BuffBladeIndex index;
 };
+
+struct BuffIndexPredictTime {
+  BuffBladeIndex index;
+  double predict_time;
+};
+
 } // namespace auto_buff
