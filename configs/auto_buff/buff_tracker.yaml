@@ -5,6 +5,7 @@ always_on_task_small_buff: true
 always_on_task_big_buff: false
 tf_query_tolerance_ms: 200.0
 cmd_pub_dt_sec: 0.005
+predict_offest_ms: 100
 camera_name: camera0
 odom_frame_id: odom
 camera_frame_id: camera

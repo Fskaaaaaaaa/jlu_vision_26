@@ -58,6 +58,7 @@ struct TrackerConfigs {
   bool always_on_task_big_buff;
   bool plot_info;
   bool show_image;
+  int predict_offset_ms;
   double cmd_pub_dt_sec;
   double tf_query_tolerance_ms;
   std::string camera_name;

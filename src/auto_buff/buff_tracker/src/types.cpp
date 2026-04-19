@@ -34,7 +34,7 @@ auto_buff::BuffBlade::BuffBlade(
 
 Eigen::Vector3d auto_buff::BladePositionRoll::getHitPosition() const {
   auto z_hit = std::cos(this->roll.theta()) * BUFF_RADIUS + this->position.z();
-  auto horizontal_bias = std::sin(this->roll.theta()) * BUFF_RADIUS;
+  auto horizontal_bias = -std::sin(this->roll.theta()) * BUFF_RADIUS;
   auto center_aim_yaw = std::atan2(this->position.y(), this->position.x());
   // XXX: 这里需要再检查下
   auto x_hit = this->position.x() - horizontal_bias * std::sin(center_aim_yaw);
