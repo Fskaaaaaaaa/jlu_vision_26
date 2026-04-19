@@ -43,11 +43,14 @@ struct PlannerConfig {};
 
 struct TrackerConfigs {
   quill::LogLevel log_level;
+  bool always_on_task_small_buff;
+  bool always_on_task_big_buff;
   bool plot_info;
   bool show_image;
   bool erase_if_not_key_frame;
   double tf_query_tolerance_ms;
   std::string camera_name;
+  std::string odom_frame_id;
   std::string camera_frame_id; // 这两个用在tf上
   confs::IceoryxServiceDescription buff_blade_topic;
   confs::IceoryxServiceDescription serial_topic;

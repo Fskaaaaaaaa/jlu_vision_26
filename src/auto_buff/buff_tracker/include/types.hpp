@@ -114,7 +114,8 @@ struct BuffState {
   std::array<BladePositionRoll, 5> blades() const;
 
 private:
-  friend class auto_buff::Trajectory; // 只允许轨迹规划类访问预测方法
+  friend class Trajectory;  // 只允许轨迹规划类访问预测方法
+  friend class TrackerNode; // 可视化绘制也需要预判
   BuffState predict(double dt) const;
   std::function<BuffState(const BuffState &self, double dt)> predict_fn_;
 };

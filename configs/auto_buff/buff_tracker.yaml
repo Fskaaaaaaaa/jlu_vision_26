@@ -1,0 +1,47 @@
+log_level: TraceL1
+plot_info: true
+show_image: true
+always_on_task_small_buff: true
+always_on_task_big_buff: false
+erase_if_not_key_frame: true
+tf_query_tolerance_ms: 200.0
+camera_name: camera0
+odom_frame_id: odom
+camera_frame_id: camera
+buff_blade_topic:
+  service: runes
+  instance: detector
+  event: data
+serial_topic:
+  service: aim_command
+  instance: tracker
+  event: data
+
+small_buff_conf:
+  match_conf:
+    max_match_distance_m: 0.6
+    max_match_roll_diff_degree: 45.0
+  blade_conf:
+    pixel_error:
+      x: 2.0
+      y: 2.0
+    position_noise_m:
+      x: 0.03
+      y: 0.03
+      z: 0.03
+    roll_noise_degree: 2.0
+  center_conf:
+    position_consistency_noise_m:
+      x: 0.01
+      y: 0.01
+      z: 0.01
+    roll_noise_degree: 3.0
+    vroll_noise_rad: 0.10
+    position_prior_noise_m:
+      x: 0.10
+      y: 0.10
+      z: 0.10
+    roll_prior_noise_degree: 30.0
+    vroll_prior_noise_rad: 6.0
+
+  lost_threshold_sec: 0.5

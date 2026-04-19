@@ -18,6 +18,7 @@
 #include "quill/Logger.h"
 #include "types.hpp"
 
+#include <chrono>
 #include <memory>
 namespace auto_buff {
 
@@ -30,12 +31,16 @@ private:
       iox::popo::Subscriber<msgs::BuffBlade, msgs::Header> *subscriber,
       TrackerNode *self);
 
-  void drawBuffBlade(const BladePositionRoll &blade, cv::Mat &image,
-                     const std::chrono::system_clock::time_point &img_stamp,
+  void drawBuffBlade(const BladePositionRoll &blade_odom, cv::Mat &image,
+                     const Eigen::Isometry3d &T_odom_to_camera,
                      const cv::Scalar &color = tools::Color::bgr::RED,
-                     const std::string &txt = "");
-  void drawBuff(const BuffState &state, cv::Mat &image,
-                const std::chrono::system_clock::time_point &img_stamp);
+                     const std::string &txt = "") const;
+  // 子类向常引用基类的转换不会发生对象切片
+  void drawBuff(const BuffTarget &buff_target, cv::Mat &image,
+                const std::chrono::system_clock::time_point &stamp,
+                const Eigen::Isometry3d &T_odom_to_camera) const;
+  void imageCallback(const cv::Mat &image, const std::string &frame_id,
+                     const std::chrono::system_clock::time_point &stamp) const;
 
   quill::Logger *logger_;
   TrackerConfigs configs_;

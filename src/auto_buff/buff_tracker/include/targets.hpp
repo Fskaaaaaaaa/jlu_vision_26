@@ -28,9 +28,9 @@ public:
   virtual double get(const std::string &str) const;
 
   virtual std::pair<BuffState, TrackState> getTargetTrackState() const = 0;
-  quill::Logger *logger_;
 
 protected:
+  quill::Logger *logger_;
   static BuffState getTargetStateFromBlade(const BladePositionRPYPoints &blade);
   std::optional<BladePositionRPYPoints> solvePNP(const BuffBlade &blade) const;
   std::vector<std::pair<BladePositionRPYPoints, BuffBladeIndex>>
