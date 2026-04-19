@@ -51,6 +51,7 @@ inline const std::vector<cv::Point3f> BUFF_BLADE_OBJ_POINTS{
 };
 // 风车旋转中心到击打中心的距离
 constexpr auto BUFF_RADIUS{0.7};
+inline const cv::Point3f BUFF_BLADE_HIT_OBJ_POINT(0, 0, BUFF_RADIUS);
 
 enum class BuffPointPosition {
   Center,

@@ -7,6 +7,7 @@
 #include "hardware/task_mode_listener.hpp"
 #include "math/angle_tools.hpp"
 #include "msgs/BuffBlade.hpp"
+#include "opencv2/core/types.hpp"
 #include "targets.hpp"
 #include "types.hpp"
 #include "types/IceoryxServiceDescription.hpp"
@@ -135,6 +136,8 @@ void auto_buff::TrackerNode::drawBuffBlade(
   cv::projectPoints(BUFF_BLADE_OBJ_POINTS, rvec, tvec, camera_matrix_,
                     distortion_coefficients_, image_points);
   tools::drawPoints(image, image_points, color);
+  cv::projectPoints(std::vector{BUFF_BLADE_HIT_OBJ_POINT}, rvec, tvec,
+                    camera_matrix_, distortion_coefficients_, image_points);
   cv::putText(image, txt, image_points.front(), cv::FONT_HERSHEY_SIMPLEX, 1.0,
               color, 2);
 }

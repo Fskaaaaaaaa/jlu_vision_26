@@ -60,7 +60,7 @@ auto_buff::BuffState::blades() const {
         .type = inactivated_flag.at(i) ? types::BuffBladeType::Inactivated
                                        : types::BuffBladeType::Activated,
         .position = center_position,
-        .roll = center_roll + i * std::numbers::pi / 5,
+        .roll = center_roll + i * 2 * std::numbers::pi / 5,
     };
   }
   return blades;

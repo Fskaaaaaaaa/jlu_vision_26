@@ -19,8 +19,8 @@ serial_topic:
 
 small_buff_conf:
   match_conf:
-    max_match_distance_m: 0.6
-    max_match_roll_diff_degree: 45.0
+    max_match_distance_m: 2.0
+    max_match_roll_diff_degree: 30.0
   blade_conf:
     pixel_error:
       x: 2.0

@@ -157,13 +157,13 @@ inline gtsam::Key getBladePoseKeyFromIndex(auto_buff::BuffBladeIndex index,
                                            std::uint64_t k) {
   if (index == auto_buff::BuffBladeIndex::_0)
     return G(k);
-  if (index == auto_buff::BuffBladeIndex::_0)
+  if (index == auto_buff::BuffBladeIndex::_1)
     return H(k);
-  if (index == auto_buff::BuffBladeIndex::_0)
+  if (index == auto_buff::BuffBladeIndex::_2)
     return J(k);
-  if (index == auto_buff::BuffBladeIndex::_0)
+  if (index == auto_buff::BuffBladeIndex::_3)
     return K(k);
-  if (index == auto_buff::BuffBladeIndex::_0)
+  if (index == auto_buff::BuffBladeIndex::_4)
     return L(k);
   return {};
 }
