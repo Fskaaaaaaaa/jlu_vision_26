@@ -36,7 +36,7 @@ struct SmallBuffConfig {
   double lost_threshold_sec;
 };
 
-struct BigBuffConfig {};
+// struct BigBuffConfig {};
 
 struct TrajectoryConfig {
   tools::ballistic::BallisticConfig ballistic_conf;
@@ -48,6 +48,8 @@ struct TrajectoryConfig {
   double max_bullet_speed;
   double default_bullet_speed;
   bool iterative_fly_time;
+  double yaw_offset;
+  double pitch_offset;
 };
 
 struct TrackerConfigs {
@@ -56,7 +58,6 @@ struct TrackerConfigs {
   bool always_on_task_big_buff;
   bool plot_info;
   bool show_image;
-  bool erase_if_not_key_frame;
   double cmd_pub_dt_sec;
   double tf_query_tolerance_ms;
   std::string camera_name;

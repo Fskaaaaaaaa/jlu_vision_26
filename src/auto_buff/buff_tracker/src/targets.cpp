@@ -63,6 +63,7 @@ auto_buff::BuffTarget::solvePNP(const BuffBlade &blade) const {
   Eigen::Matrix3d R = Eigen::Matrix3d::Zero();
   cv::cv2eigen(R_cv, R);
   Eigen::Vector3d rpy = tools::rotationMatrixToRPY(R);
+  result.type = blade.type;
   result.roll = gtsam::Rot2::fromAngle(rpy(0));
   result.pitch = rpy(1);
   result.yaw = rpy(2);
@@ -333,6 +334,10 @@ auto_buff::TrackState::State auto_buff::SmallBuffTarget::track(
     track_state_.k = 0;
     isam2_ = gtsam::ISAM2{};
   }
+  // NOTE:
+  for (auto flag : target_state_.inactivated_flag)
+    std::cout << flag << ' ';
+  std::cout << std::endl;
   return track_state_.state;
 }
 

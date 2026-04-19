@@ -1,10 +1,10 @@
-log_level: TraceL1
+log_level: Info
 plot_info: true
 show_image: true
 always_on_task_small_buff: true
 always_on_task_big_buff: false
-erase_if_not_key_frame: true
 tf_query_tolerance_ms: 200.0
+cmd_pub_dt_sec: 0.005
 camera_name: camera0
 odom_frame_id: odom
 camera_frame_id: camera
@@ -44,3 +44,25 @@ small_buff_conf:
       z: 0.10
     roll_prior_noise_degree: 30.0
     vroll_prior_noise_rad: 6.0
+trajectory_conf:
+  ballistic_conf:
+    g: 9.8
+    k: 0.005
+    barrel_length: 0.08
+    time_step: 0.01
+    max_fly_time: 1.0
+    max_pitch_iterate_count: 100
+    min_pitch_error_m: 0.01
+    gimbal_pitch_min_degree: -30.0
+    gimbal_pitch_max_degree: 30.0
+  max_aim_iterate_count: 20
+  aim_ok_error_m: 0.005
+  blade_select_change_count_thres: 5
+  fail_polling_interval_sec: 0.1
+  min_bullet_speed: 18
+  max_bullet_speed: 25
+  default_bullet_speed: 22
+  iterative_fly_time: true
+  yaw_offset: 0.0
+  pitch_offset: 0.0
+

@@ -96,6 +96,8 @@ auto_buff::Trajectory::solveBlade(BuffBladeIndex blade_index,
     result.fly_time = fly_time;
   } while (iterative_fly_time && error >= config_.aim_ok_error_m);
   result.index = blade_index;
+  result.yaw = result.yaw + config_.yaw_offset;
+  result.pitch = result.pitch + config_.pitch_offset;
   return result;
 }
 

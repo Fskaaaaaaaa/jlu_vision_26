@@ -29,7 +29,7 @@ auto_buff::YOLO::YOLO() {
   input.preprocess()
       .convert_element_type(ov::element::f32)
       .convert_color(ov::preprocess::ColorFormat::RGB);
-      // .scale(255.0);
+  // .scale(255.0);
   model = ppp.build();
   compiled_model_ = core_.compile_model(
       model, config_.device,
@@ -65,7 +65,7 @@ ov::Tensor auto_buff::YOLO::preProcess(const cv::Mat &img) {
   cv::Mat resized_img;
   cv::resize(img, resized_img, cv::Size(resize_w, resize_h));
   cv::Mat float_img;
-  resized_img.convertTo(float_img, CV_32FC3,1.0);
+  resized_img.convertTo(float_img, CV_32FC3, 1.0);
   if (!is_recoded_image_parameters_) {
     is_recoded_image_parameters_ = true;
     getTransformMatrix(half_h, half_w, scale);
@@ -117,8 +117,8 @@ float auto_buff::YOLO::intersectionArea(const RuneObject &a,
 std::vector<auto_buff::RuneObject>
 auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
   auto output_shape = output_tensor.get_shape();
-  cv::Mat output_buffer = cv::Mat(output_shape[1], output_shape[2], CV_32F,
-                        output_tensor.data());
+  cv::Mat output_buffer =
+      cv::Mat(output_shape[1], output_shape[2], CV_32F, output_tensor.data());
 
   std::vector<RuneObject> objs_tmp, objs_result;
   std::vector<int> indices;
@@ -144,8 +144,8 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
     //       objs_result[i].points.children.end(), objs_result[i].points);
     //   objs_result[i].points = pts_final / N;
     // }
-    
-    //这里取加权平均不知道会不会好一点
+
+    // 这里取加权平均不知道会不会好一点
     float weights = objs_result[i].prob;
     objs_result[i].points = objs_result[i].points * objs_result[i].prob;
     for (size_t j = 0; j < objs_result[i].points.children.size(); j++) {
@@ -162,7 +162,7 @@ auto_buff::YOLO::postProcess(const ov::Tensor &output_tensor) {
 
 void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
                                         const cv::Mat &output_buffer) const {
-  
+
   for (int anchor_idx = 0; anchor_idx < grid_strides_.size(); anchor_idx++) {
     float confidence =
         output_buffer.at<float>(anchor_idx, yolo_point_number * 2);
@@ -204,8 +204,8 @@ void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
     Eigen::Matrix<float, 3, 5> apex_dst;
 
     // LOG_INFO(ConfigManager::instance()->logger(),
-    //          "\nx1:{} y1:{}\n x2:{} y2:{}\n x3:{} y3:{}\n x4:{} y4:{}\n x5:{} y5:{}",
-    //          x_1, y_1, x_2, y_2, x_3, y_3, x_4, y_4, x_5, y_5);
+    //          "\nx1:{} y1:{}\n x2:{} y2:{}\n x3:{} y3:{}\n x4:{} y4:{}\n x5:{}
+    //          y5:{}", x_1, y_1, x_2, y_2, x_3, y_3, x_4, y_4, x_5, y_5);
     /* clang-format off */
     /* *INDENT-OFF* */
     apex_norm << x_1, x_2, x_3, x_4, x_5,
@@ -228,7 +228,8 @@ void auto_buff::YOLO::generateProposals(std::vector<RuneObject> &output_objs,
 
     obj.box = rect;
     obj.color = color_id.x ? types::EnemyColor::Blue : types::EnemyColor::Red;
-    obj.type = class_id.x ? types::BuffBladeType::Inactivated : types::BuffBladeType::Activated;
+    obj.type = class_id.x ? types::BuffBladeType::Activated
+                          : types::BuffBladeType::Inactivated;
     obj.prob = confidence;
 
     output_objs.push_back(std::move(obj));
@@ -249,7 +250,7 @@ void auto_buff::YOLO::nmsMergeSortedBboxes(
 
   for (int i = 0; i < object_num; i++) {
     RuneObject &obj_waiting_to_be_merged = rune_objects[i];
-    if(areas[i] <= 0) {
+    if (areas[i] <= 0) {
       continue;
     }
 
@@ -272,10 +273,12 @@ void auto_buff::YOLO::nmsMergeSortedBboxes(
                 config_.merge_conf_error) {
           obj_has_been_merged.points.children.push_back(
               obj_waiting_to_be_merged.points);
-          obj_has_been_merged.points.probs.push_back(obj_waiting_to_be_merged.prob);
-          
+          obj_has_been_merged.points.probs.push_back(
+              obj_waiting_to_be_merged.prob);
+
           // obj_has_been_merged.prob =
-          //     std::max(obj_waiting_to_be_merged.prob, obj_has_been_merged.prob);
+          //     std::max(obj_waiting_to_be_merged.prob,
+          //     obj_has_been_merged.prob);
         }
       }
     }
