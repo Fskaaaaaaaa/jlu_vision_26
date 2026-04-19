@@ -217,7 +217,7 @@ auto_buff::SmallBuffState
 auto_buff::SmallBuffTarget::predictBuffState(const BuffState &state,
                                              double vroll, double dt) {
   SmallBuffState state_pre{state, vroll};
-  state_pre.center_roll = tools::limitRadian(state.center_roll + vroll + dt);
+  state_pre.center_roll = tools::limitRadian(state.center_roll + vroll * dt);
   return state_pre;
 }
 
