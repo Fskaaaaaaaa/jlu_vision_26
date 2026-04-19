@@ -11,7 +11,6 @@
 #include <opencv2/imgproc.hpp>
 
 #include <cmath>
-#include <string>
 
 auto_buff::YOLO::YOLO() {
   generateGridsAndStride();

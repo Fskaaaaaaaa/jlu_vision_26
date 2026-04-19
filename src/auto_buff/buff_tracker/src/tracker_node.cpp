@@ -225,8 +225,10 @@ msgs::AimCommand auto_buff::TrackerNode::solveAimCommand(
           std::chrono::system_clock::now() - target_stamp)
           .count();
   auto cmd_opt = trajectory_.solveBuff(target_state, gimbal_info.bullet_speed);
-  if (!cmd_opt.has_value())
+  if (!cmd_opt.has_value()) {
+    this->index_predict_time_cache_opt_.store(std::nullopt);
     return {.control = false};
+  }
   this->index_predict_time_cache_opt_.store(std::optional{BuffIndexPredictTime{
       .index = cmd_opt->index,
       .predict_time = cmd_opt->fly_time + dt_update_to_now_sec,

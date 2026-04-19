@@ -334,10 +334,6 @@ auto_buff::TrackState::State auto_buff::SmallBuffTarget::track(
     track_state_.k = 0;
     isam2_ = gtsam::ISAM2{};
   }
-  // NOTE:
-  for (auto flag : target_state_.inactivated_flag)
-    std::cout << flag << ' ';
-  std::cout << std::endl;
   return track_state_.state;
 }
 
