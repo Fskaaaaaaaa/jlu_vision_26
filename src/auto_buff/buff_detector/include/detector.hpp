@@ -15,7 +15,7 @@ using ImageRunesFrameIdStamp =
 
 class STDetector {
 public:
-  virtual std::vector<RuneObject> detect(const cv::Mat &image) = 0;
+  virtual std::vector<RuneObject> detect(const cv::Mat &image, Mode mode) = 0;
 };
 
 class MTDetector {
@@ -28,7 +28,7 @@ public:
 class STDetectorDL : public STDetector {
 public:
   STDetectorDL();
-  std::vector<RuneObject> detect(const cv::Mat &image) override;
+  std::vector<RuneObject> detect(const cv::Mat &image, Mode mode) override;
 
 private:
   std::unique_ptr<YOLOBase> yolo_;

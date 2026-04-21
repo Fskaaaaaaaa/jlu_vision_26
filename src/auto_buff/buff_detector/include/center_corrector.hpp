@@ -13,7 +13,7 @@ class CenterCorrector {
 public:
   CenterCorrector();
   ~CenterCorrector();
-  static void correctRunes(const cv::Mat &image, std::vector<RuneObject> &runes);
+  static void correctRunes(const cv::Mat &image, std::vector<RuneObject> &runes, Mode mode);
 
 private:
   static bool getCenterpoint(const cv::Mat &image, std::vector<RuneObject> runes, cv::Point2f &center);

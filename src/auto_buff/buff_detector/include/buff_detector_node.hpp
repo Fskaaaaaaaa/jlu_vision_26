@@ -34,7 +34,7 @@ public:
 private:
   void init();
   void imageCallback(const cv::Mat &image, const std::string &frame_id,
-                     const std::chrono::system_clock::time_point &stamp);
+                     const std::chrono::system_clock::time_point &stamp, Mode mode);
   std::optional<cv::Mat>
   afterDetect(const cv::Mat &bgr_image, std::vector<RuneObject> &runes,
               const std::string &frame_id,

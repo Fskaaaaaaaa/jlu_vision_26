@@ -45,11 +45,17 @@ struct CorrectorConfig {
   bool show_window;
 };
 
+enum class Mode{
+  Idle = 0,
+  SmallBuff = 1,
+  BigBuff = 2,
+};
+
 struct RuneDetectorConfigs {
   quill::LogLevel log_level;
   confs::CameraParams camera_params;
 
-  bool detect_when_idle;
+  Mode do_when_idle;
   bool debug_mode;
   bool step_by_step_debug;
 

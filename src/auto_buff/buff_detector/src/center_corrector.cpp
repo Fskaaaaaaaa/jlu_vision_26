@@ -7,6 +7,7 @@
 #include "opencv2/core/types.hpp"
 #include "opencv2/highgui.hpp"
 #include "quill/LogMacros.h"
+#include "types/BuffBladeType.hpp"
 
 #include <opencv2/imgproc.hpp>
 #include <vector>
@@ -15,9 +16,16 @@ auto_buff::CorrectorConfig auto_buff::CenterCorrector::config_ =
     ConfigManager::instance()->configs().corrector_config;
 
 void auto_buff::CenterCorrector::correctRunes(const cv::Mat &image,
-                                              std::vector<RuneObject> &runes) {
+                                              std::vector<RuneObject> &runes, Mode mode) {
   if (runes.size() == 0)
     return;
+  if (mode == Mode::BigBuff) {
+    runes.erase(std::remove_if(runes.begin(), runes.end(),
+                             [](const RuneObject &obj) {
+                               return obj.type == types::BuffBladeType::Activated;
+                             }),
+              runes.end());
+  }
 
   std::sort(runes.begin(), runes.end(),
             [](auto &a, auto &b) { return a.box.area() > b.box.area(); });
