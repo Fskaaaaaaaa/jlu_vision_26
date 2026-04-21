@@ -5,7 +5,7 @@ camera_params:
   frame_rate: -1.0
 do_when_idle: BigBuff
 debug_mode: true
-step_by_step_debug: false
+step_by_step_debug: true
 default_enemy_color: Red
 camera_name: camera0
 runes_topic: 
@@ -27,6 +27,6 @@ corrector_config:
   roi_size: 100
   skewing: 0.2
   rune_size_tolerance: 0.3
-  center_shape_tolerance: 0.2
+  center_shape_tolerance: 0.6
   center_weight: 5
   show_window: false

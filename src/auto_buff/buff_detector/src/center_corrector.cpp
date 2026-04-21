@@ -26,14 +26,16 @@ void auto_buff::CenterCorrector::correctRunes(const cv::Mat &image,
                              }),
               runes.end());
   }
-
+  for (auto &rune : runes) {
+    rune.area = cv::contourArea(rune.points.toVector2i());
+  }
   std::sort(runes.begin(), runes.end(),
-            [](auto &a, auto &b) { return a.box.area() > b.box.area(); });
-  float maxArea = runes.front().box.area();
-  float minArea = maxArea * config_.rune_size_tolerance;
+            [](auto &a, auto &b) { return a.area > b.area; });
+  
+  float minArea = runes.front().area * config_.rune_size_tolerance;
   runes.erase(std::remove_if(runes.begin(), runes.end(),
-                             [minArea](const RuneObject &obj) {
-                               return obj.box.area() < minArea;
+                             [minArea](const RuneObject &rune) {
+                               return rune.area < minArea;
                              }),
               runes.end());
 
