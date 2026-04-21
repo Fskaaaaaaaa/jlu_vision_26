@@ -32,7 +32,8 @@ void auto_buff::CenterCorrector::correctRunes(const cv::Mat &image,
   cv::Point2f center;
   float center_x = 0, center_y = 0, weight = 0;
   if (CenterCorrector::getCenterpoint(image, runes, center)) {
-    // LOG_INFO(ConfigManager::instance()->logger(), "x:{} y:{}", center.x, center.y);
+    // LOG_INFO(ConfigManager::instance()->logger(), "x:{} y:{}", center.x,
+    // center.y);
     center_x += center.x * config_.center_weight;
     center_y += center.y * config_.center_weight;
     weight += config_.center_weight;
@@ -118,7 +119,7 @@ bool auto_buff::CenterCorrector::getCenterpoint(const cv::Mat &image,
     corner_y = roi_rect.y;
     roi = image(roi_rect);
     break;
-    }
+  }
   default: {
     std::vector<cv::Point2f> points;
     for (auto &rune : runes)
@@ -133,19 +134,19 @@ bool auto_buff::CenterCorrector::getCenterpoint(const cv::Mat &image,
     corner_x = roi_rect.x;
     corner_y = roi_rect.y;
     roi = image(roi_rect);
-  }
-    break;
+  } break;
   }
   if (roi.empty() || roi.cols <= 1 || roi.rows <= 1)
     return false;
 
-//   LOG_INFO(ConfigManager::instance()->logger(), "{} {}", roi.cols, roi.rows);
+  //   LOG_INFO(ConfigManager::instance()->logger(), "{} {}", roi.cols,
+  //   roi.rows);
   cv::Mat gray_img;
   cv::cvtColor(roi, gray_img, cv::COLOR_BGR2GRAY);
   cv::Mat binary_img;
   cv::threshold(gray_img, binary_img, 0, 255,
                 cv::THRESH_BINARY | cv::THRESH_OTSU);
-  cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3));
+  cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
   cv::morphologyEx(binary_img, binary_img, cv::MORPH_OPEN, kernel);
   cv::dilate(binary_img, binary_img, kernel);
 
@@ -159,10 +160,10 @@ bool auto_buff::CenterCorrector::getCenterpoint(const cv::Mat &image,
     float w = rect.size.width;
     float h = rect.size.height;
     if (w < 1e-6 || h < 1e-6)
-        continue;
+      continue;
     float ratio = std::max(w, h) / std::min(w, h);
     if (fabs(ratio - 1.0f) < config_.center_shape_tolerance)
-        rects.push_back(rect);
+      rects.push_back(rect);
   }
   if (rects.size() == 0)
     return false;
@@ -179,19 +180,19 @@ bool auto_buff::CenterCorrector::getCenterpoint(const cv::Mat &image,
   if (config_.show_window) {
     cv::Mat image_copy;
     image.copyTo(image_copy);
-    
+
     cv::Point2f pts[4];
     center_rect.points(pts);
-    
+
     for (int i = 0; i < 4; i++) {
-      cv::line(image_copy, pts[i], pts[(i+1)%4], cv::Scalar(0,255,0), 2);
+      cv::line(image_copy, pts[i], pts[(i + 1) % 4], cv::Scalar(0, 255, 0), 2);
     }
-    
+
     cv::circle(image_copy, center_rect.center, 3, cv::Scalar(255, 0, 0), -1);
     cv::resize(
-      image_copy, image_copy,
-      cv::Size(image_copy.size().width / 2, image_copy.size().height / 2));
-      cv::imshow("image_copy", image_copy);
+        image_copy, image_copy,
+        cv::Size(image_copy.size().width / 2, image_copy.size().height / 2));
+    cv::imshow("image_copy", image_copy);
   }
 
   return true;

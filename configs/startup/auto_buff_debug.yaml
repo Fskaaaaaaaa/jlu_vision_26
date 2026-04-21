@@ -1,0 +1,40 @@
+working_dir: "."
+processes:
+  iox_roudi:
+    command: iox-roudi -c configs/iox-roudi_config.toml
+    ready_log_line: "RouDi is ready for clients"
+    availability:
+      restart: always
+  camera:
+    command: build/linux/x86_64/release/camera
+    availability:
+      restart: always
+    depends_on:
+      iox_roudi:
+        condition: process_log_ready
+  serial:
+    command: build/linux/x86_64/release/serial
+    availability:
+      restart: always
+    depends_on:
+      iox_roudi:
+        condition: process_log_ready
+  static_tf_bc:
+    command: build/linux/x86_64/release/static_tf_bc
+    depends_on:
+      iox_roudi:
+        condition: process_log_ready
+  detector:
+    command: build/linux/x86_64/release/buff_detector -d
+    depends_on:
+      camera:
+        condition: process_started
+  tracker:
+    command: startup/buff_tracker_with_system_tbb.bash -d
+    depends_on:
+      camera:
+        condition: process_started
+      serial:
+        condition: process_started
+      static_tf_bc:
+        condition: process_started
