@@ -1,20 +1,21 @@
 #include "buff_detector_node.hpp"
-#include "configs.hpp"
 #include "basic/colors.hpp"
-#include "opencv2/core/types.hpp"
+#include "configs.hpp"
+#include "msgs/BuffBlade.hpp"
+#include "types.hpp"
+#include "types/BuffBladeType.hpp"
 #include "types/IceoryxServiceDescription.hpp"
 
-#include "msgs/BuffBlade.hpp"
+#include "opencv2/core/types.hpp"
 #include "opencv2/highgui.hpp"
-#include <exception>
+#include "quill/LogMacros.h"
+#include "rfl/enums.hpp"
 #include <opencv2/imgproc.hpp>
+
+#include <exception>
 #include <optional>
 #include <string>
 #include <vector>
-#include "quill/LogMacros.h"
-#include "rfl/enums.hpp"
-#include "types.hpp"
-
 
 auto_buff::DetectorNode::DetectorNode()
     : cam_params_changer_(ConfigManager::instance()->logger(),
@@ -38,13 +39,11 @@ auto_buff::DetectorNode::DetectorNode()
             LOG_INFO(ConfigManager::instance()->logger(),
                      "on task! change camera params.");
           }),
-      rune_pub_(
-          types::IceoryxServiceDescription{ConfigManager::instance()->configs().runes_topic}.description){
-}
+      rune_pub_(types::IceoryxServiceDescription{
+          ConfigManager::instance()->configs().runes_topic}
+                    .description) {}
 
-auto_buff::DetectorNode::~DetectorNode() {
-  cv::destroyAllWindows();
-}
+auto_buff::DetectorNode::~DetectorNode() { cv::destroyAllWindows(); }
 
 int auto_buff::DetectorNode::run() {
   LOG_INFO(ConfigManager::instance()->logger(),
@@ -67,13 +66,14 @@ void auto_buff::DetectorNode::init() {
           [this](const cv::Mat &image, const std::string frame_id,
                  const std::chrono::system_clock::time_point &stamp) {
             bool should_continue =
-                task_mode_listener_small_buff_.isOnTask() || task_mode_listener_big_buff_.isOnTask() ||
+                task_mode_listener_small_buff_.isOnTask() ||
+                task_mode_listener_big_buff_.isOnTask() ||
                 (ConfigManager::instance()->configs().detect_when_idle &&
                  task_mode_listener_small_buff_.isTask(types::TaskMode::Idle));
             if (should_continue)
               this->imageCallback(image, frame_id, stamp);
           });
-    LOG_INFO(ConfigManager::instance()->logger(), "detector node inited!");
+  LOG_INFO(ConfigManager::instance()->logger(), "detector node inited!");
 }
 
 void auto_buff::DetectorNode::imageCallback(
@@ -84,7 +84,8 @@ void auto_buff::DetectorNode::imageCallback(
   try {
     runes = st_detector_->detect(image);
   } catch (std::exception &e) {
-    LOG_ERROR(ConfigManager::instance()->logger(), "Detector Error:{}", e.what());
+    LOG_ERROR(ConfigManager::instance()->logger(), "Detector Error:{}",
+              e.what());
   }
   auto infer_end = std::chrono::system_clock::now();
 
@@ -111,9 +112,11 @@ void auto_buff::DetectorNode::imageCallback(
     cv::putText(img, camera_str, cv::Point(10, 120), cv::FONT_HERSHEY_SIMPLEX,
                 1.0, cv::Scalar(0, 255, 0), 2);
     cv::Mat resize_img;
-    cv::resize(img, resize_img, cv::Size(img.size().width/2, img.size().height/2));
+    cv::resize(img, resize_img,
+               cv::Size(img.size().width / 2, img.size().height / 2));
     cv::imshow("detector", resize_img);
-    cv::waitKey(ConfigManager::instance()->configs().step_by_step_debug ? 0 : 1);
+    cv::waitKey(ConfigManager::instance()->configs().step_by_step_debug ? 0
+                                                                        : 1);
   }
 }
 
@@ -145,7 +148,7 @@ std::optional<cv::Mat> auto_buff::DetectorNode::afterDetect(
 
 void auto_buff::DetectorNode::drawRune(const RuneObject &rune, cv::Mat &image,
                                        const cv::Scalar &color) {
-  
+
   // LOG_INFO(ConfigManager::instance()->logger(), "r_center x:{} y:{}",
   //          rune.points.center.x, rune.points.center.y);
   // LOG_INFO(ConfigManager::instance()->logger(), "top_left x:{} y:{}",
@@ -156,37 +159,55 @@ void auto_buff::DetectorNode::drawRune(const RuneObject &rune, cv::Mat &image,
   //          rune.points.bottom_left.x, rune.points.bottom_left.y);
   // LOG_INFO(ConfigManager::instance()->logger(), "bottom_right x:{} y:{}",
   //          rune.points.bottom_right.x, rune.points.bottom_right.y);
-  
-  cv::polylines(image, rune.points.toVector2i(), true, color, 2, cv::LINE_AA);
+
+  cv::polylines(image, rune.points.toVector2i(), true,
+                (rune.type == types::BuffBladeType::Inactivated)
+                    ? color
+                    : tools::Color::bgr::GREEN,
+                2, cv::LINE_AA);
   cv::putText(image,
-              rfl::enum_to_string(rune.color) + " " + rfl::enum_to_string(rune.type) + " " +
+              rfl::enum_to_string(rune.color) + " " +
+                  rfl::enum_to_string(rune.type) + " " +
                   std::to_string(rune.prob),
-              (rune.points.top_right + rune.points.top_left + rune.points.bottom_left + rune.points.bottom_right) * 0.25,
+              (rune.points.top_right + rune.points.top_left +
+               rune.points.bottom_left + rune.points.bottom_right) *
+                  0.25,
               cv::FONT_HERSHEY_SIMPLEX, 0.8, tools::Color::PURPLE, 2);
 }
 
-void auto_buff::DetectorNode::publishRunes(const std::vector<RuneObject> &runes) {
+void auto_buff::DetectorNode::publishRunes(
+    const std::vector<RuneObject> &runes) {
   for (const auto &rune : runes) {
     this->rune_pub_.loan()
-        .and_then([&](iox::popo::Sample<msgs::BuffBlade, msgs::Header> &sample) {
-          sample.getUserHeader().frame_id = {iox::TruncateToCapacity,
-                                             rune.frame_id.c_str()};
-          sample.getUserHeader().stamp_ns =
-              tools::chronoPointToNanoSec(rune.stamp);
-          sample->color = static_cast<int>(rune.color);
-          sample->type = static_cast<int>(rune.type);
-          sample->confidence = rune.prob;
-          sample->points.r_center       = msgs::Point2d(rune.points.center.x, rune.points.center.y);
-          sample->points.bottom_right   = msgs::Point2d(rune.points.bottom_right.x, rune.points.bottom_right.y);
-          sample->points.top_right      = msgs::Point2d(rune.points.top_right.x, rune.points.top_right.y);
-          sample->points.top_left       = msgs::Point2d(rune.points.top_left.x, rune.points.top_left.y);
-          sample->points.bottom_left    = msgs::Point2d(rune.points.bottom_left.x, rune.points.bottom_left.y);
+        .and_then(
+            [&](iox::popo::Sample<msgs::BuffBlade, msgs::Header> &sample) {
+              sample.getUserHeader().frame_id = {iox::TruncateToCapacity,
+                                                 rune.frame_id.c_str()};
+              sample.getUserHeader().stamp_ns =
+                  tools::chronoPointToNanoSec(rune.stamp);
+              sample->color = static_cast<int>(rune.color);
+              sample->type = static_cast<int>(rune.type);
+              sample->confidence = rune.prob;
+              sample->points.r_center =
+                  msgs::Point2d(rune.points.center.x, rune.points.center.y);
+              sample->points.bottom_right = msgs::Point2d(
+                  rune.points.bottom_right.x, rune.points.bottom_right.y);
+              sample->points.top_right = msgs::Point2d(rune.points.top_right.x,
+                                                       rune.points.top_right.y);
+              sample->points.top_left =
+                  msgs::Point2d(rune.points.top_left.x, rune.points.top_left.y);
+              sample->points.bottom_left = msgs::Point2d(
+                  rune.points.bottom_left.x, rune.points.bottom_left.y);
 
-          sample->heart_beat = false;
-          sample.publish();
-          LOG_TRACE_L1(ConfigManager::instance()->logger(), "{} armor(s) published.", runes.size());
-        })
-        .or_else([&](auto) { LOG_ERROR(ConfigManager::instance()->logger(), "armor publish failed!"); });
+              sample->heart_beat = false;
+              sample.publish();
+              LOG_TRACE_L1(ConfigManager::instance()->logger(),
+                           "{} armor(s) published.", runes.size());
+            })
+        .or_else([&](auto) {
+          LOG_ERROR(ConfigManager::instance()->logger(),
+                    "armor publish failed!");
+        });
   }
 }
 
@@ -197,7 +218,11 @@ void auto_buff::DetectorNode::publishHeartbeat(
         sample.getUserHeader().stamp_ns = tools::chronoPointToNanoSec(stamp);
         sample->heart_beat = true;
         sample.publish();
-        LOG_TRACE_L1(ConfigManager::instance()->logger(), "heart_beat published.");
+        LOG_TRACE_L1(ConfigManager::instance()->logger(),
+                     "heart_beat published.");
       })
-      .or_else([&](auto) { LOG_ERROR(ConfigManager::instance()->logger(), "heart_beat publish failed!"); });
+      .or_else([&](auto) {
+        LOG_ERROR(ConfigManager::instance()->logger(),
+                  "heart_beat publish failed!");
+      });
 }

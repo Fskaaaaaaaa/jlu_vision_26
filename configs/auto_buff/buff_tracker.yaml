@@ -25,8 +25,8 @@ small_buff_conf:
     max_match_roll_diff_degree: 30.0
   blade_conf:
     pixel_error:
-      x: 2.0
-      y: 2.0
+      x: 5.0
+      y: 5.0
     position_noise_m:
       x: 0.03
       y: 0.03
@@ -58,7 +58,7 @@ trajectory_conf:
     gimbal_pitch_max_degree: 30.0
   max_aim_iterate_count: 20
   aim_ok_error_m: 0.005
-  blade_select_change_count_thres: 5
+  blade_select_change_count_thres: 10
   fail_polling_interval_sec: 0.1
   min_bullet_speed: 18
   max_bullet_speed: 25
