@@ -65,24 +65,28 @@ void auto_buff::DetectorNode::init() {
           ConfigManager::instance()->configs().camera_name,
           [this](const cv::Mat &image, const std::string frame_id,
                  const std::chrono::system_clock::time_point &stamp) {
-            bool should_continue =
-                task_mode_listener_small_buff_.isOnTask() ||
-                task_mode_listener_big_buff_.isOnTask() ||
-                (ConfigManager::instance()->configs().detect_when_idle &&
-                 task_mode_listener_small_buff_.isTask(types::TaskMode::Idle));
-            if (should_continue)
-              this->imageCallback(image, frame_id, stamp);
+            Mode mode = Mode::Idle;
+            if (task_mode_listener_small_buff_.isOnTask())
+              mode = Mode::SmallBuff;
+            else if (task_mode_listener_big_buff_.isOnTask())
+              mode = Mode::BigBuff;
+            else if (task_mode_listener_big_buff_.isTask(types::TaskMode::Idle))
+              mode = ConfigManager::instance()->configs().do_when_idle;
+                  
+            if (mode != Mode::Idle)
+              this->imageCallback(image, frame_id, stamp, mode);
           });
   LOG_INFO(ConfigManager::instance()->logger(), "detector node inited!");
 }
 
 void auto_buff::DetectorNode::imageCallback(
     const cv::Mat &image, const std::string &frame_id,
-    const std::chrono::system_clock::time_point &stamp) {
+    const std::chrono::system_clock::time_point &stamp,
+    Mode mode) {
   auto infer_start = std::chrono::system_clock::now();
   std::vector<RuneObject> runes;
   try {
-    runes = st_detector_->detect(image);
+    runes = st_detector_->detect(image, mode);
   } catch (std::exception &e) {
     LOG_ERROR(ConfigManager::instance()->logger(), "Detector Error:{}",
               e.what());

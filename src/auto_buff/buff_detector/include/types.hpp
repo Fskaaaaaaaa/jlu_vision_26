@@ -37,7 +37,8 @@ struct RuneObject {
   float prob;
   cv::Rect box;
   std::string frame_id;
-  std::chrono::system_clock::time_point stamp;  
+  std::chrono::system_clock::time_point stamp;
+  float area;
 };
 
 struct GridAndStride {
