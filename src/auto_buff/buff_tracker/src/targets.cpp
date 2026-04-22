@@ -1,4 +1,5 @@
 #include "targets.hpp"
+#include "buff_fitter.hpp"
 #include "configs.hpp"
 #include "factors.hpp"
 #include "math/angle_tools.hpp"
@@ -394,4 +395,31 @@ auto_buff::SmallBuffTarget::update(
               track_state_.k);
     return {{}, TrackState::State::LOST};
   }
+}
+
+auto_buff::BigBuffTarget::BigBuffTarget(quill::Logger *logger,
+                                        const BigBuffConfig &config,
+                                        const cv::Mat &camera_matrix,
+                                        const cv::Mat &distortion_coefficients)
+    : BuffTarget(logger, config.match_conf, config.blade_conf, camera_matrix,
+                 distortion_coefficients),
+      config_(config), fitter_(logger, config_.fitter_conf) {
+  track_state_.state = TrackState::State::LOST;
+  track_state_.stamp_last_update = std::chrono::system_clock::from_time_t(0);
+  track_state_.stamp_last_tracking = std::chrono::system_clock::from_time_t(0);
+  track_state_.k = 0;
+}
+
+std::pair<auto_buff::BuffState, auto_buff::TrackState>
+auto_buff::BigBuffTarget::getTargetTrackState() const {
+  // TODO:
+  std::scoped_lock lk{state_mtx_};
+  // return {
+  //     target_state_.getStateWithPredictFunc(
+  //         [vroll = target_state_.center_vroll](const BuffState &state,
+  //                                              double dt) {
+  //           return predictBuffState(state, vroll, dt);
+  //         }),
+  //     track_state_,
+  // };
 }

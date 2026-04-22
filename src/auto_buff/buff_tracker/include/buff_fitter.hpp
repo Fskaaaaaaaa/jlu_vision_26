@@ -1,12 +1,12 @@
 #pragma once
 
 #include "configs.hpp"
-#include "quill/Logger.h"
 #include "types.hpp"
 
-#include <array>
+#include "quill/Logger.h"
 #include <ceres/ceres.h>
 
+#include <array>
 #include <deque>
 #include <mutex>
 #include <optional>
@@ -19,8 +19,6 @@ public:
 
   std::optional<std::array<double, 5>> update(double dt_last_update_to_image,
                                               double buff_roll);
-
-  // Reset fitter
   void reset();
 
 private:

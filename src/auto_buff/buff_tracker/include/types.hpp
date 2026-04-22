@@ -136,14 +136,16 @@ struct IntervalTimeBuffRoll {
 
 inline auto getBuffCurve(auto x, auto a, auto omega, auto b, auto c, auto d,
                          auto sign) {
-  return (-((a) / (omega)*ceres::cos((omega) * ((x) + (d)))) +
-          (b) * ((x) + (d)) + (c)) *
-         (sign);
+  return (-(a / omega * ceres::cos(omega * (x + d))) + b * (x + d) + c) * sign;
 }
 
 struct BigBuffState : public BuffState {
-  double theta{0};
+  double a{0};
   double omega{0};
+  double b{0};
+  double c{0};
+  double d{0};
+  BuffDirection direction{BuffDirection::Unknown};
 };
 
 struct TrackState {

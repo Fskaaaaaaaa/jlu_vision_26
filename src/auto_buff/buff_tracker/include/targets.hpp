@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buff_fitter.hpp"
 #include "configs.hpp"
 #include "quill/Logger.h"
 #include "types.hpp"
@@ -94,7 +95,25 @@ private:
 
 class BigBuffTarget : public BuffTarget {
 public:
+  BigBuffTarget(quill::Logger *logger, const BigBuffConfig &config,
+                const cv::Mat &camera_matrix,
+                const cv::Mat &distortion_coefficients);
+  std::pair<BuffState, TrackState> getTargetTrackState() const override;
+  double get(const std::string &str) const override;
+  TrackState::State track(const std::vector<BuffBlade> &blades,
+                          const std::chrono::system_clock::time_point &stamp,
+                          const Eigen::Isometry3d &T_camera_to_odom) override;
+
 private:
+  // quill::Logger *logger_; 在基类里
+  BigBuffConfig config_;
+
+  BuffFitter fitter_;
+
+  mutable std::mutex state_mtx_;
+  mutable gtsam::ISAM2 isam2_;
+  BigBuffState target_state_;
+  TrackState track_state_;
 };
 
 } // namespace auto_buff

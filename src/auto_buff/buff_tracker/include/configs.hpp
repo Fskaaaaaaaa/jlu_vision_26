@@ -42,7 +42,13 @@ struct SmallBuffConfig {
   double lost_threshold_sec;
 };
 
-// struct BigBuffConfig {};
+struct BigBuffConfig {
+  BuffFitterConfig fitter_conf;
+  BuffBladeMatchConfig match_conf;
+  BuffBladeNoiseConfig blade_conf;
+  BuffCenterNoiseConfig center_conf;
+  double lost_threshold_sec;
+};
 
 struct TrajectoryConfig {
   tools::ballistic::BallisticConfig ballistic_conf;
@@ -73,7 +79,7 @@ struct TrackerConfigs {
   confs::IceoryxServiceDescription buff_blade_topic;
   confs::IceoryxServiceDescription serial_topic;
   SmallBuffConfig small_buff_conf;
-  // BigBuffConfig big_buff_conf;
+  BigBuffConfig big_buff_conf;
   TrajectoryConfig trajectory_conf;
 };
 
