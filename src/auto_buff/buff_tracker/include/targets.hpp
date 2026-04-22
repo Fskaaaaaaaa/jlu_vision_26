@@ -92,7 +92,7 @@ private:
   TrackState track_state_;
 };
 
-class BigBuffTarget : private BuffTarget {
+class BigBuffTarget : public BuffTarget {
 public:
 private:
 };

@@ -64,6 +64,27 @@ public:
                               gtsam::OptionalMatrixType H2) const override;
 };
 
+class BigBuffVRollFactor
+    : public gtsam::NoiseModelFactorN<double, double, double, double, double> {
+  using Base = gtsam::NoiseModelFactorN<double, double, double, double, double>;
+
+public:
+  BigBuffVRollFactor(const gtsam::SharedNoiseModel &model, double dt,
+                     double dt_pre, gtsam::Key r_cur, gtsam::Key r_pre,
+                     gtsam::Key r_before_pre, gtsam::Key w, gtsam::Key a);
+  gtsam::Vector evaluateError(const double &w_cur, const double &w_pre,
+                              const double &w_before_pre, const double &w,
+                              const double &a, gtsam::OptionalMatrixType H1,
+                              gtsam::OptionalMatrixType H2,
+                              gtsam::OptionalMatrixType H3,
+                              gtsam::OptionalMatrixType H4,
+                              gtsam::OptionalMatrixType H5) const override;
+
+private:
+  double dt_;
+  double dt_pre_;
+};
+
 // NOTE:
 // 一个扇叶对应着五个keypoint，N个观测会产生N*5个重投影因子，优化N个扇叶位姿
 // 重投影因子只需要知道自身的点编号（用来访问世界点）
