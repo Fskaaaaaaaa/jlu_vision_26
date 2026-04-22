@@ -19,9 +19,9 @@ serial_topic:
   event: data
 
 small_buff_conf:
-  lost_threshold_sec: 0.3
+  lost_threshold_sec: 0.8
   match_conf:
-    max_match_distance_m: 2.0
+    max_match_distance_m: 1.0
     max_match_roll_diff_degree: 30.0
   blade_conf:
     pixel_error:

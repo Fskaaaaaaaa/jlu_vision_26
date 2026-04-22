@@ -29,6 +29,12 @@ struct BuffCenterNoiseConfig {
   double vroll_prior_noise_rad;
 };
 
+struct BuffFitterConfig {
+  int queue_upper_limit;
+  int queue_lower_limit;
+  int curve_fitting_interval_time_ms;
+};
+
 struct SmallBuffConfig {
   BuffBladeMatchConfig match_conf;
   BuffBladeNoiseConfig blade_conf;

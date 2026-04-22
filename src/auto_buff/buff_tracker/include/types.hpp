@@ -8,6 +8,7 @@
 #include "iceoryx_posh/popo/sample.hpp"
 #include "opencv2/core/types.hpp"
 #include <Eigen/Dense>
+#include <ceres/ceres.h>
 #include <gtsam/geometry/Rot2.h>
 #include <opencv2/core.hpp>
 
@@ -119,7 +120,26 @@ struct SmallBuffState : public BuffState {
   SmallBuffState() = default;
   SmallBuffState(const BuffState &state, double vroll);
   double center_vroll{0};
+}; // 下面的全是大符的了
+
+// 旋转方向，逆时针为正，经典的enum cast到int
+enum class BuffDirection {
+  ClockWise = -1,
+  AntiClockWise = 1,
+  Unknown = 0,
 };
+
+struct IntervalTimeBuffRoll {
+  double interval_time;
+  double buff_roll;
+};
+
+inline auto getBuffCurve(auto x, auto a, auto omega, auto b, auto c, auto d,
+                         auto sign) {
+  return (-((a) / (omega)*ceres::cos((omega) * ((x) + (d)))) +
+          (b) * ((x) + (d)) + (c)) *
+         (sign);
+}
 
 struct BigBuffState : public BuffState {
   double theta{0};

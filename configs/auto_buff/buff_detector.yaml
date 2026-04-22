@@ -5,7 +5,7 @@ camera_params:
   frame_rate: -1.0
 do_when_idle: BigBuff
 debug_mode: true
-step_by_step_debug: true
+step_by_step_debug: false
 default_enemy_color: Red
 camera_name: camera0
 runes_topic: 

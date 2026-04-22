@@ -35,48 +35,6 @@ gtsam::Vector auto_buff::RollFactor::evaluateError(
   return error;
 }
 
-auto_buff::BigBuffVRollFactor::BigBuffVRollFactor(
-    const gtsam::SharedNoiseModel &model, double dt, double dt_pre,
-    gtsam::Key r_cur, gtsam::Key r_pre, gtsam::Key r_before_pre, gtsam::Key w,
-    gtsam::Key a)
-    : Base(model, r_cur, r_pre, r_before_pre, w, a), dt_(dt), dt_pre_(dt_pre) {}
-
-gtsam::Vector auto_buff::BigBuffVRollFactor::evaluateError(
-    const double &w_cur, const double &w_pre, const double &w_before_pre,
-    const double &w, const double &a, gtsam::OptionalMatrixType H1,
-    gtsam::OptionalMatrixType H2, gtsam::OptionalMatrixType H3,
-    gtsam::OptionalMatrixType H4, gtsam::OptionalMatrixType H5) const {
-  auto b = 2.09 - a;
-  auto sin_pre = (w_pre - b) / a;
-  auto sin_before_pre = (w_before_pre - b) / a;
-  auto k1 = std::sin(w * (dt_ + dt_pre_)) / std::sin(w * dt_pre_);
-  auto k2 = std::sin(w * dt_) / std::sin(w * dt_pre_);
-  auto sin_predict = k1 * sin_pre - k2 * sin_before_pre;
-  auto w_predict = a * sin_predict + b;
-  // XXX: 感觉太不靠谱了，只有一维的误差根本约束不住吧
-  gtsam::Vector1 error{w_cur - w_predict};
-  if (H1)
-    *H1 = gtsam::Matrix1::Identity();
-  if (H2)
-    *H2 = gtsam::Matrix1{-k1};
-  if (H3)
-    *H3 = gtsam::Matrix1{k2};
-  if (H4) {
-    auto dt_dt_pre = dt_ + dt_pre_;
-    auto cos_dt_dt_pre = std::cos(dt_dt_pre * w);
-    auto sin_dt_dt_pre = std::sin(dt_dt_pre * w);
-    auto cos_dt_pre = std::cos(dt_pre_ * w);
-    auto sin_dt_pre = std::sin(dt_pre_ * w);
-    auto cos_dt = std::cos(dt_ * w);
-    auto sin_dt = std::sin(dt_ * w);
-    auto d_k1 = 0;
-    *H4 = gtsam::Matrix1{};
-  }
-  if (H5) {
-  }
-  return error;
-}
-
 auto_buff::ConstVRollFactor::ConstVRollFactor(
     const gtsam::SharedNoiseModel &model, gtsam::Key w_pre, gtsam::Key w_cur)
     : Base(model, w_pre, w_cur) {}
