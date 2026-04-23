@@ -64,7 +64,7 @@ private:
   cv::Mat distortion_coefficients_;
   iox::popo::Listener buff_blade_listener_;
   std::unique_ptr<SmallBuffTarget> small_buff_target_;
-  // BigBuffTarget big_buff_target_;
+  std::unique_ptr<BigBuffTarget> big_buff_target_;
   std::jthread plan_thread_;
   Trajectory trajectory_;
   // for debug

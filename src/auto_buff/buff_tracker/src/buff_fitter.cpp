@@ -17,7 +17,8 @@ struct BigRuneFittingCost {
   BigRuneFittingCost(double x, double y, int m)
       : x_(x), y_(y), mov_(static_cast<double>(m)) {}
   template <typename T> bool operator()(const T *const p, T *residual) const {
-    residual[0] = y_ - getBuffCurve(x_, p[0], p[1], p[2], p[3], p[4], mov_);
+    residual[0] =
+        y_ - getBuffCurvePoint(x_, p[0], p[1], p[2], p[3], p[4], mov_);
     return true;
   }
   const double x_, y_;
@@ -64,14 +65,15 @@ auto_buff::BuffFitter::BuffFitter(quill::Logger *logger,
   }};
 }
 
-std::optional<std::array<double, 5>>
+std::optional<auto_buff::BuffParamDirectionDeltaTime>
 auto_buff::BuffFitter::update(double dt_last_update_to_image,
                               double buff_roll) {
   std::scoped_lock lk{data_mtx_};
   data_history_queue_.emplace_back(IntervalTimeBuffRoll{
-      .interval_time = last_update_time_ + dt_last_update_to_image,
+      .dt_from_start = dt_start_to_last_update_ + dt_last_update_to_image,
       .buff_roll = buff_roll,
   });
+  dt_start_to_last_update_ += dt_last_update_to_image;
   if (data_history_queue_.size() < config_.queue_lower_limit)
     return std::nullopt;
   if (data_history_queue_.size() > config_.queue_upper_limit)
@@ -82,14 +84,17 @@ auto_buff::BuffFitter::update(double dt_last_update_to_image,
   direction_ =
       angle_diff < 0 ? BuffDirection::ClockWise : BuffDirection::AntiClockWise;
   if (fitting_ok_)
-    return fitting_param_;
+    return {{
+        .param = fitting_param_,
+        .direction = direction_,
+        .dt_from_start = dt_start_to_last_update_,
+    }};
   return std::nullopt;
 }
 
 void auto_buff::BuffFitter::reset() {
   std::scoped_lock lk{data_mtx_};
-  this->start_time_ = 0;
-  this->last_update_time_ = 0;
+  this->dt_start_to_last_update_ = 0;
   this->direction_ = BuffDirection::Unknown;
   this->data_history_queue_.clear();
   this->fitting_param_ = {0.9125, 1.942, 2.090 - 0.9125, 0, 0};
@@ -110,17 +115,23 @@ std::optional<std::array<double, 5>> auto_buff::BuffFitter::fitCurve(
       [&](const auto &data) {
         problem.AddResidualBlock(
             new ceres::AutoDiffCostFunction<BigRuneFittingCost, 1, 5>(
-                new BigRuneFittingCost(data.interval_time, data.buff_roll,
+                new BigRuneFittingCost(data.dt_from_start, data.buff_roll,
                                        static_cast<int>(direction))),
             new ceres::CauchyLoss(0.5), param_ptr);
       });
   // 约束参数范围
-  problem.SetParameterLowerBound(param_ptr, 0, 0.780 * 0.5);
-  problem.SetParameterUpperBound(param_ptr, 0, 1.045 * 1.5);
-  problem.SetParameterLowerBound(param_ptr, 1, 1.884 * 0.5);
-  problem.SetParameterUpperBound(param_ptr, 1, 2.000 * 1.5);
-  problem.SetParameterLowerBound(param_ptr, 2, (2.090 - 1.045) * 0.5);
-  problem.SetParameterUpperBound(param_ptr, 2, (2.090 - 0.780) * 1.5);
+  problem.SetParameterLowerBound(param_ptr, 0,
+                                 0.780 * config_.param_lower_bound_scale);
+  problem.SetParameterUpperBound(param_ptr, 0,
+                                 1.045 * config_.param_upper_bound_scale);
+  problem.SetParameterLowerBound(param_ptr, 1,
+                                 1.884 * config_.param_lower_bound_scale);
+  problem.SetParameterUpperBound(param_ptr, 1,
+                                 2.000 * config_.param_upper_bound_scale);
+  problem.SetParameterLowerBound(
+      param_ptr, 2, (2.090 - 1.045) * config_.param_lower_bound_scale);
+  problem.SetParameterUpperBound(
+      param_ptr, 2, (2.090 - 0.780) * config_.param_upper_bound_scale);
   // 求解问题
   ceres::Solver::Options options;
   options.linear_solver_type = ceres::DENSE_QR;

@@ -89,3 +89,10 @@ auto_buff::BladePositionRPYPoints::transform(const Eigen::Isometry3d &T) const {
 
 auto_buff::SmallBuffState::SmallBuffState(const BuffState &state, double vroll)
     : BuffState(state), center_vroll(vroll) {}
+
+auto_buff::BigBuffState::BigBuffState(const BuffState &state,
+                                      double dt_from_start, double a,
+                                      double omega, double b, double c,
+                                      double d, BuffDirection direction)
+    : BuffState(state), dt_from_start(dt_from_start), a(a), omega(omega), b(b),
+      c(c), d(d), direction(direction) {}

@@ -32,6 +32,8 @@ struct BuffCenterNoiseConfig {
 struct BuffFitterConfig {
   int queue_upper_limit;
   int queue_lower_limit;
+  double param_lower_bound_scale{0.5};
+  double param_upper_bound_scale{1.5};
   int curve_fitting_interval_time_ms;
 };
 

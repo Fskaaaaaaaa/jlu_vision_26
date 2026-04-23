@@ -45,7 +45,9 @@ auto_buff::TrackerNode::TrackerNode(quill::Logger *logger,
   this->small_buff_target_ = std::make_unique<SmallBuffTarget>(
       logger_, configs_.small_buff_conf, camera_matrix_,
       distortion_coefficients_);
-  LOG_INFO(logger_, "Add Target: SmallBuff");
+  this->big_buff_target_ =
+      std::make_unique<BigBuffTarget>(logger_, configs_.big_buff_conf,
+                                      camera_matrix_, distortion_coefficients_);
   // 开始订阅扇叶
   buff_blade_listener_
       .attachEvent(buff_blade_sub_, iox::popo::SubscriberEvent::DATA_RECEIVED,
@@ -85,7 +87,7 @@ auto_buff::TrackerNode::TrackerNode(quill::Logger *logger,
             small_buff_target_->getTargetTrackState();
       if (on_big_buff_task)
         std::tie(target_state, track_state) =
-            small_buff_target_->getTargetTrackState();
+            big_buff_target_->getTargetTrackState();
       if (track_state.state == TrackState::State::LOST) {
         aimcommand_pub_.loan().and_then(
             [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
@@ -146,9 +148,16 @@ auto_buff::TrackerNode::TrackerNode(quill::Logger *logger,
         plotter_.plot("buff_center_y", target_state.center_position.y());
         plotter_.plot("buff_center_z", target_state.center_position.z());
         plotter_.plot("buff_roll", target_state.center_roll);
-        plotter_.plot("buff_vroll", on_small_buff_task
-                                        ? small_buff_target_->get("vroll")
-                                        : 0); // TODO: 大符
+        if (on_small_buff_task)
+          plotter_.plot("buff_vroll", small_buff_target_->get("vroll"));
+        if (on_big_buff_task) {
+          plotter_.plot("buff_a", big_buff_target_->get("a"));
+          plotter_.plot("buff_omega", big_buff_target_->get("omega"));
+          plotter_.plot("buff_b", big_buff_target_->get("b"));
+          plotter_.plot("buff_c", big_buff_target_->get("c"));
+          plotter_.plot("buff_d", big_buff_target_->get("d"));
+          plotter_.plot("buff_direction", big_buff_target_->get("direction"));
+        }
       }
       std::this_thread::sleep_for(std::chrono::milliseconds{
           static_cast<int>(configs_.cmd_pub_dt_sec * 1000)});
@@ -213,6 +222,10 @@ void auto_buff::TrackerNode::onBladesReceivedCallback(
   if (self->task_mode_listener_.isTask(types::TaskMode::SmallBuff) ||
       self->configs_.always_on_task_small_buff)
     self->small_buff_target_->track(blades, image_stamp, T_camera_to_odom);
+  if (self->task_mode_listener_.isTask(types::TaskMode::BigBuff) ||
+      self->configs_.always_on_task_big_buff)
+    self->big_buff_target_->track(blades, image_stamp, T_camera_to_odom);
+  // NOTE: 开到一半的误识别在detector过滤过一遍了
   // XXX: 这里最好加上些发布调试信息的东西
 }
 

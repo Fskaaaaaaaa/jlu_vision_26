@@ -105,15 +105,33 @@ public:
                           const Eigen::Isometry3d &T_camera_to_odom) override;
 
 private:
+  std::pair<BigBuffState, TrackState::State>
+  update(const std::vector<BladePositionRPYPoints> &blades_camera, double dt,
+         const Eigen::Isometry3d &T_camera_to_odom) const;
+  void addMotionValuesFactors(gtsam::Values &values,
+                              gtsam::NonlinearFactorGraph &graph,
+                              const BigBuffState &state, std::uint64_t k,
+                              double dt) const;
+
+  BigBuffState predictBuffState(double dt) const;
+  // 用来注入到BuffState里，最好设成static
+  static BigBuffState predictBuffState(const BuffState &state, double dt,
+                                       double dt_from_start, double a,
+                                       double omega, double b, double c,
+                                       double d, BuffDirection direction);
+  static double getBuffVRoll(double dt_from_start, double a, double omega,
+                             double b, double c, double d,
+                             BuffDirection direction);
+  double getBuffVRoll(const BigBuffState &state) const;
+
   // quill::Logger *logger_; 在基类里
   BigBuffConfig config_;
-
-  BuffFitter fitter_;
 
   mutable std::mutex state_mtx_;
   mutable gtsam::ISAM2 isam2_;
   BigBuffState target_state_;
   TrackState track_state_;
+  mutable BuffFitter fitter_;
 };
 
 } // namespace auto_buff

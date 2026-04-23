@@ -130,16 +130,29 @@ enum class BuffDirection {
 };
 
 struct IntervalTimeBuffRoll {
-  double interval_time;
+  double dt_from_start;
   double buff_roll;
 };
 
-inline auto getBuffCurve(auto x, auto a, auto omega, auto b, auto c, auto d,
-                         auto sign) {
-  return (-(a / omega * ceres::cos(omega * (x + d))) + b * (x + d) + c) * sign;
+// XXX: 好丑陋的设计
+struct BuffParamDirectionDeltaTime {
+  std::array<double, 5> param;
+  BuffDirection direction;
+  double dt_from_start;
+};
+
+// WARNING: FYT的方案根本没添加a和b的约束，我严重怀疑其能不能拟合上
+inline auto getBuffCurvePoint(auto t, auto a, auto omega, auto b, auto c,
+                              auto d, auto sign) {
+  return (-a / omega * ceres::cos(omega * (t + d)) + b * (t + d) + c) * sign;
 }
 
 struct BigBuffState : public BuffState {
+  BigBuffState() = default;
+  BigBuffState(const BuffState &state, double dt_from_start, double a,
+               double omega, double b, double c, double d,
+               BuffDirection direction);
+  double dt_from_start{0};
   double a{0};
   double omega{0};
   double b{0};
