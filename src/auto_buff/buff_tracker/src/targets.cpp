@@ -497,7 +497,7 @@ void auto_buff::BigBuffTarget::addMotionValuesFactors(
                    gtsam::noiseModel::Isotropic::Sigma(
                        1, tools::angle2Radian(
                               config_.center_conf.roll_prior_noise_degree)));
-    graph.addPrior(W(0), 0,
+    graph.addPrior(W(0), 0.0,
                    gtsam::noiseModel::Isotropic::Sigma(
                        1, config_.center_conf.vroll_prior_noise_rad));
   } else {

@@ -1,11 +1,11 @@
 log_level: Info
 plot_info: true
 show_image: true
-always_on_task_small_buff: true
-always_on_task_big_buff: false
+always_on_task_small_buff: false
+always_on_task_big_buff: true
 tf_query_tolerance_ms: 200.0
 cmd_pub_dt_sec: 0.005
-predict_offest_ms: 100
+predict_offset_ms: 100
 camera_name: camera0
 odom_frame_id: odom
 camera_frame_id: camera
@@ -45,6 +45,41 @@ small_buff_conf:
       z: 0.10
     roll_prior_noise_degree: 30.0
     vroll_prior_noise_rad: 6.0
+
+big_buff_conf:
+  fitter_conf:
+    queue_upper_limit: 300
+    queue_lower_limit: 20
+    param_lower_bound_scale: 0.5
+    param_upper_bound_scale: 1.5
+    curve_fitting_interval_time_ms: 50
+  lost_threshold_sec: 0.8
+  match_conf:
+    max_match_distance_m: 1.0
+    max_match_roll_diff_degree: 30.0
+  blade_conf:
+    pixel_error:
+      x: 5.0
+      y: 5.0
+    position_noise_m:
+      x: 0.03
+      y: 0.03
+      z: 0.03
+    roll_noise_degree: 2.0
+  center_conf:
+    position_consistency_noise_m:
+      x: 0.01
+      y: 0.01
+      z: 0.01
+    roll_noise_degree: 3.0
+    vroll_noise_rad: 0.10
+    position_prior_noise_m:
+      x: 0.10
+      y: 0.10
+      z: 0.10
+    roll_prior_noise_degree: 30.0
+    vroll_prior_noise_rad: 6.0
+
 trajectory_conf:
   ballistic_conf:
     g: 9.8
@@ -66,4 +101,3 @@ trajectory_conf:
   iterative_fly_time: true
   yaw_offset: 0.0
   pitch_offset: 0.0
-
