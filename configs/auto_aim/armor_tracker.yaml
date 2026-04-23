@@ -9,8 +9,8 @@ camera_frame_id: camera
 odom_frame_id: odom
 armors_sub_topic:
   service: armors
-  # instance: fake_ap
-  instance: detector
+  instance: fake_ap
+  # instance: detector
   event: data
 serial_topic:
   service: aim_command

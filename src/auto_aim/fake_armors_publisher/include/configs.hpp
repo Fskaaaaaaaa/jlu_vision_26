@@ -27,8 +27,12 @@ struct RobotConfig {
   int time_step_ms;
   bool hidden_invisible_armors;
   double facing_armor_cos_incidence;
+  double tf_query_tolerance_ms;
   types::ArmorType armor_type;
   types::EnemyColor armor_color;
+  std::string camera_name;
+  std::string camera_frame_id;
+  std::string odom_frame_id;
   std::array<double, 2> camera_pos;
   ArmorsPublisherConfig pub_conf;
 };
