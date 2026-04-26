@@ -17,8 +17,8 @@ class BuffFitter {
 public:
   BuffFitter(quill::Logger *logger, const BuffFitterConfig &config);
 
-  std::optional<BuffParamDirectionDeltaTime>
-  update(double dt_last_update_to_image, double buff_roll);
+  std::optional<BuffParamVRollDeltaTime>
+  update(double dt_last_update_to_image, double buff_roll, double buff_vroll);
 
   void reset();
 
@@ -28,14 +28,13 @@ private:
 
   std::optional<std::array<double, 5>>
   fitCurve(const std::deque<IntervalTimeBuffRoll> &data_history_queue,
-           const std::array<double, 5> &initial_params,
-           BuffDirection direction) const;
+           const std::array<double, 5> &initial_params, double vroll) const;
 
   std::jthread fitting_thread_;
 
   mutable std::mutex data_mtx_;
   double dt_start_to_last_update_{0};
-  BuffDirection direction_{BuffDirection::Unknown};
+  double vroll_;
   std::deque<IntervalTimeBuffRoll> data_history_queue_;
   std::array<double, 5> fitting_param_;
   bool fitting_ok_{false};

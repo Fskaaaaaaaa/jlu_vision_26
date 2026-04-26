@@ -48,19 +48,19 @@ small_buff_conf:
 
 big_buff_conf:
   fitter_conf:
-    queue_upper_limit: 300
-    queue_lower_limit: 20
-    param_lower_bound_scale: 0.5
-    param_upper_bound_scale: 1.5
-    curve_fitting_interval_time_ms: 50
-  lost_threshold_sec: 0.8
+    queue_upper_limit: 100
+    queue_lower_limit: 50
+    param_lower_bound_scale: 1.0
+    param_upper_bound_scale: 1.0
+    curve_fitting_interval_time_ms: 10
+  lost_threshold_sec: 1.0
   match_conf:
     max_match_distance_m: 1.0
     max_match_roll_diff_degree: 30.0
   blade_conf:
     pixel_error:
-      x: 5.0
-      y: 5.0
+      x: 2.0
+      y: 2.0
     position_noise_m:
       x: 0.03
       y: 0.03
@@ -93,7 +93,7 @@ trajectory_conf:
     gimbal_pitch_max_degree: 30.0
   max_aim_iterate_count: 20
   aim_ok_error_m: 0.005
-  blade_select_change_count_thres: 10
+  blade_select_change_count_thres: 20
   fail_polling_interval_sec: 0.1
   min_bullet_speed: 18
   max_bullet_speed: 25

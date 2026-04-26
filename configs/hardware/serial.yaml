@@ -27,7 +27,7 @@ iceoryx_conf:
     event: data
 
 serial_conf:
-  device_name: /dev/gimbal
+  device_name: /dev/ttyACM0
   baudrate: 115200
   stopbits: stopbits_one 
   flowcontrol: flowcontrol_none 

@@ -156,7 +156,7 @@ auto_buff::TrackerNode::TrackerNode(quill::Logger *logger,
           plotter_.plot("buff_b", big_buff_target_->get("b"));
           plotter_.plot("buff_c", big_buff_target_->get("c"));
           plotter_.plot("buff_d", big_buff_target_->get("d"));
-          plotter_.plot("buff_direction", big_buff_target_->get("direction"));
+          plotter_.plot("buff_vroll", big_buff_target_->get("vroll"));
         }
       }
       std::this_thread::sleep_for(std::chrono::milliseconds{
@@ -238,7 +238,8 @@ msgs::AimCommand auto_buff::TrackerNode::solveAimCommand(
           std::chrono::system_clock::now() - target_stamp)
           .count() +
       configs_.predict_offset_ms / 1000.0;
-  auto cmd_opt = trajectory_.solveBuff(target_state, gimbal_info.bullet_speed);
+  auto cmd_opt = trajectory_.solveBuff(
+      target_state.predict(dt_update_to_now_sec), gimbal_info.bullet_speed);
   if (!cmd_opt.has_value()) {
     this->index_predict_time_cache_opt_.store(std::nullopt);
     return {.control = false};
@@ -324,15 +325,31 @@ void auto_buff::TrackerNode::imageCallback(
   }
   cv::Mat copy;
   image.copyTo(copy);
-  drawBuff(*small_buff_target_, copy, stamp, T_odom_to_camera);
+  auto on_small_buff_mode =
+      task_mode_listener_.isTask(types::TaskMode::SmallBuff) ||
+      configs_.always_on_task_small_buff;
+  auto on_big_buff_mode =
+      task_mode_listener_.isTask(types::TaskMode::BigBuff) ||
+      configs_.always_on_task_big_buff;
+  if (on_big_buff_mode)
+    drawBuff(*big_buff_target_, copy, stamp, T_odom_to_camera);
+  if (on_small_buff_mode)
+    drawBuff(*small_buff_target_, copy, stamp, T_odom_to_camera);
   if (auto idx_time_opt = index_predict_time_cache_opt_.load();
       idx_time_opt.has_value()) {
     auto [index, predict_time] = idx_time_opt.value();
-    drawBuffBlade(small_buff_target_->getTargetTrackState()
-                      .first.predict(predict_time)
-                      .blades()
-                      .at(static_cast<int>(index)),
-                  copy, T_odom_to_camera, tools::Color::bgr::GREEN);
+    if (on_big_buff_mode)
+      drawBuffBlade(big_buff_target_->getTargetTrackState()
+                        .first.predict(predict_time)
+                        .blades()
+                        .at(static_cast<int>(index)),
+                    copy, T_odom_to_camera, tools::Color::bgr::GREEN);
+    if (on_small_buff_mode)
+      drawBuffBlade(small_buff_target_->getTargetTrackState()
+                        .first.predict(predict_time)
+                        .blades()
+                        .at(static_cast<int>(index)),
+                    copy, T_odom_to_camera, tools::Color::bgr::GREEN);
   }
   cv::imshow("buff_tracker", copy);
   cv::waitKey(1);

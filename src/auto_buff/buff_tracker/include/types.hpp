@@ -122,22 +122,16 @@ struct SmallBuffState : public BuffState {
   double center_vroll{0};
 }; // 下面的全是大符的了
 
-// 旋转方向，逆时针为正，经典的enum cast到int
-enum class BuffDirection {
-  ClockWise = -1,
-  AntiClockWise = 1,
-  Unknown = 0,
-};
-
 struct IntervalTimeBuffRoll {
   double dt_from_start;
   double buff_roll;
 };
 
 // XXX: 好丑陋的设计
-struct BuffParamDirectionDeltaTime {
+struct BuffParamVRollDeltaTime {
   std::array<double, 5> param;
-  BuffDirection direction;
+  // BuffDirection direction;
+  double vroll;
   double dt_from_start;
 };
 
@@ -150,15 +144,14 @@ inline auto getBuffCurvePoint(auto t, auto a, auto omega, auto b, auto c,
 struct BigBuffState : public BuffState {
   BigBuffState() = default;
   BigBuffState(const BuffState &state, double dt_from_start, double a,
-               double omega, double b, double c, double d,
-               BuffDirection direction);
+               double omega, double b, double c, double d, double vroll);
   double dt_from_start{0};
   double a{0};
   double omega{0};
   double b{0};
   double c{0};
   double d{0};
-  BuffDirection direction{BuffDirection::Unknown};
+  double center_vroll{0}; // NOTE: 近似为匀速模型为ba提供先验
 };
 
 struct TrackState {

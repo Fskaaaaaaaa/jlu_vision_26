@@ -6,6 +6,7 @@
 #include "quill/LogMacros.h"
 
 #include <chrono>
+#include <cmath>
 #include <functional>
 #include <mutex>
 #include <optional>
@@ -14,8 +15,8 @@
 
 namespace auto_buff {
 struct BigRuneFittingCost {
-  BigRuneFittingCost(double x, double y, int m)
-      : x_(x), y_(y), mov_(static_cast<double>(m)) {}
+  BigRuneFittingCost(double x, double y, double m)
+      : x_(x), y_(y), mov_(m > 0 ? 1 : -1) {}
   template <typename T> bool operator()(const T *const p, T *residual) const {
     residual[0] =
         y_ - getBuffCurvePoint(x_, p[0], p[1], p[2], p[3], p[4], mov_);
@@ -39,8 +40,8 @@ auto_buff::BuffFitter::BuffFitter(quill::Logger *logger,
             std::scoped_lock lk{data_mtx_};
             auto data = data_history_queue_;
             auto params = fitting_param_;
-            auto direction = direction_;
-            return std::tuple{data, params, direction};
+            auto vroll = vroll_;
+            return std::tuple{data, params, vroll};
           });
       // 进行拟合
       auto start_time = std::chrono::system_clock::now();
@@ -65,9 +66,9 @@ auto_buff::BuffFitter::BuffFitter(quill::Logger *logger,
   }};
 }
 
-std::optional<auto_buff::BuffParamDirectionDeltaTime>
-auto_buff::BuffFitter::update(double dt_last_update_to_image,
-                              double buff_roll) {
+std::optional<auto_buff::BuffParamVRollDeltaTime>
+auto_buff::BuffFitter::update(double dt_last_update_to_image, double buff_roll,
+                              double buff_vroll) {
   std::scoped_lock lk{data_mtx_};
   data_history_queue_.emplace_back(IntervalTimeBuffRoll{
       .dt_from_start = dt_start_to_last_update_ + dt_last_update_to_image,
@@ -81,12 +82,11 @@ auto_buff::BuffFitter::update(double dt_last_update_to_image,
 
   double angle_diff = data_history_queue_.back().buff_roll -
                       data_history_queue_.front().buff_roll;
-  direction_ =
-      angle_diff < 0 ? BuffDirection::ClockWise : BuffDirection::AntiClockWise;
+  vroll_ = buff_vroll;
   if (fitting_ok_)
     return {{
         .param = fitting_param_,
-        .direction = direction_,
+        .vroll = vroll_,
         .dt_from_start = dt_start_to_last_update_,
     }};
   return std::nullopt;
@@ -95,7 +95,7 @@ auto_buff::BuffFitter::update(double dt_last_update_to_image,
 void auto_buff::BuffFitter::reset() {
   std::scoped_lock lk{data_mtx_};
   this->dt_start_to_last_update_ = 0;
-  this->direction_ = BuffDirection::Unknown;
+  this->vroll_ = 0;
   this->data_history_queue_.clear();
   this->fitting_param_ = {0.9125, 1.942, 2.090 - 0.9125, 0, 0};
   this->fitting_ok_ = false; // NOTE: 在此处重置拟合状态
@@ -103,8 +103,7 @@ void auto_buff::BuffFitter::reset() {
 
 std::optional<std::array<double, 5>> auto_buff::BuffFitter::fitCurve(
     const std::deque<IntervalTimeBuffRoll> &data_history_queue,
-    const std::array<double, 5> &initial_params,
-    BuffDirection direction) const {
+    const std::array<double, 5> &initial_params, double vroll) const {
   if (data_history_queue.size() < config_.queue_lower_limit)
     return std::nullopt;
   ceres::Problem problem;
@@ -116,7 +115,7 @@ std::optional<std::array<double, 5>> auto_buff::BuffFitter::fitCurve(
         problem.AddResidualBlock(
             new ceres::AutoDiffCostFunction<BigRuneFittingCost, 1, 5>(
                 new BigRuneFittingCost(data.dt_from_start, data.buff_roll,
-                                       static_cast<int>(direction))),
+                                       vroll)),
             new ceres::CauchyLoss(0.5), param_ptr);
       });
   // 约束参数范围

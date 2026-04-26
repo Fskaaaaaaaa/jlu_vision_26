@@ -118,11 +118,7 @@ private:
   static BigBuffState predictBuffState(const BuffState &state, double dt,
                                        double dt_from_start, double a,
                                        double omega, double b, double c,
-                                       double d, BuffDirection direction);
-  static double getBuffVRoll(double dt_from_start, double a, double omega,
-                             double b, double c, double d,
-                             BuffDirection direction);
-  double getBuffVRoll(const BigBuffState &state) const;
+                                       double d, double vroll);
 
   // quill::Logger *logger_; 在基类里
   BigBuffConfig config_;

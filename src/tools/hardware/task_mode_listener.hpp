@@ -20,7 +20,7 @@ public:
       const confs::IceoryxServiceDescription &task_topic = {"task_mode",
                                                             "serial", "data"});
   bool isOnTask();
-  bool isTask(types::TaskMode task);
+  bool isTask(types::TaskMode task) const;
 
 private:
   static void onTaskModeReceiveCallback(
