@@ -26,9 +26,9 @@ private:
   quill::Logger *logger_;
   BuffFitterConfig config_;
 
-  std::optional<std::array<double, 5>>
+  std::optional<std::array<double, 4>>
   fitCurve(const std::deque<IntervalTimeBuffRoll> &data_history_queue,
-           const std::array<double, 5> &initial_params, double vroll) const;
+           const std::array<double, 4> &initial_params, double vroll) const;
 
   std::jthread fitting_thread_;
 
@@ -36,7 +36,7 @@ private:
   double dt_start_to_last_update_{0};
   double vroll_;
   std::deque<IntervalTimeBuffRoll> data_history_queue_;
-  std::array<double, 5> fitting_param_;
+  std::array<double, 4> fitting_param_;
   bool fitting_ok_{false};
 };
 

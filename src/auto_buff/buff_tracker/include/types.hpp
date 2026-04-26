@@ -129,26 +129,26 @@ struct IntervalTimeBuffRoll {
 
 // XXX: 好丑陋的设计
 struct BuffParamVRollDeltaTime {
-  std::array<double, 5> param;
+  std::array<double, 4> param;
   // BuffDirection direction;
   double vroll;
   double dt_from_start;
 };
 
 // WARNING: FYT的方案根本没添加a和b的约束，我严重怀疑其能不能拟合上
-inline auto getBuffCurvePoint(auto t, auto a, auto omega, auto b, auto c,
-                              auto d, auto sign) {
-  return (-a / omega * ceres::cos(omega * (t + d)) + b * (t + d) + c) * sign;
+inline auto getBuffCurvePoint(auto t, auto a, auto omega, auto c, auto d,
+                              auto sign) {
+  return (-a / omega * ceres::cos(omega * (t + d)) + (2.09 - a) * (t + d) + c) *
+         sign;
 }
 
 struct BigBuffState : public BuffState {
   BigBuffState() = default;
   BigBuffState(const BuffState &state, double dt_from_start, double a,
-               double omega, double b, double c, double d, double vroll);
+               double omega, double c, double d, double vroll);
   double dt_from_start{0};
   double a{0};
   double omega{0};
-  double b{0};
   double c{0};
   double d{0};
   double center_vroll{0}; // NOTE: 近似为匀速模型为ba提供先验

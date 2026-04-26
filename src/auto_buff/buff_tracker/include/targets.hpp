@@ -117,8 +117,8 @@ private:
   // 用来注入到BuffState里，最好设成static
   static BigBuffState predictBuffState(const BuffState &state, double dt,
                                        double dt_from_start, double a,
-                                       double omega, double b, double c,
-                                       double d, double vroll);
+                                       double omega, double c, double d,
+                                       double vroll);
 
   // quill::Logger *logger_; 在基类里
   BigBuffConfig config_;

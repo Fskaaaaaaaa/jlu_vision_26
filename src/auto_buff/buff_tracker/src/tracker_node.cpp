@@ -8,6 +8,7 @@
 #include "math/angle_tools.hpp"
 #include "msgs/BuffBlade.hpp"
 #include "opencv2/core/types.hpp"
+#include "rfl/enums.hpp"
 #include "targets.hpp"
 #include "trajectory.hpp"
 #include "types.hpp"
@@ -153,7 +154,7 @@ auto_buff::TrackerNode::TrackerNode(quill::Logger *logger,
         if (on_big_buff_task) {
           plotter_.plot("buff_a", big_buff_target_->get("a"));
           plotter_.plot("buff_omega", big_buff_target_->get("omega"));
-          plotter_.plot("buff_b", big_buff_target_->get("b"));
+          // plotter_.plot("buff_b", big_buff_target_->get("b"));
           plotter_.plot("buff_c", big_buff_target_->get("c"));
           plotter_.plot("buff_d", big_buff_target_->get("d"));
           plotter_.plot("buff_vroll", big_buff_target_->get("vroll"));
@@ -343,13 +344,15 @@ void auto_buff::TrackerNode::imageCallback(
                         .first.predict(predict_time)
                         .blades()
                         .at(static_cast<int>(index)),
-                    copy, T_odom_to_camera, tools::Color::bgr::GREEN);
+                    copy, T_odom_to_camera, tools::Color::bgr::GREEN,
+                    rfl::enum_to_string(index));
     if (on_small_buff_mode)
       drawBuffBlade(small_buff_target_->getTargetTrackState()
                         .first.predict(predict_time)
                         .blades()
                         .at(static_cast<int>(index)),
-                    copy, T_odom_to_camera, tools::Color::bgr::GREEN);
+                    copy, T_odom_to_camera, tools::Color::bgr::GREEN,
+                    rfl::enum_to_string(index));
   }
   cv::imshow("buff_tracker", copy);
   cv::waitKey(1);

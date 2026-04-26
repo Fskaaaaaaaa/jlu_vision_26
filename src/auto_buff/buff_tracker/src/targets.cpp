@@ -413,19 +413,18 @@ auto_buff::BigBuffTarget::BigBuffTarget(quill::Logger *logger,
 
 auto_buff::BigBuffState auto_buff::BigBuffTarget::predictBuffState(
     const BuffState &state, double dt, double dt_from_start, double a,
-    double omega, double b, double c, double d, double vroll) {
-  BigBuffState state_pre{state, dt + dt_from_start, a, omega, b, c, d, vroll};
+    double omega, double c, double d, double vroll) {
+  BigBuffState state_pre{state, dt + dt_from_start, a, omega, c, d, vroll};
   state_pre.center_roll = getBuffCurvePoint(state_pre.dt_from_start, a, omega,
-                                            b, c, d, vroll > 0.0 ? 1.0 : 0.0);
+                                            c, d, vroll > 0.0 ? 1.0 : 0.0);
   return state_pre;
 }
 
 auto_buff::BigBuffState
 auto_buff::BigBuffTarget::predictBuffState(double dt) const {
   return predictBuffState(target_state_, dt, target_state_.dt_from_start,
-                          target_state_.a, target_state_.omega, target_state_.b,
-                          target_state_.c, target_state_.d,
-                          target_state_.center_vroll);
+                          target_state_.a, target_state_.omega, target_state_.c,
+                          target_state_.d, target_state_.center_vroll);
 }
 
 std::pair<auto_buff::BuffState, auto_buff::TrackState>
@@ -434,12 +433,11 @@ auto_buff::BigBuffTarget::getTargetTrackState() const {
   return {
       target_state_.getStateWithPredictFunc(
           [dt_from_start = target_state_.dt_from_start, a = target_state_.a,
-           omega = target_state_.omega, b = target_state_.b,
-           c = target_state_.c, d = target_state_.d,
-           vroll = target_state_.center_vroll](const BuffState &state,
-                                               double dt) {
+           omega = target_state_.omega, c = target_state_.c,
+           d = target_state_.d, vroll = target_state_.center_vroll](
+              const BuffState &state, double dt) {
             // XXX: 没有人类了
-            return predictBuffState(state, dt, dt_from_start, a, omega, b, c, d,
+            return predictBuffState(state, dt, dt_from_start, a, omega, c, d,
                                     vroll);
           }),
       track_state_,
@@ -454,8 +452,8 @@ double auto_buff::BigBuffTarget::get(const std::string &str) const {
     return target_state_.a;
   if (str == "omega")
     return target_state_.omega;
-  if (str == "b")
-    return target_state_.b;
+  // if (str == "b")
+  //   return target_state_.b;
   if (str == "c")
     return target_state_.c;
   if (str == "d")
@@ -540,7 +538,6 @@ auto_buff::BigBuffTarget::update(
           0.0, // 初始时刻时间为0
           0.9125,
           1.942,
-          2.090 - 0.9125,
           0,
           0,
           0,
@@ -587,9 +584,9 @@ auto_buff::BigBuffTarget::update(
     target_state.dt_from_start = dt_from_start;
     target_state.a = param[0];
     target_state.omega = param[1];
-    target_state.b = param[2];
-    target_state.c = param[3];
-    target_state.d = param[4];
+    // target_state.b = param[2];
+    target_state.c = param[2];
+    target_state.d = param[3];
   } else {
     LOG_DEBUG(logger_, "[BigBuff]: Fitter not converged.");
   }

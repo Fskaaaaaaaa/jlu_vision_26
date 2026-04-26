@@ -18,8 +18,10 @@ struct BigRuneFittingCost {
   BigRuneFittingCost(double x, double y, double m)
       : x_(x), y_(y), mov_(m > 0 ? 1 : -1) {}
   template <typename T> bool operator()(const T *const p, T *residual) const {
-    residual[0] =
-        y_ - getBuffCurvePoint(x_, p[0], p[1], p[2], p[3], p[4], mov_);
+    const T pred = getBuffCurvePoint(x_, p[0], p[1], p[2], p[3], mov_);
+    // Use angular distance in unit circle space to avoid wrap-around jumps.
+    residual[0] = ceres::sin(T(y_)) - ceres::sin(pred);
+    residual[1] = ceres::cos(T(y_)) - ceres::cos(pred);
     return true;
   }
   const double x_, y_;
@@ -97,13 +99,13 @@ void auto_buff::BuffFitter::reset() {
   this->dt_start_to_last_update_ = 0;
   this->vroll_ = 0;
   this->data_history_queue_.clear();
-  this->fitting_param_ = {0.9125, 1.942, 2.090 - 0.9125, 0, 0};
+  this->fitting_param_ = {0.9125, 1.942, 0, 0};
   this->fitting_ok_ = false; // NOTE: 在此处重置拟合状态
 }
 
-std::optional<std::array<double, 5>> auto_buff::BuffFitter::fitCurve(
+std::optional<std::array<double, 4>> auto_buff::BuffFitter::fitCurve(
     const std::deque<IntervalTimeBuffRoll> &data_history_queue,
-    const std::array<double, 5> &initial_params, double vroll) const {
+    const std::array<double, 4> &initial_params, double vroll) const {
   if (data_history_queue.size() < config_.queue_lower_limit)
     return std::nullopt;
   ceres::Problem problem;
@@ -113,7 +115,7 @@ std::optional<std::array<double, 5>> auto_buff::BuffFitter::fitCurve(
       data_history_queue.begin(), data_history_queue.end(),
       [&](const auto &data) {
         problem.AddResidualBlock(
-            new ceres::AutoDiffCostFunction<BigRuneFittingCost, 1, 5>(
+            new ceres::AutoDiffCostFunction<BigRuneFittingCost, 2, 4>(
                 new BigRuneFittingCost(data.dt_from_start, data.buff_roll,
                                        vroll)),
             new ceres::CauchyLoss(0.5), param_ptr);
@@ -127,10 +129,10 @@ std::optional<std::array<double, 5>> auto_buff::BuffFitter::fitCurve(
                                  1.884 * config_.param_lower_bound_scale);
   problem.SetParameterUpperBound(param_ptr, 1,
                                  2.000 * config_.param_upper_bound_scale);
-  problem.SetParameterLowerBound(
-      param_ptr, 2, (2.090 - 1.045) * config_.param_lower_bound_scale);
-  problem.SetParameterUpperBound(
-      param_ptr, 2, (2.090 - 0.780) * config_.param_upper_bound_scale);
+  // problem.SetParameterLowerBound(
+  //     param_ptr, 2, (2.090 - 1.045) * config_.param_lower_bound_scale);
+  // problem.SetParameterUpperBound(
+  //     param_ptr, 2, (2.090 - 0.780) * config_.param_upper_bound_scale);
   // 求解问题
   ceres::Solver::Options options;
   options.linear_solver_type = ceres::DENSE_QR;

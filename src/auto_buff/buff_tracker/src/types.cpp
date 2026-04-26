@@ -92,7 +92,7 @@ auto_buff::SmallBuffState::SmallBuffState(const BuffState &state, double vroll)
 
 auto_buff::BigBuffState::BigBuffState(const BuffState &state,
                                       double dt_from_start, double a,
-                                      double omega, double b, double c,
-                                      double d, double vroll)
-    : BuffState(state), dt_from_start(dt_from_start), a(a), omega(omega), b(b),
-      c(c), d(d), center_vroll(vroll) {}
+                                      double omega, double c, double d,
+                                      double vroll)
+    : BuffState(state), dt_from_start(dt_from_start), a(a), omega(omega), c(c),
+      d(d), center_vroll(vroll) {}
