@@ -5,6 +5,7 @@
 
 #include "quill/LogMacros.h"
 
+#include <algorithm>
 #include <optional>
 #include <vector>
 
@@ -37,7 +38,11 @@ auto_buff::Trajectory::selectBlade(const BuffState &state) const {
     }
   }
 
-  auto index = inactive_indices.front();
+  auto index = (last_selected.has_value() &&
+                std::ranges::find(inactive_indices, last_selected.value()) !=
+                    inactive_indices.end())
+                   ? last_selected.value()
+                   : inactive_indices.front();
 
   if (!last_selected.has_value()) {
     last_selected = index;
