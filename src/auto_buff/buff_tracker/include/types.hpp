@@ -132,7 +132,8 @@ struct BuffParamVRollDeltaTime {
   std::array<double, 4> param;
   // BuffDirection direction;
   double vroll;
-  double dt_from_start;
+  double dt_start_to_update;
+  double dt_start_to_fit;
 };
 
 // WARNING: FYT的方案根本没添加a和b的约束，我严重怀疑其能不能拟合上

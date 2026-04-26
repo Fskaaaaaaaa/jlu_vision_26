@@ -57,6 +57,8 @@ auto_buff::BuffFitter::BuffFitter(quill::Logger *logger,
       // 更新优化结果
       if (result_opt.has_value()) {
         std::scoped_lock lk{data_mtx_};
+        // NOTE: 优化过程中data也会更新，所以需要单独保存fit时间戳
+        this->dt_start_to_last_fit_ = data_snapshot.back().dt_from_start;
         this->fitting_param_ = result_opt.value();
         this->fitting_ok_ = true; // NOTE: 在此处更新拟合成功
         LOG_TRACE_L1(logger_, "[BuffFitter]: Fitting praram updated!");
@@ -89,7 +91,8 @@ auto_buff::BuffFitter::update(double dt_last_update_to_image, double buff_roll,
     return {{
         .param = fitting_param_,
         .vroll = vroll_,
-        .dt_from_start = dt_start_to_last_update_,
+        .dt_start_to_update = dt_start_to_last_update_,
+        .dt_start_to_fit = dt_start_to_last_fit_,
     }};
   return std::nullopt;
 }
@@ -97,6 +100,7 @@ auto_buff::BuffFitter::update(double dt_last_update_to_image, double buff_roll,
 void auto_buff::BuffFitter::reset() {
   std::scoped_lock lk{data_mtx_};
   this->dt_start_to_last_update_ = 0;
+  this->dt_start_to_last_fit_ = 0;
   this->vroll_ = 0;
   this->data_history_queue_.clear();
   this->fitting_param_ = {0.9125, 1.942, 0, 0};

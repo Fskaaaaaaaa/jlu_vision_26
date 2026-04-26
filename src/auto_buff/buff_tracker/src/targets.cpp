@@ -416,7 +416,7 @@ auto_buff::BigBuffState auto_buff::BigBuffTarget::predictBuffState(
     double omega, double c, double d, double vroll) {
   BigBuffState state_pre{state, dt + dt_from_start, a, omega, c, d, vroll};
   state_pre.center_roll = getBuffCurvePoint(state_pre.dt_from_start, a, omega,
-                                            c, d, vroll > 0.0 ? 1.0 : 0.0);
+                                            c, d, vroll > 0.0 ? 1.0 : -1.0);
   return state_pre;
 }
 
@@ -430,15 +430,26 @@ auto_buff::BigBuffTarget::predictBuffState(double dt) const {
 std::pair<auto_buff::BuffState, auto_buff::TrackState>
 auto_buff::BigBuffTarget::getTargetTrackState() const {
   std::scoped_lock lk{state_mtx_};
+  // XXX: 没有人类了
   return {
       target_state_.getStateWithPredictFunc(
           [dt_from_start = target_state_.dt_from_start, a = target_state_.a,
            omega = target_state_.omega, c = target_state_.c,
            d = target_state_.d, vroll = target_state_.center_vroll](
               const BuffState &state, double dt) {
-            // XXX: 没有人类了
-            return predictBuffState(state, dt, dt_from_start, a, omega, c, d,
-                                    vroll);
+            auto make_predict_fn = [a, omega, c, d, vroll](auto &&self,
+                                                           double dt_base)
+                -> std::function<BuffState(const BuffState &, double)> {
+              return [a, omega, c, d, vroll, dt_base,
+                      self](const BuffState &state_inner,
+                            double dt_inner) -> BuffState {
+                auto predicted_state = predictBuffState(
+                    state_inner, dt_inner, dt_base, a, omega, c, d, vroll);
+                return predicted_state.getStateWithPredictFunc(
+                    self(self, dt_base + dt_inner));
+              };
+            };
+            return make_predict_fn(make_predict_fn, dt_from_start)(state, dt);
           }),
       track_state_,
   };
@@ -580,14 +591,18 @@ auto_buff::BigBuffTarget::update(
                                                  target_state.center_roll,
                                                  target_state.center_vroll);
       fit_result_opt.has_value()) {
-    auto [param, direction, dt_from_start] = fit_result_opt.value();
-    target_state.dt_from_start = dt_from_start;
-    target_state.a = param[0];
-    target_state.omega = param[1];
-    // target_state.b = param[2];
-    target_state.c = param[2];
-    target_state.d = param[3];
+    auto [param, direction, dt_start_to_update, dt_start_to_fit] =
+        fit_result_opt.value();
+    // target_state.a = param[0];
+    // target_state.omega = param[1];
+    // // target_state.b = param[2];
+    // target_state.c = param[2];
+    // target_state.d = param[3];
+    target_state = predictBuffState(
+        target_state, dt_start_to_update - dt_start_to_fit, dt_start_to_fit,
+        param[0], param[1], param[2], param[3], target_state.center_vroll);
   } else {
+    target_state.dt_from_start += dt;
     LOG_DEBUG(logger_, "[BigBuff]: Fitter not converged.");
   }
   return {target_state, matched_blades.empty() ? TrackState::State::TEMPLOST

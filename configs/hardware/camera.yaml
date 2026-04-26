@@ -16,7 +16,7 @@ camera_info:
 camera_params:
   exposure_time: 3000
   gain: 15.0
-  frame_rate: 60
+  frame_rate: 100
 
 # NOTE: hik12mm
 # camera matrix
