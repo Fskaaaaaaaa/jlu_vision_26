@@ -13,7 +13,6 @@ namespace auto_aim {
 
 struct ArmorsPublisherConfig {
   std::array<std::string, 3> service_instance_event;
-  std::string frame_id;
 };
 
 struct RobotConfig {
@@ -27,8 +26,16 @@ struct RobotConfig {
   int time_step_ms;
   bool hidden_invisible_armors;
   double facing_armor_cos_incidence;
+  double tf_query_tolerance_ms;
   types::ArmorType armor_type;
   types::EnemyColor armor_color;
+  std::string camera_name;
+  std::string camera_frame_id;
+  std::string odom_frame_id;
+  std::array<double, 2> startup_position_xy_m;
+  double startup_yaw_degree;
+  double startup_vel_yaw_degree_s;
+  bool startup_const_speed_spin;
   std::array<double, 2> camera_pos;
   ArmorsPublisherConfig pub_conf;
 };

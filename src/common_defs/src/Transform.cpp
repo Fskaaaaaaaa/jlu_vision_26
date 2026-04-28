@@ -9,8 +9,11 @@ types::Transform::Transform(
         &sample) {
   this->parent_frame_id = sample.getUserHeader().frame_id.c_str();
   this->child_frame_id = sample->child_frame_id.c_str();
-  this->stamp = std::chrono::time_point<std::chrono::system_clock>{
-      std::chrono::nanoseconds{sample.getUserHeader().stamp_ns}};
+  // this->stamp = std::chrono::time_point<std::chrono::system_clock>{
+  //     std::chrono::nanoseconds{sample.getUserHeader().stamp_ns}};
+  this->stamp = std::chrono::time_point<std::chrono::system_clock>(
+      std::chrono::duration_cast<std::chrono::system_clock::duration>(
+          std::chrono::nanoseconds(sample.getUserHeader().stamp_ns)));
   this->translation.x() = sample->translation.x;
   this->translation.y() = sample->translation.y;
   this->translation.z() = sample->translation.z;

@@ -9,8 +9,8 @@ camera_frame_id: camera
 odom_frame_id: odom
 armors_sub_topic:
   service: armors
-  # instance: fake_ap
-  instance: detector
+  instance: fake_ap
+  # instance: detector
   event: data
 serial_topic:
   service: aim_command
@@ -32,29 +32,29 @@ robot_conf:
     y: 0.5
     z: 0.5
   yaw_factor_noise: 0.01
-  vyaw_factor_noise: 0.1
+  vyaw_factor_noise: 0.2
   translation_factor_noise:
-    x: 0.05
-    y: 0.05
-    z: 0.05
+    x: 0.01
+    y: 0.01
+    z: 0.01
   velocity_factor_noise:
-    x: 0.05
-    y: 0.05
-    z: 0.05
-  radius_prior_noise: 0.001
+    x: 0.03
+    y: 0.03
+    z: 0.03
+  radius_prior_noise: 0.0001
   radius_min: 0.15
-  default_radius: 0.23
+  default_radius: 0.26
   radius_max: 0.5
   dz_prior_noise: 0.05
   default_dz: 0.0
   armor_observation_noise:
     pixel_error:
-      x: 2.0
-      y: 2.0
-    tangential_error_m: 0.01
-    radial_error_m: 0.03
-    height_error_m: 0.005
-    yaw_error_rad: 0.01
+      x: 0.1
+      y: 0.1
+    tangential_error_m: 0.005
+    radial_error_m: 0.5
+    height_error_m: 0.01
+    yaw_error_rad: 0.001
 
 outpost_conf:
   first_update_batch_size: 5
@@ -112,8 +112,8 @@ planner_conf:
   aim_center_distance_high: 3.0
   aim_center_distance_low: 2.0
   shoot_offset: 0
-  yaw_offset: 0.1
-  pitch_offset: 0.1
+  yaw_offset: 0.0
+  pitch_offset: 0.0
   predict_offset_ms: 73
   max_yaw_acc: 50.0
   Q_yaw: [9e6, 0]

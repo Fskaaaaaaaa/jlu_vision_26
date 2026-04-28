@@ -1,12 +1,17 @@
 #pragma once
 
 #include "configs.hpp"
+#include "hardware/cam_info_listener.hpp"
 #include "iceoryx_posh/popo/publisher.hpp"
 #include "msgs/Armor.hpp"
 #include "msgs/Header.hpp"
+#include "transform/tf_listener.hpp"
+#include "types/CameraInfo.hpp"
 #include "quill/Logger.h"
 #include "types/Basic.hpp"
 #include <Eigen/Dense>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/types.hpp>
 #include <atomic>
 #include <chrono>
 #include <mutex>
@@ -40,7 +45,12 @@ public:
   void resetStatus();
 
 private:
-  std::vector<msgs::Armor> getArmorMsgsFromStatus();
+  std::optional<std::array<cv::Point2d, 4>>
+  getArmorCornersInImageOpt(const msgs::Armor &armor,
+                            const std::chrono::system_clock::time_point &stamp,
+                            Eigen::Isometry3d &pose_camera);
+  std::vector<msgs::Armor>
+  getArmorMsgsFromStatus(const std::chrono::system_clock::time_point &stamp);
   void publishArmors();
   void updateContrlPhysic();
 
@@ -49,6 +59,13 @@ private:
   std::jthread physic_pub_thread_;
   std::chrono::system_clock::time_point last_update_stamp_;
   iox::popo::Publisher<msgs::Armor, msgs::Header> armor_pub_;
+  fast_tf::detail::transform_buffer tf_buffer_;
+  tf::TransformListener tf_listener_;
+  hardware::CameraInfoListener cam_info_listener_;
+  cv::Mat camera_matrix_;
+  cv::Mat distortion_coefficients_;
+  int view_width_px_;
+  int view_height_px_;
   RobotStatus status_;
   std::mutex status_mtx_;
   RobotContrl &atom_contrl_;

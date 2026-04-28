@@ -25,9 +25,12 @@ processes:
       iox_roudi:
         condition: process_log_ready
   detector:
-    command: build/linux/x86_64/release/buff_detector
-    availability:
-      restart: always
+    command: build/linux/x86_64/release/buff_detector -d
+    depends_on:
+      camera:
+        condition: process_started
+  tracker:
+    command: startup/buff_tracker_with_system_tbb.bash -d
     depends_on:
       camera:
         condition: process_started
@@ -35,15 +38,3 @@ processes:
         condition: process_started
       static_tf_bc:
         condition: process_started
-  tracker:
-    command: build/linux/x86_64/release/buff_tracker
-    availability:
-      restart: always
-    depends_on:
-      detector:
-        condition: process_started
-      serial:
-        condition: process_started
-      static_tf_bc:
-        condition: process_started
-
