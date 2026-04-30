@@ -3,12 +3,10 @@
 #include "basic/logger.hpp"
 #include "configs.hpp"
 #include "coord_geometry.hpp"
-#include "target_geometry.hpp"
-
-#include <open3d/Open3D.h>
 
 #include <cxxopts.hpp>
 #include <iceoryx_posh/runtime/posh_runtime.hpp>
+#include <open3d/Open3D.h>
 #include <quill/Backend.h>
 #include <quill/LogMacros.h>
 #include <quill/backend/ThreadUtilities.h>
