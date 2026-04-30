@@ -29,30 +29,6 @@ public:
   virtual ImageArmorsFrameIdStamp pop() = 0;
 };
 
-////////////////////////////////////////////////////////
-// 传统算法的单/多线程识别
-// TODO
-class STDetectorTrad : public STDetector {
-public:
-  std::vector<Armor> detect(const cv::Mat &image) override { return {}; };
-
-private:
-};
-
-class MTDetectorTrad : public MTDetector {
-public:
-  bool push(const cv::Mat &image, const std::string &frame_id,
-            std::chrono::system_clock::time_point stamp) override {
-    return {};
-  };
-  ImageArmorsFrameIdStamp pop() override { return {}; };
-
-private:
-};
-
-////////////////////////////////////////////////////////
-// 深度学习的单/多线程识别
-
 class STDetectorDL : public STDetector {
 public:
   STDetectorDL(quill::Logger *logger, YOLOVersion yolo_version,

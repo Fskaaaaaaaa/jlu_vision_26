@@ -18,35 +18,11 @@ struct YOLOConfig {
   float nms_iou_thresh = 0.3;       // 候选之间是否合并
   float accept_thresh = 0.8;        // 是否作为最终目标
 };
+
 enum class YOLOVersion {
   YOLOv5,
   YOLOv8,
   YOLO11,
-};
-
-struct LightParams {
-  // width / height
-  double min_ratio;
-  double max_ratio;
-  // vertical angle
-  double max_angle;
-  // judge color
-  int color_diff_thresh;
-};
-struct ArmorParams {
-  double min_light_ratio;
-  // light pairs distance
-  double min_small_center_distance;
-  double max_small_center_distance;
-  double min_large_center_distance;
-  double max_large_center_distance;
-  // horizontal angle
-  double max_angle;
-};
-struct TraditionalConfig {
-  int binary_thres;
-  LightParams light_params;
-  ArmorParams armor_params;
 };
 
 struct LightCornerCorrectorConfig {
@@ -65,16 +41,6 @@ struct PnPConfig {
   float frame_axes_length;
   bool outpost_is_small_armor;
 };
-struct BaConfig {
-  double measurement_noise_px_xy;
-  struct {
-    double roll;
-    double pitch;
-    double yaw;
-    double xyz;
-  } prior_noise;
-  bool print_result;
-};
 
 struct DetectorConfigs {
   quill::LogLevel log_level;
@@ -83,24 +49,21 @@ struct DetectorConfigs {
   bool use_muti_thread;
   int queue_size;
   bool detect_when_idle;
-  bool use_DL;
   bool use_pca;
-  bool use_ba;
   bool show_detect_result;   // detector直出的结果,红色
   bool show_optimize_result; // PCA、BA后的结果，绿色
   bool show_pnp_result;      // 绘制PNP两个解的坐标轴
-  bool plot_pnp_result;      // TODO
+  bool plot_pnp_result;      // 将PNP结果发到PlotJuggler
   bool all_is_three;
   bool step_by_step_debug;
   types::EnemyColor default_enemy_color;
+  bool update_enemy_color; // 是否从裁判系统更新敌方颜色
   std::string camera_name; // NOTE: 这些话题都是固定的，只要相机名称就够了
   confs::IceoryxServiceDescription armors_topic;
   YOLOVersion yolo_version;
   YOLOConfig yolo_conf;
-  TraditionalConfig trad_conf;
   LightCornerCorrectorConfig pca_conf;
   PnPConfig pnp_conf;
-  BaConfig ba_conf;
 };
 
 } // namespace auto_aim

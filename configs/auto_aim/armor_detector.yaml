@@ -6,9 +6,7 @@ camera_params:
 use_muti_thread: true
 queue_size: 4
 detect_when_idle: true
-use_DL: true
 use_pca: true
-use_ba: false
 show_detect_result: true
 show_optimize_result: true
 show_pnp_result: true
@@ -16,6 +14,7 @@ plot_pnp_result: true
 all_is_three: false
 step_by_step_debug: false
 default_enemy_color: Red
+update_enemy_color: true
 camera_name: camera0
 armors_topic:
   service: armors
@@ -29,20 +28,6 @@ yolo_conf:
   score_thresh: 0.7
   nms_iou_thresh: 0.3
   accept_thresh: 0.8
-trad_conf:
-  binary_thres: 90
-  light_params:
-    min_ratio: 0.0001
-    max_ratio: 1.0
-    max_angle: 40.0
-    color_diff_thresh: 20
-  armor_params:
-    min_light_ratio: 0.1
-    min_small_center_distance: 0.8
-    max_small_center_distance: 3.5
-    min_large_center_distance: 3.5
-    max_large_center_distance: 8.0
-    max_angle: 35.0
 pca_conf:
   pass_optimize_lightbar_width: 3
   normalize_max_brightness: 25.0
@@ -56,11 +41,3 @@ pnp_conf:
   roll_thres_degree: 15.0
   frame_axes_length: 0.1
   outpost_is_small_armor: true
-ba_conf:
-  measurement_noise_px_xy: 0.5
-  prior_noise:
-    roll: 0.00001
-    pitch: 0.00001
-    yaw: 0.1
-    xyz: 0.00001
-  print_result: true

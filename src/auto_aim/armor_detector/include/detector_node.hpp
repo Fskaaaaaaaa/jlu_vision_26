@@ -1,12 +1,10 @@
 // Copyright (c) 2026 idot. All Rights Reserved.
 #pragma once
 
-#include "ba_solver.hpp"
 #include "basic/plotter.hpp"
 #include "configs.hpp"
 #include "detector.hpp"
 #include "hardware/camera_params_changer.hpp"
-// #include "hardware/image_listener.hpp"
 #include "hardware/enemy_color_listener.hpp"
 #include "hardware/image_poller.hpp"
 #include "hardware/task_mode_listener.hpp"
@@ -14,13 +12,12 @@
 #include "msgs/Armor.hpp"
 #include "msgs/Header.hpp"
 #include "msgs/Image.hpp"
-#include "opencv2/core/types.hpp"
 #include "pnp_solver.hpp"
 #include "types.hpp"
 
 #include "iceoryx_posh/popo/publisher.hpp"
+#include "opencv2/core/types.hpp"
 #include "quill/Logger.h"
-#include "types/EnemyColor.hpp"
 
 #include <chrono>
 #include <memory>
@@ -63,7 +60,6 @@ private:
   std::unique_ptr<STDetector> st_detector_;
   std::unique_ptr<LightCornerCorrector> lightbar_corrector_;
   std::unique_ptr<PnPSolver> pnp_solver_;
-  std::unique_ptr<BASolver> ba_solver_;
 
   std::jthread pop_thread_;
 

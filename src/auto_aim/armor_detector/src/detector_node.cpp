@@ -1,6 +1,5 @@
 // Copyright (c) 2026 F. All Rights Reserved.
 #include "detector_node.hpp"
-#include "ba_solver.hpp"
 #include "basic/colors.hpp"
 #include "configs.hpp"
 #include "detector.hpp"
@@ -48,24 +47,13 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
   LOG_INFO(logger_, "armor detector node start!");
   // 初始化detector
   if (configs_.use_muti_thread) {
-    if (configs_.use_DL) {
-      this->mt_detector_ = std::make_unique<MTDetectorDL>(
-          logger_, configs_.yolo_version, configs_.yolo_conf,
-          configs.queue_size);
-      LOG_INFO(logger_, "use DL detector muti thread.");
-    } else {
-      this->mt_detector_ = std::make_unique<MTDetectorTrad>();
-      LOG_INFO(logger_, "use traditional detector muti thread.");
-    }
+    this->mt_detector_ = std::make_unique<MTDetectorDL>(
+        logger_, configs_.yolo_version, configs_.yolo_conf, configs.queue_size);
+    LOG_INFO(logger_, "use DL detector muti thread.");
   } else {
-    if (configs_.use_DL) {
-      this->st_detector_ = std::make_unique<STDetectorDL>(
-          logger_, configs_.yolo_version, configs_.yolo_conf);
-      LOG_INFO(logger_, "use DL detector single thread.");
-    } else {
-      this->st_detector_ = std::make_unique<STDetectorTrad>();
-      LOG_INFO(logger_, "use traditional detector single thread.");
-    }
+    this->st_detector_ = std::make_unique<STDetectorDL>(
+        logger_, configs_.yolo_version, configs_.yolo_conf);
+    LOG_INFO(logger_, "use DL detector single thread.");
   }
   // 初始化PCA优化器
   if (configs_.use_pca) {
@@ -78,11 +66,6 @@ auto_aim::DetectorNode::DetectorNode(quill::Logger *logger,
       hardware::CameraInfoListener{logger_, configs_.camera_name}.get();
   this->pnp_solver_ =
       std::make_unique<PnPSolver>(logger_, configs_.pnp_conf, camera_info);
-  if (configs_.use_ba) {
-    this->ba_solver_ =
-        std::make_unique<BASolver>(logger_, configs_.ba_conf, camera_info);
-    LOG_INFO(logger_, "use BA corrector.");
-  }
   // 初始化自瞄模式监测器
   this->task_mode_listener_ = std::make_unique<hardware::TaskModeListener>(
       logger_, types::TaskMode::Armor, [this]() {
@@ -178,13 +161,19 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
   cv::Mat gray_img;
   cv::cvtColor(bgr_image, gray_img, cv::COLOR_BGR2GRAY);
   // HACK: 用eraseif遍历处理装甲板
+  auto default_self_color =
+      (configs_.default_enemy_color == types::EnemyColor::Blue)
+          ? types::EnemyColor::Red
+          : types::EnemyColor::Blue;
   std::erase_if(armors, [&](Armor &armor) -> bool {
     // 动态更新敌方颜色
-    if (armor.color == enemy_color_listener_.getSelfColor())
+    if (armor.color == (configs_.update_enemy_color
+                            ? enemy_color_listener_.getSelfColor()
+                            : default_self_color))
       return true; // 删除友军
     armor.frame_id = frame_id;
     armor.stamp = stamp;
-    bool pca_success{true}, ba_success{true};
+    bool pca_success{true};
     if (configs_.use_pca)
       pca_success = this->lightbar_corrector_->correctCorners(armor, gray_img);
     armor.distance_to_image_center =
@@ -194,9 +183,7 @@ std::optional<cv::Mat> auto_aim::DetectorNode::afterDetect(
       LOG_WARNING(logger_, "PNP failed!");
       return true; // 删除无解装甲板
     }
-    if (configs_.use_ba)
-      ba_success = this->ba_solver_->optimizeArmorPose(armor);
-    armor.key_frame = pca_success && ba_success;
+    armor.key_frame = pca_success;
 
     if (configs_.show_pnp_result)
       this->pnp_solver_->drawFrameAxes(pnp_opt.value(), result_img);
