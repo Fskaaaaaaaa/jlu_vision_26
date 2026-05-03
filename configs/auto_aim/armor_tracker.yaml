@@ -94,7 +94,7 @@ outpost_conf:
     radial_error_m: 0.03
     height_error_m: 0.005
     yaw_error_rad: 0.01
-
+aim_target_change_count: 10
 planner_conf:
   dt_sec: 0.01
   fail_polling_interval_sec: 0.1

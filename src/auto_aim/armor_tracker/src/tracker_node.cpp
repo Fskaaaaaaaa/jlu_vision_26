@@ -72,7 +72,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
            types::ArmorType::One, types::ArmorType::Two,
            types::ArmorType::Three, types::ArmorType::Four,
            types::ArmorType::Sentry,
-           // types::ArmorType::Base,
+           types::ArmorType::Base, // HACK: 懒得写基地了，当机器人打吧
        }) {
     targets_.emplace(target_type,
                      std::make_unique<RobotTarget>(logger_, configs_.robot_conf,
@@ -286,9 +286,13 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
       });
   // 选择光心最近装甲板作为打击目标
   // XXX: 不合适，被操作手抱怨打团战时对敌人“雨露均沾”了QAQ
+  // 先尝试添加个迟滞切换了
+  static auto change_count{0};
   if (!armors.empty()) {
-    if (self->aiming_target_.load() != armors.front().type) {
+    if (self->aiming_target_.load() != armors.front().type &&
+        change_count++ >= self->configs_.aim_target_change_count) {
       self->aiming_target_.store(armors.front().type);
+      change_count = 0;
       LOG_INFO(self->logger_, "Select target {}!",
                rfl::enum_to_string(armors.front().type));
     }

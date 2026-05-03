@@ -127,6 +127,7 @@ struct TrackerConfigs {
   confs::IceoryxServiceDescription serial_topic;
   RobotConfig robot_conf;
   OutpostConfig outpost_conf;
+  int aim_target_change_count;
   PlannerConfig planner_conf;
 };
 } // namespace auto_aim
