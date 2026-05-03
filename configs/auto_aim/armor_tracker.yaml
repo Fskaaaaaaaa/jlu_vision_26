@@ -9,18 +9,18 @@ camera_frame_id: camera
 odom_frame_id: odom
 armors_sub_topic:
   service: armors
-  instance: fake_ap
-  # instance: detector
+  # instance: fake_ap
+  instance: detector
   event: data
 serial_topic:
   service: aim_command
   instance: tracker
   event: data
 robot_conf:
-  first_update_batch_size: 10
+  first_update_batch_size: 1
   max_match_distance_m: 1.5
   max_match_yaw_diff_degree: 60.0
-  lost_threshold_sec: 0.5
+  lost_threshold_sec: 0.3
   yaw_prior_noise: 9.0
   vyaw_prior_noise: 9.0
   translation_prior_noise:
@@ -57,7 +57,7 @@ robot_conf:
     yaw_error_rad: 0.001
 
 outpost_conf:
-  first_update_batch_size: 5
+  first_update_batch_size: 1
   max_match_distance_m: 1.5
   max_match_yaw_diff_degree: 45.0
   lost_threshold_sec: 0.8
@@ -104,13 +104,7 @@ planner_conf:
   rk45_traj: false
   iterative_traj: false
   no_predict: false
-  enable_aim_center: false
   consider_gimbal_response: true
-  use_history_traj_cache: true
-  aim_center_vyaw_thres_low: 6.0
-  aim_center_vyaw_thres_high: 8.0
-  aim_center_distance_high: 3.0
-  aim_center_distance_low: 2.0
   shoot_offset: 0
   yaw_offset: 0.0
   pitch_offset: 0.0

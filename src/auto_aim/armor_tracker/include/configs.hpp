@@ -88,15 +88,9 @@ struct PlannerConfig {
   int trajectory_half_horizon;      // 生成的瞄准轨迹一半在过去，一半在未来
   bool rk45_yaw0;
   bool iterative_yaw0;
-  bool rk45_traj;                // 是否使用解析解
-  bool iterative_traj;           // 是否考虑子弹飞行时敌人的运动
-  bool enable_aim_center;        // 理论上不需要，电控没调好yaw时启用
-  bool consider_gimbal_response; // 用响应曲线(而不是规划曲线)做火控
-  double aim_center_vyaw_thres_high;
-  double aim_center_vyaw_thres_low;
-  double aim_center_distance_high;
-  double aim_center_distance_low; // 近到一定程度后就得瞄中心了，不然响应跟不上
-  int shoot_offset; // 预判几个MPC帧，在iterative_fly_time时应当为0
+  bool rk45_traj;      // 是否使用解析解
+  bool iterative_traj; // 是否考虑子弹飞行时敌人的运动
+  int shoot_offset;    // 预判几个MPC帧，在iterative_fly_time时应当为0
   double yaw_offset;
   double pitch_offset;
   int predict_offset_ms; // 补偿拨盘响应延迟

@@ -36,12 +36,6 @@ private:
   msgs::AimCommand aimMPC(const TargetState &target_state,
                           double bullet_speed_mps, double &fly_time,
                           ArmorIndex &selected_index);
-  [[deprecated]]
-  bool shouldAimCenter(const TargetState &target_state);
-  [[deprecated]]
-  msgs::AimCommand aimCenter(const TargetState &target_state,
-                             double dt_image_to_now_sec,
-                             double bullet_speed_mps);
   quill::Logger *logger_;
   PlannerConfig config_;
   int trajectory_horizon_;

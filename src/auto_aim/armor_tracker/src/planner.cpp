@@ -2,11 +2,9 @@
 #include "configs.hpp"
 #include "fire_controller.hpp"
 #include "math/angle_tools.hpp"
-#include "math/threshold_tools.hpp"
 #include "msgs/AimCommand.hpp"
 #include "trajectory.hpp"
 #include "types.hpp"
-#include "types/ArmorType.hpp"
 
 #include "quill/LogMacros.h"
 
@@ -113,20 +111,6 @@ msgs::AimCommand auto_aim::Planner::plan(
   return cmd;
 }
 
-bool auto_aim::Planner::shouldAimCenter(const TargetState &target_state) {
-  if (!config_.enable_aim_center)
-    return false;
-  static types::ArmorType last_target_type{target_state.type};
-  bool reset{false};
-  if (last_target_type != target_state.type) {
-    last_target_type = target_state.type;
-    reset = true;
-  }
-  static tools::HysteresisComparator comp_vyaw{
-      config_.aim_center_vyaw_thres_high, config_.aim_center_vyaw_thres_low};
-  return comp_vyaw(target_state.center_vyaw, reset);
-}
-
 msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
                                            double bullet_speed_mps,
                                            double &fly_time,
@@ -182,31 +166,6 @@ msgs::AimCommand auto_aim::Planner::aimMPC(const TargetState &target_state,
 
   cmd.pitch_vel = pitch_solver_->work->x(1, config_.trajectory_half_horizon);
   cmd.pitch_acc = pitch_solver_->work->u(0, config_.trajectory_half_horizon);
-  cmd.bullet_id = bullet_id_++;
-  return cmd;
-}
-
-msgs::AimCommand auto_aim::Planner::aimCenter(const TargetState &target_state,
-                                              double dt_image_to_now_sec,
-                                              double bullet_speed_mps) {
-  auto aim_opt = trajectory_solver_.solveTarget(
-      target_state.predict(dt_image_to_now_sec), bullet_speed_mps,
-      config_.rk45_yaw0, config_.iterative_yaw0);
-  if (!aim_opt.has_value())
-    return {.control = false};
-  auto aim = aim_opt.value();
-  msgs::AimCommand cmd;
-  cmd.control = true;
-  cmd.target_yaw = tools::limitRadian(aim.yaw + config_.yaw_offset);
-  cmd.target_pitch = aim.pitch + config_.pitch_offset;
-  cmd.yaw = tools::limitRadian(std::atan2(target_state.center_position.y(),
-                                          target_state.center_position.x()) +
-                               config_.yaw_offset);
-  cmd.yaw_vel = 0;
-  cmd.yaw_acc = 0;
-  cmd.pitch = aim.pitch + config_.pitch_offset;
-  cmd.pitch_vel = 0;
-  cmd.pitch_acc = 0;
   cmd.bullet_id = bullet_id_++;
   return cmd;
 }
