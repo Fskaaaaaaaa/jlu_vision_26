@@ -2,7 +2,6 @@
 #include "confs/CameraParams.hpp"
 
 #include "MvCameraControl.h"
-#include "opencv2/core.hpp"
 #include "quill/LogMacros.h"
 
 #include <chrono>
@@ -13,10 +12,10 @@
 
 // XXX: 一坨狗屎，一点异常处理都没有
 hardware::HikRobot::HikRobot(quill::Logger *logger,
-                             const confs::CameraParams &camera_params)
+                             const confs::CameraParams &camera_params,
+                             bool reverse_xy)
     : logger_(logger), camera_params_(camera_params), handle_(nullptr),
-      buffer_inited_(false), use_software_rotate_(true), error_count_(0),
-      payload_size_(0) {
+      buffer_inited_(false), error_count_(0), payload_size_(0) {
   LOG_INFO(logger_, "start hik camera.");
   // 查找并打开设备
   MV_CC_DEVICE_INFO_LIST device_list{};
@@ -79,13 +78,9 @@ hardware::HikRobot::HikRobot(quill::Logger *logger,
   setEnumValue("GainAuto", MV_GAIN_MODE_OFF);
   setFloatValue("ExposureTime", camera_params_.exposure_time);
   setFloatValue("Gain", camera_params_.gain);
-
-  use_software_rotate_ =
-      !setBoolValue("ReverseX", true) || !setBoolValue("ReverseY", true);
-  if (use_software_rotate_) {
-    LOG_WARNING(logger_,
-                "[hikrobot]: device reverse not supported, use software "
-                "rotate 180.");
+  if (reverse_xy) {
+    setBoolValue("ReverseX", true);
+    setBoolValue("ReverseY", true);
   }
   ret = MV_CC_SetFrameRate(handle_, camera_params_.frame_rate);
   if (ret != MV_OK) {
@@ -222,12 +217,6 @@ bool hardware::HikRobot::readImage(
                   raw.pBufAddr},
           cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
           pixel_type_cv);
-      if (use_software_rotate_) {
-        cv::rotate(
-            cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
-            cv::Mat{frame_info.nHeight, frame_info.nWidth, CV_8UC3, buffer},
-            cv::ROTATE_180);
-      }
       success = true;
     }
   }

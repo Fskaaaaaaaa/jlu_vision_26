@@ -11,7 +11,8 @@
 namespace hardware {
 class Galaxy : public CameraBase {
 public:
-  Galaxy(quill::Logger *logger, const confs::CameraParams &camera_params);
+  Galaxy(quill::Logger *logger, const confs::CameraParams &camera_params,
+         bool reverse_xy);
   bool readImage(unsigned char *buffer, std::size_t buffer_size,
                  std::chrono::system_clock::time_point &stamp) override;
   bool changeExposureGain(double exposure, double gain) override;
@@ -27,5 +28,6 @@ private:
   } img_info_;
   std::vector<char> bayer_buffer_holder_;
   bool buffer_inited_;
+  bool reverse_xy_;
 };
 } // namespace hardware

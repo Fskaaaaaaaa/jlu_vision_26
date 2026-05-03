@@ -16,8 +16,10 @@
 #define GX_SUCCESS(X) (X == GX_STATUS_SUCCESS)
 
 hardware::Galaxy::Galaxy(quill::Logger *logger,
-                         const confs::CameraParams &camera_params)
-    : logger_(logger), camera_params_({0, 0}), buffer_inited_(false) {
+                         const confs::CameraParams &camera_params,
+                         bool reverse_xy)
+    : logger_(logger), camera_params_({0, 0}), buffer_inited_(false),
+      reverse_xy_(reverse_xy) {
   LOG_INFO(logger_, "starting galaxy camera.");
   GX_STATUS status;
   // Init lib
@@ -98,9 +100,10 @@ bool hardware::Galaxy::readImage(unsigned char *buffer, std::size_t buffer_size,
       if (!GX_SUCCESS(status)) {
         LOG_ERROR(this->logger_, "Can not open camera, status = {}", status);
       } else {
-        // HACK: 步兵相机倒装，暂时直接写死，但感觉放到配置文件里更好
-        GXSetBool(camera_handle_, GX_BOOL_REVERSE_X, 1);
-        GXSetBool(camera_handle_, GX_BOOL_REVERSE_Y, 1);
+        if (reverse_xy_) {
+          GXSetBool(camera_handle_, GX_BOOL_REVERSE_X, 1);
+          GXSetBool(camera_handle_, GX_BOOL_REVERSE_Y, 1);
+        }
         fail_conut_ = 0;
         break;
       }

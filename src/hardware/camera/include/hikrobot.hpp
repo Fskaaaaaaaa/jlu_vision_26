@@ -10,7 +10,8 @@
 namespace hardware {
 class HikRobot : public CameraBase {
 public:
-  HikRobot(quill::Logger *logger, const confs::CameraParams &camera_params);
+  HikRobot(quill::Logger *logger, const confs::CameraParams &camera_params,
+           bool reverse_xy);
   ~HikRobot() override;
   bool readImage(unsigned char *buffer, std::size_t buffer_size,
                  std::chrono::system_clock::time_point &stamp) override;
@@ -26,7 +27,6 @@ private:
   void *handle_;
   std::vector<char> bayer_buffer_holder_;
   bool buffer_inited_;
-  bool use_software_rotate_;
   int error_count_;
   std::size_t payload_size_;
 };

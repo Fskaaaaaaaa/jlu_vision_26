@@ -37,10 +37,12 @@ hardware::Camera::Camera(quill::Logger *logger, const CameraConfigs &configs)
   // init camera
   switch (configs_.camera_type) {
   case CameraType::galaxy:
-    this->camera_ = std::make_unique<Galaxy>(logger, configs_.camera_params);
+    this->camera_ = std::make_unique<Galaxy>(logger, configs_.camera_params,
+                                             configs_.reverse_xy);
     break;
   case CameraType::hik:
-    this->camera_ = std::make_unique<HikRobot>(logger, configs_.camera_params);
+    this->camera_ = std::make_unique<HikRobot>(logger, configs_.camera_params,
+                                               configs_.reverse_xy);
     break;
   case CameraType::video:
     this->camera_ = std::make_unique<VideoCapture>(logger, configs_.video_path);
