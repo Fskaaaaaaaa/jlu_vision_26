@@ -34,7 +34,7 @@ on_load(function(target)
 end)
 rule_end()
 
-add_requires("opencv")
+add_requires("opencv", { system = true })
 add_requires("eigen <5")
 add_requires("yaml-cpp", { system = false })
 add_requires("reflect-cpp", { configs = { yaml = true } })
