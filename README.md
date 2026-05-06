@@ -44,7 +44,7 @@ filetree
 
 采用类君瞄的架构，但并未引入ros依赖。
 
-使用共享内存进行跨进程通信，fast_tf管理坐标系变换。
+使用共享内存进行跨进程通信，[fast_tf](https://github.com/dorezyuk/fast_tf)管理坐标系变换。
 
 ### 部署
 
