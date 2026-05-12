@@ -45,7 +45,8 @@ auto_aim::Trajectory::selectArmor(const TargetState &state) const {
     auto facing_angle_diff =
         getArmorFacingAngleAbs(last_select_armor) - min_facing_angle_abs;
     // 新选板明显更正对，切板
-    if (facing_angle_diff > config_.armor_switch_facing_degree_diff_thres) {
+    if (facing_angle_diff >
+        tools::angle2Radian(config_.armor_switch_facing_degree_diff_thres)) {
       return selected_index;
       LOG_TRACE_L2(logger_, "[Trajectory]: Select index {}",
                    static_cast<int>(selected_index));
@@ -70,7 +71,7 @@ auto_aim::Trajectory::solveTarget(const TargetState &target_state,
                              target_state.center_position.y()) +
                   config_.flytime0_distance_offset;
   if (distance < 0) {
-    LOG_WARNING(logger_, "[Trajectory]: Negative distance!");
+    LOG_TRACE_L1(logger_, "[Trajectory]: Negative distance!");
     return std::nullopt;
   }
   auto pitch_flytime_opt = this->solver_.resolvePitchFlyTime(

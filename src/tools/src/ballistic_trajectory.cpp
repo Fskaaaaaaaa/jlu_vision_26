@@ -81,6 +81,6 @@ tools::ballistic::BallisticTrajectorySolver::solveParabola(
       target_distance_m, target_height_m, muzzle_velocity_mps, config_.g,
       config_.gimbal_pitch_min_degree, config_.gimbal_pitch_max_degree);
   if (!solution.has_value())
-    LOG_WARNING(logger_, "[BallisticSolver]: Unsolvable trajectory!");
+    LOG_TRACE_L1(logger_, "[BallisticSolver]: Unsolvable trajectory!");
   return solution;
 }

@@ -18,8 +18,8 @@ serial_topic:
   event: data
 robot_conf:
   first_update_batch_size: 1
-  max_match_distance_m: 1.5
-  max_match_yaw_diff_degree: 60.0
+  max_match_distance_m: 1.0
+  max_match_yaw_diff_degree: 40.0
   lost_threshold_sec: 0.3
   yaw_prior_noise: 9.0
   vyaw_prior_noise: 9.0
@@ -31,17 +31,17 @@ robot_conf:
     x: 0.5
     y: 0.5
     z: 0.5
-  yaw_factor_noise: 0.01
-  vyaw_factor_noise: 0.2
+  yaw_factor_noise: 0.005
+  vyaw_factor_noise: 0.05
   translation_factor_noise:
+    x: 0.001
+    y: 0.001
+    z: 0.001
+  velocity_factor_noise:
     x: 0.01
     y: 0.01
     z: 0.01
-  velocity_factor_noise:
-    x: 0.03
-    y: 0.03
-    z: 0.03
-  radius_prior_noise: 0.0001
+  radius_prior_noise: 0.005
   radius_min: 0.15
   default_radius: 0.26
   radius_max: 0.5
@@ -49,12 +49,12 @@ robot_conf:
   default_dz: 0.0
   armor_observation_noise:
     pixel_error:
-      x: 0.1
-      y: 0.1
-    tangential_error_m: 0.005
-    radial_error_m: 0.5
+      x: 1.0
+      y: 1.0
+    tangential_error_m: 0.01
+    radial_error_m: 0.01
     height_error_m: 0.01
-    yaw_error_rad: 0.001
+    yaw_error_rad: 0.005
 
 outpost_conf:
   first_update_batch_size: 1
@@ -132,7 +132,7 @@ planner_conf:
     max_aim_iterate_count: 100
     max_aim_switch_armor_count: 10
     aim_ok_error_m: 0.02
-    armor_switch_facing_degree_diff_thres: 0.0
+    armor_switch_facing_degree_diff_thres: 5.0
     iterative_max_facing_angle: 75.0
     flytime0_distance_offset: -0.3
   fire_ctrl_conf:

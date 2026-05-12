@@ -287,6 +287,8 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
   // 选择光心最近装甲板作为打击目标
   // XXX: 不合适，被操作手抱怨打团战时对敌人“雨露均沾”了QAQ
   // 先尝试添加个迟滞切换了
+  // 被击中的装甲板会闪烁（段时间无有效识别），难怪会乱切换锁定
+  // 应该把目标选择直接放到规划线程里，而不是拿原子跨线程
   static auto change_count{0};
   if (!armors.empty()) {
     if (self->aiming_target_.load() != armors.front().type &&
