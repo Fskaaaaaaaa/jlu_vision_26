@@ -34,7 +34,6 @@ public:
   matchArmor(const std::vector<ArmorPositionYaw> &armors,
              const ArmorPositionYaw &obs, double max_match_distance,
              double max_match_yaw_diff);
-  static gtsam::Key distributeKey();
 };
 
 class RobotTarget : public Target {
