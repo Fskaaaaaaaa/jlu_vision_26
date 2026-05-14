@@ -59,7 +59,7 @@ void hardware::TaskModeListener::onTaskModeReceiveCallback(
   } // end of while
 }
 
-bool hardware::TaskModeListener::isOnTask() {
+bool hardware::TaskModeListener::isOnTask() const {
   return current_mode_.load() == target_mode_;
 }
 

@@ -19,7 +19,7 @@ public:
       const std::function<void()> &on_change_to_target_mode_callback = []() {},
       const confs::IceoryxServiceDescription &task_topic = {"task_mode",
                                                             "serial", "data"});
-  bool isOnTask();
+  bool isOnTask() const;
   bool isTask(types::TaskMode task) const;
 
 private:

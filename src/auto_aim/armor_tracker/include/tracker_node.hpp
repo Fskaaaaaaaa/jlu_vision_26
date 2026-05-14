@@ -25,8 +25,10 @@
 #include <atomic>
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <thread>
 #include <unordered_map>
+#include <utility>
 
 namespace auto_aim {
 
@@ -38,7 +40,12 @@ private:
   static void onArmorsReceivedCallback(
       iox::popo::Subscriber<msgs::Armor, msgs::Header> *subscriber,
       TrackerNode *self);
-  const Target &getAimingTarget() const;
+  std::optional<std::pair<TargetState, std::chrono::system_clock::time_point>>
+  selectAimingTarget(bool reselect) const;
+  std::optional<double> getPixelDistanceToImageCenter(
+      const Eigen::Vector3d &odom_position,
+      const std::chrono::system_clock::time_point &stamp) const;
+
   void drawArmor(const ArmorPositionYaw &armor, types::ArmorType type,
                  cv::Mat &image,
                  const std::chrono::system_clock::time_point &img_stamp,

@@ -34,6 +34,7 @@
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
 #include <Eigen/Dense>
+#include <limits>
 #include <opencv2/core/eigen.hpp>
 
 #include <algorithm>
@@ -44,9 +45,11 @@
 #include <cstdlib>
 #include <exception>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
@@ -101,19 +104,17 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
     while (!iox::hasTerminationRequested()) {
       bool on_task =
           configs_.always_on_task ? true : task_mode_listener_.isOnTask();
-      if (!on_task || !targets_.contains(aiming_target_.load())) { // 无锁定状态
-        aimcommand_pub_.loan().and_then(
-            [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
-              sample->control = false;
-              sample.publish();
-            });
-        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
-            configs_.planner_conf.fail_polling_interval_sec * 1000)));
-        continue;
+      bool switch_to_on_task;
+      {
+        static bool last_call_on_task{false};
+        switch_to_on_task = on_task && !last_call_on_task;
+        last_call_on_task = on_task;
       }
-      auto [target_state, track_state] =
-          targets_.at(aiming_target_.load())->getTargetTrackState();
-      if (track_state.state == TrackState::State::LOST) {
+      auto aiming_target_state_opt = selectAimingTarget(switch_to_on_task);
+      this->aiming_target_.store(aiming_target_state_opt.has_value()
+                                     ? aiming_target_state_opt->first.type
+                                     : types::ArmorType::Negative);
+      if (!on_task || !aiming_target_state_opt.has_value()) {
         aimcommand_pub_.loan().and_then(
             [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
               sample->control = false;
@@ -121,11 +122,11 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
             });
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
-        continue; // 锁定的敌人已经丢失
+        continue; // 非自瞄模式或无锁定状态
       }
       auto gimbal_info = gimbal_listener_.getLatestInfo();
-      auto cmd = planner_.plan(target_state, track_state.stamp_last_update,
-                               gimbal_info);
+      auto cmd = planner_.plan(aiming_target_state_opt->first,
+                               aiming_target_state_opt->second, gimbal_info);
       // TODO: this->hit_target_.load()
       if (!cmd.control) {
         LOG_WARNING(logger_, "Aimcommand not control!");
@@ -226,6 +227,81 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
   LOG_INFO(logger_, "Tracker node initialization complete!");
 }
 
+std::optional<double> auto_aim::TrackerNode::getPixelDistanceToImageCenter(
+    const Eigen::Vector3d &odom_position,
+    const std::chrono::system_clock::time_point &stamp) const {
+  try {
+    Eigen::Isometry3d T_odom_to_camera =
+        tf_buffer_.get(configs_.camera_frame_id, configs_.odom_frame_id, stamp,
+                       std::chrono::nanoseconds{static_cast<int64_t>(
+                           configs_.tf_query_tolerance_ms * 1e6)});
+    Eigen::Isometry3d pose_odom{Eigen::Isometry3d::Identity()};
+    pose_odom.pretranslate(odom_position);
+    Eigen::Vector3d position_camera =
+        (T_odom_to_camera * pose_odom).translation();
+    if (position_camera.z() < 0)
+      return std::nullopt;
+    cv::Point3d obj_point{position_camera.x(), position_camera.y(),
+                          position_camera.z()};
+    // 已经转换到相机系了，外参为单位阵
+    cv::Mat rvec = cv::Mat::zeros(3, 1, CV_64F);
+    cv::Mat tvec = cv::Mat::zeros(3, 1, CV_64F);
+    std::vector<cv::Point2d> image_points;
+    cv::projectPoints(std::vector{obj_point}, rvec, tvec, camera_matrix_,
+                      distortion_coefficients_, image_points);
+    auto u = image_points.front().x;
+    auto v = image_points.front().y;
+    // 投影到图像外边了
+    if (u < 0 || u > msgs::Image1440x1080_8UC3::cols || v < 0 ||
+        v > msgs::Image1440x1080_8UC3::rows)
+      return std::nullopt;
+    // 从投影点计算到像素距离
+    auto cx = camera_matrix_.at<double>(0, 2);
+    auto cy = camera_matrix_.at<double>(1, 2);
+    auto dx = image_points.front().x - cx;
+    auto dy = image_points.front().y - cy;
+    return std::hypot(dx, dy);
+  } catch (const std::exception &e) {
+    LOG_WARNING(logger_, "{}", e.what());
+    return std::nullopt;
+  }
+}
+
+std::optional<
+    std::pair<auto_aim::TargetState, std::chrono::system_clock::time_point>>
+auto_aim::TrackerNode::selectAimingTarget(bool reselect) const {
+  // 筛选所有可瞄准目标
+  std::vector<std::pair<TargetState, TrackState>> targetable_targets;
+  for (const auto &[type, target] : this->targets_)
+    if (auto state = target->getTargetTrackState();
+        state.second.state != TrackState::State::LOST)
+      targetable_targets.emplace_back(state);
+  static std::optional<types::ArmorType> last_select_type{std::nullopt};
+  // 不重新锁定时尝试保持上一帧的锁定，否则跌入重新选择锁定的逻辑，锁定离画面中心最近的
+  if (!reselect && last_select_type.has_value())
+    for (const auto [target_state, track_state] : targetable_targets)
+      if (last_select_type.value() == target_state.type)
+        return {{target_state, track_state.stamp_last_update}};
+  auto min_px_distance{std::numeric_limits<double>::max()};
+  std::optional<std::pair<TargetState, std::chrono::system_clock::time_point>>
+      selected_state{std::nullopt};
+  for (const auto &[target_state, track_state] : targetable_targets)
+    if (auto distance_opt = getPixelDistanceToImageCenter(
+            target_state.center_position, track_state.stamp_last_update);
+        distance_opt.has_value() && distance_opt.value() < min_px_distance) {
+      min_px_distance = distance_opt.value();
+      selected_state = {target_state, track_state.stamp_last_update};
+    }
+  // 此时若有值一定是重新选择的
+  if (selected_state.has_value())
+    LOG_INFO(logger_, "Select Target {}",
+             rfl::enum_to_string(selected_state->first.type));
+  last_select_type = selected_state.has_value()
+                         ? std::optional{selected_state->first.type}
+                         : std::nullopt;
+  return selected_state;
+}
+
 void auto_aim::TrackerNode::onArmorsReceivedCallback(
     iox::popo::Subscriber<msgs::Armor, msgs::Header> *subscriber,
     TrackerNode *self) {
@@ -247,14 +323,14 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
     return;
   // 由于frame_id从相机的配置文件读取，依赖图像回调获得，故心跳帧只有时间戳无坐标系
   auto image_stamp = armors.front().stamp; // 假设一次接收的armors来自同一帧
-  bool all_target_not_hit{true};
+  bool all_armors_not_hit{true};
   std::erase_if(armors, [&](const types::Armor &armor) {
     if (armor.heart_beat)
       return true;
     if (armor.type == self->aiming_target_.load() &&
         armor.color == types::EnemyColor::Extinguished) {
       self->hit_target_.store(true);
-      all_target_not_hit = false;
+      all_armors_not_hit = false;
     }
     if (self->configs_.erase_if_not_key_frame && !armor.key_frame)
       return true;
@@ -262,7 +338,7 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
       return true;
     return false;
   }); // 之后armors可能为空
-  if (all_target_not_hit)
+  if (all_armors_not_hit)
     self->hit_target_.store(false);
   LOG_TRACE_L1(self->logger_, "receive {} valid armors.", armors.size());
   // 查找该帧的坐标变换
@@ -280,39 +356,12 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
                 e.what());
       armors.clear(); // 失败舍弃该帧接收的装甲板
     }
-  std::ranges::sort(
-      armors, [](const types::Armor &a, const types::Armor &b) -> bool {
-        return a.distance_to_image_center < b.distance_to_image_center;
-      });
-  // 选择光心最近装甲板作为打击目标
-  // XXX: 不合适，被操作手抱怨打团战时对敌人“雨露均沾”了QAQ
-  // 先尝试添加个迟滞切换了
-  // 被击中的装甲板会闪烁（段时间无有效识别），难怪会乱切换锁定
-  // 应该把目标选择直接放到规划线程里，而不是拿原子跨线程
-  static auto change_count{0};
-  if (!armors.empty()) {
-    if (self->aiming_target_.load() != armors.front().type &&
-        change_count++ >= self->configs_.aim_target_change_count) {
-      self->aiming_target_.store(armors.front().type);
-      change_count = 0;
-      LOG_INFO(self->logger_, "Select target {}!",
-               rfl::enum_to_string(armors.front().type));
-    }
-  }
-  // NOTE:
   // 更新所有目标。track由图像时间戳驱动，图像到发射瞬间的补偿由planner完成
-  bool all_targets_lost{true};
-  for (auto &[type, target] : self->targets_) {
+  for (auto &[type, target] : self->targets_)
     auto track_state = target->track(armors, image_stamp, T_camera_to_odom);
-    if (track_state != TrackState::State::LOST)
-      all_targets_lost = false;
-  }
-  if (all_targets_lost)
-    self->aiming_target_.store(types::ArmorType::Negative);
 
   // NOTE: 下面的都是发布调试波形的了
-  if (!self->configs_.plot_info ||
-      self->aiming_target_.load() == types::ArmorType::Negative)
+  if (!self->configs_.plot_info)
     return;
   if (!armors.empty()) {
     const auto &armor = armors.front();
@@ -329,8 +378,9 @@ void auto_aim::TrackerNode::onArmorsReceivedCallback(
     self->plotter_.plot(armor_name + "Z", xyz.z());
   }
   auto aiming_target = self->aiming_target_.load();
-  if (!self->targets_.contains(aiming_target))
+  if (!self->targets_.contains(aiming_target)) // Negative
     return;
+  // 发布正在瞄准目标的观测器状态
   const auto &target_ptr = self->targets_.at(aiming_target);
   auto state = target_ptr->getTargetTrackState().first;
   auto type_name = rfl::enum_to_string(state.type);

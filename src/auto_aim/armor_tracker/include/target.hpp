@@ -168,9 +168,4 @@ private:
   mutable gtsam::NonlinearFactorGraph initial_graph_;
 };
 
-class BaseTarget : public Target {
-public:
-private:
-};
-
 } // namespace auto_aim
