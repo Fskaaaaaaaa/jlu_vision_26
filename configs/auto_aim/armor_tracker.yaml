@@ -133,7 +133,7 @@ planner_conf:
     max_aim_switch_armor_count: 10
     aim_ok_error_m: 0.02
     armor_switch_facing_degree_diff_thres: 5.0
-    iterative_max_facing_angle: 75.0
+    iterative_max_facing_angle: 80.0
     flytime0_distance_offset: -0.3
   fire_ctrl_conf:
     norm_dispersion_yaw_degree: 2.0

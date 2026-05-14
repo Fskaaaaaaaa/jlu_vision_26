@@ -39,7 +39,9 @@ auto_aim::Trajectory::selectArmor(const TargetState &state) const {
     }
   }
   // 更换目标时重置index由solveTarget方法完成
-  if (last_armor_index_.has_value()) {
+  if (last_armor_index_.has_value() &&
+      static_cast<int>(last_armor_index_.value()) < armors.size()) {
+    // 防止越界访问前哨的第四块装甲板
     auto last_select_armor =
         armors.at(static_cast<int>(last_armor_index_.value()));
     auto facing_angle_diff =
@@ -47,9 +49,9 @@ auto_aim::Trajectory::selectArmor(const TargetState &state) const {
     // 新选板明显更正对，切板
     if (facing_angle_diff >
         tools::angle2Radian(config_.armor_switch_facing_degree_diff_thres)) {
-      return selected_index;
       LOG_TRACE_L2(logger_, "[Trajectory]: Select index {}",
                    static_cast<int>(selected_index));
+      return selected_index;
     }
     return last_armor_index_.value();
   } else { // 第一帧锁定这个目标
@@ -65,8 +67,10 @@ auto_aim::Trajectory::solveTarget(const TargetState &target_state,
                                   bool use_rk45) {
   // XXX: 绝大多数情况没有并发。有点开销但不多
   static auto last_target_type{target_state.type};
-  if (last_target_type != target_state.type)
+  if (last_target_type != target_state.type) {
     last_armor_index_ = std::nullopt;
+    last_target_type = target_state.type;
+  }
   auto distance = std::hypot(target_state.center_position.x(),
                              target_state.center_position.y()) +
                   config_.flytime0_distance_offset;

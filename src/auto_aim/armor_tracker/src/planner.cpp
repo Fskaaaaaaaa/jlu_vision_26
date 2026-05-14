@@ -96,11 +96,12 @@ msgs::AimCommand auto_aim::Planner::plan(
   auto cmd =
       aimMPC(target_state.predict(predict_time_cache_),
              gimbal_info.bullet_speed, fly_time_cache_, selected_index_cache_);
-  fire_controller_.calculateFireThres(
-      cmd, gimbal_info.bullet_speed, target_state.type,
-      target_state.predict(predict_time_cache_ + fly_time_cache_)
-          .armors()
-          .at(static_cast<int>(selected_index_cache_)));
+  if (cmd.control) // 避免未更新的selected_index_cache造成前哨的越界访问
+    fire_controller_.calculateFireThres(
+        cmd, gimbal_info.bullet_speed, target_state.type,
+        target_state.predict(predict_time_cache_ + fly_time_cache_)
+            .armors()
+            .at(static_cast<int>(selected_index_cache_)));
   cmd.target_yaw = tools::limitRadian(cmd.target_yaw + config_.yaw_offset);
   cmd.target_pitch =
       tools::limitRadian(cmd.target_pitch + config_.pitch_offset);
