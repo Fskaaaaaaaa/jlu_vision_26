@@ -2,6 +2,7 @@ log_level: Info
 plot_info: true
 always_on_task: true
 show_image: true
+save_image: false
 erase_if_not_key_frame: true
 tf_query_tolerance_ms: 200.0
 camera_name: camera0
@@ -9,8 +10,8 @@ camera_frame_id: camera
 odom_frame_id: odom
 armors_sub_topic:
   service: armors
-  # instance: fake_ap
-  instance: detector
+  instance: fake_ap
+  # instance: detector
   event: data
 serial_topic:
   service: aim_command
@@ -136,8 +137,8 @@ planner_conf:
     iterative_max_facing_angle: 80.0
     flytime0_distance_offset: -0.3
   fire_ctrl_conf:
-    norm_dispersion_yaw_degree: 2.0
-    norm_dispersion_pitch_degree: 1.0
+    norm_dispersion_yaw_degree: 0.5
+    norm_dispersion_pitch_degree: 0.5
     min_fire_thres_yaw_degree: 0.1
     min_fire_thres_pitch_degree: 0.1
 
