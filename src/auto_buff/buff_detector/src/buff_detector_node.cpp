@@ -72,7 +72,7 @@ void auto_buff::DetectorNode::init() {
               mode = Mode::BigBuff;
             else if (task_mode_listener_big_buff_.isTask(types::TaskMode::Idle))
               mode = ConfigManager::instance()->configs().do_when_idle;
-                  
+
             if (mode != Mode::Idle)
               this->imageCallback(image, frame_id, stamp, mode);
           });
@@ -81,8 +81,7 @@ void auto_buff::DetectorNode::init() {
 
 void auto_buff::DetectorNode::imageCallback(
     const cv::Mat &image, const std::string &frame_id,
-    const std::chrono::system_clock::time_point &stamp,
-    Mode mode) {
+    const std::chrono::system_clock::time_point &stamp, Mode mode) {
   auto infer_start = std::chrono::system_clock::now();
   std::vector<RuneObject> runes;
   try {

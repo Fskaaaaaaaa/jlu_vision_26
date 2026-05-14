@@ -7,16 +7,16 @@
 #include "hardware/task_mode_listener.hpp"
 #include "math/angle_tools.hpp"
 #include "msgs/BuffBlade.hpp"
-#include "opencv2/core/types.hpp"
-#include "rfl/enums.hpp"
 #include "targets.hpp"
 #include "trajectory.hpp"
 #include "types.hpp"
 #include "types/IceoryxServiceDescription.hpp"
 #include "types/TaskMode.hpp"
 
+#include "opencv2/core/types.hpp"
 #include "opencv2/highgui.hpp"
 #include "quill/LogMacros.h"
+#include "rfl/enums.hpp"
 #include <opencv2/core/eigen.hpp>
 
 #include <cmath>
