@@ -6,7 +6,7 @@
 #include <array>
 #include <cmath>
 #include <optional>
-
+//好像有点多余
 tools::ballistic::BallisticState2D tools::ballistic::getBarrelStateFromPitch(
     double pitch_rad, double muzzle_velocity_mps, double barrel_length) {
   return BallisticState2D{
@@ -72,7 +72,7 @@ tools::ballistic::solveTrajectoryParabola(double target_distance_m,
   }
   return best_solution;
 }
-
+//何意味
 std::optional<tools::ballistic::PitchFlytime>
 tools::ballistic::BallisticTrajectorySolver::solveParabola(
     double target_distance_m, double target_height_m,
