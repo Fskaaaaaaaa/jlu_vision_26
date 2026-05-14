@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
                             "configs/auto_aim/armor_tracker.yaml"))(
       "l,log", "Path of log dir",
       cxxopts::value<std::string>()->default_value("logs/armor_tracker"))(
-      "h,help", "Print usage.")("d,debug", "Enable debug mode.");
+      "h,help", "Print usage.")("d,debug", "Enable debug mode.")(
+      "s,save_image", "Save debug image to disk.");
   auto result = options.parse(argc, argv);
   if (result.count("help")) {
     std::cout << options.help() << std::endl;
@@ -51,6 +52,11 @@ int main(int argc, char *argv[]) {
     configs.show_image = false;
     configs.plot_info = false;
   }
+  if (result.count("save_image")) {
+    configs.show_image = true;
+    configs.save_image = true;
+  }
+  // XXX: 这种写法太狗屎了
 
   auto *logger = tools::initAndGetLogger(APP_NAME, configs.log_level, log_path);
   iox::runtime::PoshRuntime::initRuntime(APP_NAME);

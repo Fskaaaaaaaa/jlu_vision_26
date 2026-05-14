@@ -112,6 +112,7 @@ struct TrackerConfigs {
   bool plot_info;
   bool always_on_task;
   bool show_image;
+  bool save_image; // TODO:
   bool erase_if_not_key_frame;
   double tf_query_tolerance_ms;
   std::string camera_name;

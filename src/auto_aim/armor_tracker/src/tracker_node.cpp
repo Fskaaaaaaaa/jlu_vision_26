@@ -3,6 +3,7 @@
 #include "tracker_node.hpp"
 #include "basic/colors.hpp"
 #include "basic/image_tools.hpp"
+#include "basic/time_tools.hpp"
 #include "configs.hpp"
 #include "hardware/cam_info_listener.hpp"
 #include "hardware/gimbal_info_listener.hpp"
@@ -13,6 +14,7 @@
 #include "msgs/Armor.hpp"
 #include "msgs/Header.hpp"
 #include "msgs/Image.hpp"
+#include "opencv2/imgcodecs.hpp"
 #include "planner.hpp"
 #include "target.hpp"
 #include "types.hpp"
@@ -34,7 +36,6 @@
 #include "quill/LogMacros.h"
 #include "rfl/enums.hpp"
 #include <Eigen/Dense>
-#include <limits>
 #include <opencv2/core/eigen.hpp>
 
 #include <algorithm>
@@ -44,6 +45,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <filesystem>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -104,6 +107,16 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
     while (!iox::hasTerminationRequested()) {
       bool on_task =
           configs_.always_on_task ? true : task_mode_listener_.isOnTask();
+      if (!on_task) {
+        aimcommand_pub_.loan().and_then(
+            [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
+              sample->control = false;
+              sample.publish();
+            });
+        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
+            configs_.planner_conf.fail_polling_interval_sec * 1000)));
+        continue; // 非自瞄模式
+      }
       bool switch_to_on_task;
       {
         static bool last_call_on_task{false};
@@ -114,7 +127,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       this->aiming_target_.store(aiming_target_state_opt.has_value()
                                      ? aiming_target_state_opt->first.type
                                      : types::ArmorType::Negative);
-      if (!on_task || !aiming_target_state_opt.has_value()) {
+      if (!aiming_target_state_opt.has_value()) {
         aimcommand_pub_.loan().and_then(
             [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
               sample->control = false;
@@ -122,7 +135,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
             });
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
-        continue; // 非自瞄模式或无锁定状态
+        continue; // 无锁定状态
       }
       auto gimbal_info = gimbal_listener_.getLatestInfo();
       auto cmd = planner_.plan(aiming_target_state_opt->first,
@@ -220,6 +233,17 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                 cv::putText(copy, predict_time_ss.str(), cv::Point(10, 90),
                             cv::FONT_HERSHEY_SIMPLEX, 1.0,
                             tools::Color::bgr::GREEN, 2);
+              }
+              if (configs_.save_image) {
+                static int frame_count{0};
+                static std::string save_dir{std::string{std::getenv("HOME")} +
+                                            "/Pictures/" +
+                                            tools::getTimeNowStr()};
+                if (frame_count == 0)
+                  std::filesystem::create_directory(save_dir);
+                cv::imwrite(save_dir + "/" + std::to_string(frame_count++) +
+                                ".jpg",
+                            copy);
               }
               cv::imshow("tracker", copy);
               cv::waitKey(1);
