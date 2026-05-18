@@ -108,6 +108,8 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
       bool on_task =
           configs_.always_on_task ? true : task_mode_listener_.isOnTask();
       if (!on_task) {
+        // 记得要在earlyreturn前更新下变量
+        this->aiming_target_.store(types::ArmorType::Negative);
         aimcommand_pub_.loan().and_then(
             [&](iox::popo::Sample<msgs::AimCommand, msgs::Header> &sample) {
               sample->control = false;
@@ -117,7 +119,7 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
             configs_.planner_conf.fail_polling_interval_sec * 1000)));
         continue; // 非自瞄模式
       }
-      bool switch_to_on_task;
+      bool switch_to_on_task{false};
       {
         static bool last_call_on_task{false};
         switch_to_on_task = on_task && !last_call_on_task;
@@ -211,6 +213,14 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                    const std::chrono::system_clock::time_point &stamp) {
               cv::Mat copy;
               image.copyTo(copy);
+              // 绘制所有目标
+              for (const auto &[type, target] : targets_)
+                if (auto [target_state, track_state] =
+                        target->getTargetTrackState();
+                    track_state.state != TrackState::State::LOST)
+                  drawTarget(target_state, copy, stamp,
+                             track_state.stamp_last_update);
+              // 绘制瞄准的armor
               if (auto aim_target = this->aiming_target_.load();
                   targets_.contains(aim_target)) {
                 auto [target_state, track_state] =
@@ -219,12 +229,9 @@ auto_aim::TrackerNode::TrackerNode(quill::Logger *logger,
                       fire_thres_pitch] =
                     planner_.getAimingArmorIndexPredictTimeFireThres(
                         target_state);
-                const auto &target = targets_.at(aim_target);
-                // 绘制所有目标装甲板（红色）
-                drawTarget(*target, copy, stamp);
-                // 绘制正在瞄准的装甲板（绿色）
                 drawArmor(aimed_armor, target_state.type, copy, stamp,
                           tools::Color::bgr::GREEN);
+                // 绘制火控阈值
                 drawCrosshair(copy, fire_thres_yaw, fire_thres_pitch);
                 std::stringstream predict_time_ss;
                 predict_time_ss << "PredictTime: " << std::fixed
@@ -301,11 +308,12 @@ auto_aim::TrackerNode::selectAimingTarget(bool reselect) const {
         state.second.state != TrackState::State::LOST)
       targetable_targets.emplace_back(state);
   static std::optional<types::ArmorType> last_select_type{std::nullopt};
-  // 不重新锁定时尝试保持上一帧的锁定，否则跌入重新选择锁定的逻辑，锁定离画面中心最近的
+  // 不重新锁定时尝试保持上一帧的锁定
   if (!reselect && last_select_type.has_value())
     for (const auto [target_state, track_state] : targetable_targets)
       if (last_select_type.value() == target_state.type)
         return {{target_state, track_state.stamp_last_update}};
+  // 跌入重新选择锁定的逻辑，锁定离画面中心最近的
   auto min_px_distance{std::numeric_limits<double>::max()};
   std::optional<std::pair<TargetState, std::chrono::system_clock::time_point>>
       selected_state{std::nullopt};
@@ -472,18 +480,18 @@ void auto_aim::TrackerNode::drawArmor(
 }
 
 void auto_aim::TrackerNode::drawTarget(
-    const Target &target, cv::Mat &image,
-    const std::chrono::system_clock::time_point &image_stamp) const {
-  auto [target_state, track_state] = target.getTargetTrackState();
+    const TargetState &target_state, cv::Mat &image,
+    const std::chrono::system_clock::time_point &stamp_image,
+    const std::chrono::system_clock::time_point &stamp_last_update) const {
   auto dt = std::chrono::duration_cast<
                 std::chrono::duration<double, std::chrono::seconds::period>>(
-                image_stamp - track_state.stamp_last_update)
+                stamp_image - stamp_last_update)
                 .count();
   auto status_predict = target_state.predict(dt);
   // 绘制所有装甲板
   int armor_index{0};
   for (const auto &armor : status_predict.armors())
-    drawArmor(armor, target_state.type, image, image_stamp,
+    drawArmor(armor, target_state.type, image, stamp_image,
               tools::Color::bgr::RED, std::to_string(armor_index++));
 }
 
